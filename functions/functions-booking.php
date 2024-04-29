@@ -47,8 +47,19 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
  * @param string $args The others arguments
  * @return array $validated The updated state of validation
  */
-function ba_plus_validate_picked_events($validated, $picked_events, $args){
-    return array();
+function ba_plus_validate_picked_events($validated, $picked_events, $args)
+{
+    // check if user certificate is not expired
+    $certi_date = get_user_meta(get_current_user(), "expire_date", true);
+    if (empty($certi_date)) {
+        // send error message
+        $validated['error'] = 'no_certificate';
+    } else if (date('', strtotime($certi_date)) > date('')) {
+        $validated['error'] = '';
+    } else {
+        $validated['error'] = array('');
+    }
+    return $validated;
 }
 
 

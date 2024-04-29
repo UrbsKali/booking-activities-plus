@@ -107,6 +107,12 @@ function ba_plus_usermeta_form_field_certificate_update($user_id)
         'expire_date',
         $_POST['expire_date']
     );
+    update_user_meta(
+        $user_id,
+        'send_mail',
+        'false'
+    );
+    update_user_meta($user_id, 'send_mail_cancel', 'true');
 }
 
 function ba_plus_create_user_certificate($user_id)
@@ -126,7 +132,8 @@ function ba_plus_create_user_certificate($user_id)
         'send_mail',
         'false'
     );
-    update_user_meta($user_id, "nb_annulation_left", 0);
+    update_user_meta($user_id, "nb_cancel_left", 0);
+    update_user_meta($user_id, 'send_mail_cancel', 'false');
 }
 
 // # ------------ HOOCKS ------------ #
@@ -137,7 +144,7 @@ add_action(
     'ba_plus_usermeta_form_field_certificat'
 );
 
-// Add the field to user new profile screen.
+// Add the field to user new profile screen. REMOVE IF NOT NEEDED
 add_action(
     'show_user_profile',
     'ba_plus_usermeta_form_field_certificat'

@@ -34,7 +34,7 @@ if ( ! wp_next_scheduled( 'bookacti_cron_remove_empty_events' ) ) {
  * Cron job to purge the waiting list of past events
  */
 function ba_plus_clean_waiting_list(){
-    echo "Checking for waiting list\n";
+    echo "Checking for waiting list<br>";
     $waiting_list = ba_plus_get_all_waiting_list();
     foreach($waiting_list as $waiting){
         $event_id = $waiting->event_id;
@@ -47,7 +47,7 @@ function ba_plus_clean_waiting_list(){
 }
 
 function ba_plus_remove_empty_events(){
-    echo "Checking for empty events\n";
+    echo "Checking for empty events<br>";
     // create a date object for today
     $today = new DateTime();
     $today = $today->format('Y-m-d h:i:s');

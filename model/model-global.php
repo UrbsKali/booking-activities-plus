@@ -14,6 +14,12 @@ define('BOOKACTI_TABLE_WAITING_LIST', $db_prefix . 'bookacti_waiting_list');
 if (!defined('BOOKACTI_TABLE_EVENTS')) {
     define('BOOKACTI_TABLE_EVENTS', $db_prefix . 'bookacti_events');
 }
+if (!defined('BOOKACTI_TABLE_BOOKINGS')) {
+	define('BOOKACTI_TABLE_BOOKINGS', $db_prefix . 'bookacti_bookings');
+}
+if (!defined('BOOKACTI_TABLE_META')) {
+	define('BOOKACTI_TABLE_META', $db_prefix . 'bookacti_meta');
+}
 
 function ba_plus_cancel_event($event_id){
 	global $wpdb;

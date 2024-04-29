@@ -6,6 +6,7 @@ if (!defined('ABSPATH')) {
 
 add_shortcode('bookingactivities_waitinglist', 'ba_plus_shortcode_waiting_list');
 add_shortcode('bookingactivities_certificate', 'ba_plus_shortcode_certificate');
+add_shortcode( 'boockinactivities_cancel_balance', 'ba_plus_shortcode_cancel_balance' );
 
 
 function ba_plus_shortcode_waiting_list($raw_atts = array(), $content = null, $tag = '')
@@ -109,6 +110,18 @@ function ba_plus_shortcode_certificate($raw_atts = array(), $content = null, $ta
 	$message .= '<div class="ba-certificate">';
 	$message .= '<div class="ba-certificate-type">' . __('Type de document : ', 'ba-plus') . $doc_type . '</div>';
 	$message .= '<div class="ba-certificate-expire">' . __('Date d\'expiration : ', 'ba-plus') . $str_date . '</div>';
+	$message .= '</div>';
+	return $message;
+}
+
+function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, $tag = ''){
+	// Check if user is logged in
+	if (!is_user_logged_in()) {
+		return bookacti_shortcode_login_form($raw_atts, $content, $tag);
+	}
+	$balance = get_user_meta(get_current_user_id(), 'nb_cancel_left', true);
+	$message = '<div class="ba-balance">';
+	$message .= '<div class="ba-balance-amount">' . __('Nombre d\'annulation gratuite restante : ', 'ba-plus') . $balance . '</div>';
 	$message .= '</div>';
 	return $message;
 }

@@ -45,6 +45,7 @@ require_once ('view/view-settings.php');
 
 // -- CRON -- //
 require_once ('cron/cron-waiting-list.php');
+require_once ('cron/cron-certificate.php');
 
 
 // # ---------------- HOOKS ---------------- # //
