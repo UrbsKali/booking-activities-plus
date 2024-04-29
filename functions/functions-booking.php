@@ -17,18 +17,13 @@ if (!defined('ABSPATH')) {
  */
 function ba_plus_validate_picked_event($validated, $picked_event, $args)
 {
-    $validated["messages"]["debug"] = array("eeeeeeeeeeeeee");
-    if (!$validated["messages"]["qty_sup_to_avail"]) {
-        return $validated;
-    }
-
-    if (ba_plus_check_if_user_is_in_waiting_list(get_current_user_id(), $picked_event['id'])) {
+    $event_id = $picked_event['events'][0]["id"];
+    $validated["messages"]["adebug"] = array("eeeeeeeeeeeeee <br>" . print_r(ba_plus_check_if_user_is_in_waiting_list(get_current_user_id(), $event_id), true) . "<br>e " . $event_id);
+    $validated["status"] = 'error';
+    return $validated;
+    if (ba_plus_check_if_user_is_in_waiting_list(get_current_user_id(), $event_id)) {
         $error = 'already_in_waiting_list';
-        if (!isset($validated['messages'][$error])) {
-            $validated['messages'][$error] = array();
-        }
-        $validated['messages'][$error][] = 'Vous êtes déjà dans la liste d\'attente pour cet événement';
-        // delete the old no_availability error
+        $validated['messages'][$error] = array('Vous êtes déjà dans la liste d\'attente pour cet événement');
         unset($validated["messages"]["no_availability"]);
     } else {
         $validated['status'] = 'success';
@@ -77,7 +72,7 @@ function ba_plus_add_user_to_waiting_list($form_id, $booking_form_values, $retur
 {
     // Refetch to check to get the waiting list state
     $response = bookacti_validate_picked_events($booking_form_values['picked_events'], $booking_form_values);
-    if (!isset($response['waiting_list'])) {
+    if (!isset($response['waiting_list']) || $response['waiting_list'] !== true) {
         return;
     }
 
