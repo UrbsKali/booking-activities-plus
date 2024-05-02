@@ -51,6 +51,7 @@ require_once ('cron/cron-certificate.php');
 // # ---------------- HOOKS ---------------- # //
 add_filter("bookacti_validate_picked_event", "ba_plus_validate_picked_event", 5, 3);
 add_filter("bookacti_validate_picked_events", "ba_plus_validate_picked_events", 5, 3);
+add_filter( "bookacti_booking_can_be_cancelled", "ba_plus_can_cancel_event", 5, 4 );
 add_action("bookacti_booking_form_before_booking", "ba_plus_add_user_to_waiting_list", 5, 3);
 
 
@@ -72,7 +73,7 @@ add_action('wp_enqueue_scripts', 'ba_plus_enqueue_scripts');
  */
 function ba_plus_create_menu()
 {
-    add_submenu_page('booking-activities', 'File d\'attente', 'File d\'attente', 'bookacti_manage_booking_activities', 'bookacti_waiting_list_settings', 'ba_plus_settings_page');
+    add_submenu_page('booking-activities', 'Plus', 'Plus', 'bookacti_manage_booking_activities', 'bookacti_waiting_list_settings', 'ba_plus_settings_page');
 }
 add_action('bookacti_admin_menu', 'ba_plus_create_menu', 20);
 
