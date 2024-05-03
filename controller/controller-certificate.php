@@ -12,33 +12,33 @@ if (!defined('ABSPATH')) {
 function ba_plus_usermeta_form_field_certificat($user)
 {
     ?>
-    <h3>Certificat / Attestation</h3>
+    <h3>Certificat & Attestation</h3>
     <table class="form-table">
         <tr>
             <th>
-                <label for="expire_date">Date d'expiration</label>
+                <label for="expire_date">Date d'expiration du certificat</label>
             </th>
             <td>
-                <input type="date" class="regular-text ltr" id="expire_date" name="expire_date"
-                    value="<?= esc_attr(get_user_meta($user->ID, 'expire_date', true)) ?>"
+                <input type="date" class="regular-text ltr" id="certificat_expire_date" name="certificat_expire_date"
+                    value="<?= esc_attr(get_user_meta($user->ID, 'certificat_expire_date', true)) ?>"
                     title="Please use YYYY-MM-DD as the date format."
                     pattern="(19[0-9][0-9]|20[0-9][0-9])-(1[0-2]|0[1-9])-(3[01]|[21][0-9]|0[1-9])" required>
                 <p class="description">
-                    Veuillez entrer la date d'expiration de votre certificat ou attestation.
+                    Veuillez entrer la date d'expiration de votre certificat.
                 </p>
             </td>
         </tr>
         <tr>
             <th>
-                <label for="doc_type">Type de document</label>
+                <label for="expire_date">Date d'expiration de l'attestation</label>
             </th>
             <td>
-                <select name="doc_type" id="doc_type" required>
-                    <option value="certificat" <?= get_user_meta($user->ID, 'doc_type', true) == "certificat" ? "selected" : "" ?>>Certificat</option>
-                    <option value="attestation" <?= get_user_meta($user->ID, 'doc_type', true) == "attestation" ? "selected" : "" ?>>Attestation</option>
-                </select>
+                <input type="date" class="regular-text ltr" id="attestation_expire_date" name="attestation_expire_date"
+                    value="<?= esc_attr(get_user_meta($user->ID, 'attestation_expire_date', true)) ?>"
+                    title="Please use YYYY-MM-DD as the date format."
+                    pattern="(19[0-9][0-9]|20[0-9][0-9])-(1[0-2]|0[1-9])-(3[01]|[21][0-9]|0[1-9])" required>
                 <p class="description">
-                    Veuillez entrer le type de document (certificat ou attestation).
+                    Veuillez entrer la date d'expiration de votre attestation.
                 </p>
             </td>
         </tr>
@@ -49,32 +49,31 @@ function ba_plus_usermeta_form_field_certificat($user)
 function ba_plus_usermeta_form_field_certificat_new_user($user)
 {
     ?>
-    <h3>Certificat / Attestation</h3>
+    <h3>Certificat & Attestation</h3>
     <table class="form-table">
         <tr class="form-required">
             <th>
-                <label for="expire_date">Date d'expiration <span class="description">(nécessaire)</span></label>
+                <label for="expire_date">Date d'expiration du certificat <span class="description">(nécessaire)</span></label>
             </th>
             <td>
-                <input type="date" class="regular-text ltr" id="expire_date" name="expire_date"
+                <input type="date" class="regular-text ltr" id="certificat_expire_date" name="certificat_expire_date"
                     title="Please use YYYY-MM-DD as the date format."
                     pattern="(19[0-9][0-9]|20[0-9][0-9])-(1[0-2]|0[1-9])-(3[01]|[21][0-9]|0[1-9])" required>
                 <p class="description">
-                    Veuillez entrer la date d'expiration de votre certificat ou attestation.
+                    Veuillez entrer la date d'expiration de votre certificat
                 </p>
             </td>
         </tr>
         <tr class="form-required">
             <th>
-                <label for="doc_type">Type de document <span class="description">(nécessaire)</span></label>
+                <label for="expire_date">Date d'expiration de l'attestation<span class="description">(nécessaire)</span></label>
             </th>
             <td>
-                <select name="doc_type" id="doc_type" required>
-                    <option value="certificat">Certificat</option>
-                    <option value="attestation">Attestation</option>
-                </select>
+                <input type="date" class="regular-text ltr" id="attestation_expire_date" name="attestation_expire_date"
+                    title="Please use YYYY-MM-DD as the date format."
+                    pattern="(19[0-9][0-9]|20[0-9][0-9])-(1[0-2]|0[1-9])-(3[01]|[21][0-9]|0[1-9])" required>
                 <p class="description">
-                    Veuillez entrer le type de document (certificat ou attestation).
+                    Veuillez entrer la date d'expiration de votre attestation
                 </p>
             </td>
         </tr>
@@ -96,40 +95,49 @@ function ba_plus_usermeta_form_field_certificate_update($user_id)
         return false;
     }
 
-    // create/update user meta for the $user_id
     update_user_meta(
         $user_id,
-        'doc_type',
-        $_POST['doc_type']
+        'certificat_expire_date',
+        $_POST['certificat_expire_date']
     );
     update_user_meta(
         $user_id,
-        'expire_date',
-        $_POST['expire_date']
+        'attestation_expire_date',
+        $_POST['attestation_expire_date']
     );
     update_user_meta(
         $user_id,
-        'send_mail',
+        'send_mail_certif_expire',
         'false'
     );
-    update_user_meta($user_id, 'send_mail_cancel', 'true');
+    update_user_meta(
+        $user_id,
+        'send_mail_attes_expire',
+        'false'
+    );
+    update_user_meta($user_id, 'send_mail_cancel', 'false');
 }
 
 function ba_plus_create_user_certificate($user_id)
 {
     update_user_meta(
         $user_id,
-        'doc_type',
-        $_POST['doc_type']
+        'certificat_expire_date',
+        $_POST['certificat_expire_date']
     );
     update_user_meta(
         $user_id,
-        'expire_date',
-        $_POST['expire_date']
+        'attestation_expire_date',
+        $_POST['attestation_expire_date']
     );
     update_user_meta(
         $user_id,
-        'send_mail',
+        'send_mail_certif_expire',
+        'false'
+    );
+    update_user_meta(
+        $user_id,
+        'send_mail_attes_expire',
         'false'
     );
     update_user_meta($user_id, "nb_cancel_left", 0);

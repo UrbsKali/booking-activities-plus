@@ -82,18 +82,18 @@ function ba_plus_shortcode_certificate($raw_atts = array(), $content = null, $ta
 	if (!is_user_logged_in()) {
 		return bookacti_shortcode_login_form($raw_atts, $content, $tag);
 	}
-	$doc_type = get_user_meta(get_current_user_id(), 'doc_type', true);
-	$expire_date = get_user_meta(get_current_user_id(), 'expire_date', true);
+	$certificate_expire_date = get_user_meta(get_current_user_id(), 'certificat_expire_date', true);
+	$attestation_expire_date = get_user_meta(get_current_user_id(), 'attestation_expire_date', true);
 
-	// If the user has no certificate, return an error message
-	if (empty($doc_type) || empty($expire_date)) {
-		return '<div class="ba-error">' . __('Vous n\'avez pas de certificat ou d\'attestation enregistré.', 'ba-plus') . '</div>';
+	$msg = '';
+	if (empty($certificate_expire_date)) {
+		$msg .= '<div class="ba-error">' . __('Vous n\'avez aucun certificat médical d\'enregistré', 'ba-plus') . '</div>';
 	}
-	if ($doc_type == 'certificat') {
-		$doc_type = __('Certificat', 'ba-plus');
-	} else {
-		$doc_type = __('Attestation', 'ba-plus');
+	if (empty($attestation_expire_date)) {
+		$msg .= '<div class="ba-error">' . __('Vous n\'avez aucune attestation d\'enregistré', 'ba-plus') . '</div>';
 	}
+
+
 	$date = datefmt_create(
 		"fr-FR",
 		IntlDateFormatter::FULL,
@@ -101,17 +101,29 @@ function ba_plus_shortcode_certificate($raw_atts = array(), $content = null, $ta
 		'Europe/Paris',
 		IntlDateFormatter::GREGORIAN
 	);
-	$message = '';
-	// add warning if certificate is expired
-	$str_date = datefmt_format($date, strtotime($expire_date));
-	if (strtotime($expire_date) < strtotime('now')) {
-		$message = '<div class="ba-error">' . __('Votre certificat est expiré depuis le ', 'ba-plus') . $str_date . '</div>';
+
+	// add warning if attestation is expired
+	$str_date_att = datefmt_format($date, strtotime($attestation_expire_date));
+	if (strtotime($attestation_expire_date) < strtotime('now')) {
+		$msg .= '<div class="ba-error">' . __('Votre attestation est expiré depuis le ', 'ba-plus') . $str_date_att . '</div>';
 	}
-	$message .= '<div class="ba-certificate">';
-	$message .= '<div class="ba-certificate-type">' . __('Type de document : ', 'ba-plus') . $doc_type . '</div>';
-	$message .= '<div class="ba-certificate-expire">' . __('Date d\'expiration : ', 'ba-plus') . $str_date . '</div>';
-	$message .= '</div>';
-	return $message;
+	// add warning if certificate is expired
+	$str_date_certif = datefmt_format($date, strtotime($certificate_expire_date));
+	if (strtotime($certificate_expire_date) < strtotime('now')) {
+		$msg .= '<div class="ba-error">' . __('Votre certificat est expiré depuis le ', 'ba-plus') . $str_date_certif . '</div>';
+	}
+
+	$msg .= '<div class="ba-certificate">';
+	$msg .= '<div class="ba-certificate-item">';
+	$msg .= '<div class="ba-certificate-title">' . __('Certificat médical', 'ba-plus') . '</div>';
+	$msg .= '<div class="ba-certificate-date">' . __('Date d\'expiration : ', 'ba-plus') . $str_date_certif . '</div>';
+	$msg .= '</div>';
+	$msg .= '<div class="ba-certificate-item">';
+	$msg .= '<div class="ba-certificate-title">' . __('Attestation', 'ba-plus') . '</div>';
+	$msg .= '<div class="ba-certificate-date">' . __('Date d\'expiration : ', 'ba-plus') . $str_date_att . '</div>';
+	$msg .=  '</div>';
+	$msg .= '</div>';
+	return $msg;
 }
 
 function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, $tag = ''){
