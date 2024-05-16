@@ -18,14 +18,16 @@ if (!defined('ABSPATH')) {
 function ba_plus_validate_picked_event($validated, $picked_event, $args)
 {
     $event_id = $picked_event['events'][0]["id"];
-    // delete the old messages
-    if (! $validated[ 'messages' ]){
-        return $validated;
-    }
-    
-    if (!empty(ba_plus_check_if_user_is_in_waiting_list(get_current_user_id(), $event_id))) {
+    $user_id = get_current_user_id();
+
+
+    if (!empty(ba_plus_check_if_user_is_in_waiting_list($user_id, $event_id))) {
         $error = 'already_in_waiting_list';
         $validated['messages'][$error] = array('Vous êtes déjà dans la liste d\'attente pour cet événement');
+        $validated['status'] = 'error';
+    } else if (ba_plus_check_if_already_booked($user_id, $event_id)) {
+        $error = 'already_booked';
+        $validated['messages'][$error] = array('Vous avez déjà réservé cet événement');
         $validated['status'] = 'error';
     } else {
         $validated['status'] = 'success';
@@ -45,14 +47,18 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
 function ba_plus_validate_picked_events($validated, $picked_events, $args)
 {
     // check if user certificate is not expired
-    $certi_date = get_user_meta(get_current_user_id(), "expire_date", true);
-    if (empty($certi_date)) {
+    $certi_date = get_user_meta(get_current_user_id(), "certificat_expire_date", true);
+    $attest_date = get_user_meta(get_current_user_id(), "attestation_expire_date", true);
+    if (empty($certi_date) || empty($attest_date)) {
         // send error message
         $validated['status'] = 'error';
-        $validated['messages']['no_certificate'] = array('Vous devez renseigner votre certificat médical pour pouvoir réserver un événement', $certi_date);
+        $validated['messages']['no_certificate'] = array('Vous devez renseigner vos informations médicales pour pouvoir réserver un événement (Certificat médical et Attestation)');
     } else if (date('Y-m-d', strtotime($certi_date)) < date('Y-m-d')) {
         $validated['status'] = 'error';
         $validated['messages']['old_certificate'] = array('Votre certificat médical est expiré, veuillez le renouveler pour pouvoir réserver un événement');
+    } else if (date('Y-m-d', strtotime($attest_date)) < date('Y-m-d')) {
+        $validated['status'] = 'error';
+        $validated['messages']['old_attestation'] = array('Votre attestation médical est expiré, veuillez le renouveler pour pouvoir réserver un événement');
     }
     return $validated;
 }
