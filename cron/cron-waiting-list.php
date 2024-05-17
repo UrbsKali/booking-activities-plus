@@ -122,6 +122,22 @@ function ba_plus_auto_register_waiting_list(){
         // auto register the user if there is a spot available
         $booked = ba_plus_check_if_event_is_full($event_id);
         if ( !$booked ){
+            // check user balance 
+            $filters = array(
+                'user_id' => $waiting->user_id,
+                'active' => 1
+            );
+            $filters = bapap_format_booking_pass_filters($filters);
+            $pass = bapap_get_booking_passes($filters);
+
+            foreach ($pass as $p) {
+                $pass = $p;
+                break;
+            }
+            if ( $pass->credits_current <= 0 ){
+                continue;
+            }
+
             ba_plus_remove_waiting_list_by_event_id($event_id, $waiting->user_id);
             // add the user to the event
             $booking_data = bookacti_sanitize_booking_data( array( 
@@ -138,17 +154,6 @@ function ba_plus_auto_register_waiting_list(){
             $booking_id = bookacti_insert_booking( $booking_data );
             if ( $booking_id ) {
                 // Remove one credit from the user
-                $filters = array(
-                    'user_id' => $waiting->user_id,
-                    'active' => 1
-                );
-                $filters = bapap_format_booking_pass_filters($filters);
-                $pass = bapap_get_booking_passes($filters);
-
-                foreach ($pass as $p) {
-                    $pass = $p;
-                    break;
-                }
 
                 $pass->credits_current -= 1;
                 bapap_update_booking_pass_data($pass->id, array('credits_current' => $pass->credits_current));
