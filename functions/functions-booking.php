@@ -125,13 +125,6 @@ add_action("bookacti_booking_form_before_booking", "ba_plus_add_user_to_waiting_
  */
 function ba_plus_can_cancel_event($is_allowed, $booking, $context, $allow_grouped_booking)
 {
-    // get the current hours, if under 24 h before event return false
-    $event_start = strtotime($booking->event_start);
-    $current_time = time();
-    $diff = $event_start - $current_time;
-    if ($diff < get_option('ba_plus_refund_delay', 24) * 3600) {
-        return false;
-    }
     if ($booking->state == 'cancelled') {
         return false;
     }
@@ -153,6 +146,12 @@ function ba_plus_cancel_event_individual($booking, $new_state, $is_admin)
     if (empty($nb_cancelled_events)) {
         return;
     } else if ($nb_cancelled_events <= 0) {
+        return;
+    }
+    $event_start = strtotime($booking->event_start);
+    $current_time = time();
+    $diff = $event_start - $current_time;
+    if ($diff < get_option('ba_plus_refund_delay', 24) * 3600){
         return;
     }
 
