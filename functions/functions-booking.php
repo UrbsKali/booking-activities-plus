@@ -161,7 +161,7 @@ function ba_plus_cancel_event_individual($booking, $new_state, $is_admin)
     // refund the cost of the event (1)
     $filters = array(
         'user_id' => $user_id,
-        'event_id' => $booking->event_id
+        'active' => 1
     );
     $filters = bapap_format_booking_pass_filters($filters);
     $pass = bapap_get_booking_passes($filters);

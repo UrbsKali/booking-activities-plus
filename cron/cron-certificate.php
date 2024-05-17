@@ -3,9 +3,13 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 add_action( 'bookacti_cron_check_certif', 'ba_plus_check_certificate_expiration' );
+add_action( 'bookacti_cron_check_attest', 'ba_plus_check_attestation_expiration' );
 
 if ( ! wp_next_scheduled( 'bookacti_cron_check_certif' ) ) {
     wp_schedule_event( time(), 'five_seconds', 'bookacti_cron_check_certif' );
+}   
+if ( ! wp_next_scheduled( 'bookacti_cron_check_attest' ) ) {
+    wp_schedule_event( time(), 'five_seconds', 'bookacti_cron_check_attest' );
 }   
 
 
