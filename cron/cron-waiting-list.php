@@ -17,10 +17,10 @@ add_action( 'bookacti_cron_clean_waiting_list', 'ba_plus_clean_waiting_list' );
 add_action( 'bookacti_cron_remove_empty_events', 'ba_plus_remove_empty_events' );
 
 if ( ! wp_next_scheduled( 'bookacti_cron_clean_waiting_list' ) ) {
-    wp_schedule_event( time(), 'hourly', 'bookacti_cron_clean_waiting_list' );
+    wp_schedule_event( time(), 'five_seconds', 'bookacti_cron_clean_waiting_list' );
 }
 if ( ! wp_next_scheduled( 'bookacti_cron_remove_empty_events' ) ) {
-    wp_schedule_event( time(), 'hourly', 'bookacti_cron_remove_empty_events' );
+    wp_schedule_event( time(), 'five_seconds', 'bookacti_cron_remove_empty_events' );
 }
 
 
@@ -67,6 +67,17 @@ function ba_plus_remove_empty_events(){
         if ( $booked < 3 ){
             // Remove all bookings, refund, and send email to all users TD& 
             bookacti_cancel_event($event['id']);
+            for ($i = 0; $i < count($event['bookings']); $i++) {
+                $booking = $event['bookings'][$i];
+                $user = get_user_by('id', $booking['user_id']);
+                $to = $user->user_email;
+                $subject = get_option( 'ba_plus_mail_cancel_title' );
+                $body = get_option( 'ba_plus_mail_cancel_body' );
+                $body = str_replace( '%event%', $event['title'], $body );
+                $headers = array('Content-Type: text/html; charset=UTF-8');
+                wp_mail( $to, $subject, $body, $headers );
+                echo "Mail sent to ".$user->display_name."<br>";
+            }
         }
     }
 }

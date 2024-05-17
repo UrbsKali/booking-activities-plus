@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-function bookacti_create_user_waiting_list($filters, $columns = array(), $per_page = 10)
+function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_page = 10)
 {
     if (!$columns) {
         $columns = array("id", "Évènements", "Actions");
@@ -138,11 +138,6 @@ function bookacti_create_user_waiting_list($filters, $columns = array(), $per_pa
         <?php } ?>
     </div>
     <?php
-
-    // Include bookings dialogs if they are not already
-    if (in_array('actions', $columns, true)) {
-        include_once (WP_PLUGIN_DIR . '/' . BOOKACTI_PLUGIN_NAME . '/view/view-bookings-dialogs.php');
-    }
 
     return apply_filters('bookacti_user_booking_list_html', ob_get_clean(), $booking_list_items, $columns, $filters, $per_page);
 }

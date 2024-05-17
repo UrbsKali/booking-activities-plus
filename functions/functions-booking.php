@@ -20,6 +20,12 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
     $event_id = $picked_event['events'][0]["id"];
     $user_id = get_current_user_id();
 
+    // check if event is fully booked
+    if (!ba_plus_check_if_event_is_full($event_id)){
+        return $validated;
+    }
+
+
 
     if (!empty(ba_plus_check_if_user_is_in_waiting_list($user_id, $event_id))) {
         $error = 'already_in_waiting_list';
@@ -120,6 +126,13 @@ function ba_plus_can_cancel_event($is_allowed, $booking, $context, $allow_groupe
     $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
     if (empty($nb_cancelled_events)) {
         $nb_cancelled_events = 0;
+    }
+    // get the current hours, if under 24 h before event retrun false
+    $event_start = strtotime($booking->event_start);
+    $current_time = time();
+    $diff = $event_start - $current_time;
+    if ($diff < get_option( 'ba_plus_refund_delay', 24) * 3600) {
+        return false;
     }
     if ($nb_cancelled_events > 0) {
         return true;

@@ -20,6 +20,12 @@ if (!defined('BOOKACTI_TABLE_BOOKINGS')) {
 if (!defined('BOOKACTI_TABLE_META')) {
 	define('BOOKACTI_TABLE_META', $db_prefix . 'bookacti_meta');
 }
+if (!defined('BOOKACTI_TABLE_PASSES')) {
+	define('BOOKACTI_TABLE_PASSES', $db_prefix . 'bookacti_passes');
+}
+if (!defined('BOOKACTI_TABLE_PASSES_TEMPLATES')) {
+	define('BOOKACTI_TABLE_PASSES_TEMPLATES', $db_prefix . 'bookacti_passes_templates');
+}
 
 function ba_plus_cancel_event($event_id)
 {
@@ -56,6 +62,21 @@ function ba_plus_check_if_already_booked($user_id, $event_id)
 	$query = $wpdb->prepare($query, $user_id, $event_id);
 	$booking = $wpdb->get_row($query, OBJECT);
 	if (!empty($booking)) {
+		return true;
+	}
+	return false;
+}
+
+function ba_plus_check_if_event_is_full($event_id)
+{
+	global $wpdb;
+	$query = 'SELECT COUNT(*) as booked FROM ' . BOOKACTI_TABLE_BOOKINGS . ' WHERE event_id = %d'; 
+	$query = $wpdb->prepare($query, $event_id);
+	$booked = $wpdb->get_var($query);
+	$query = 'SELECT availability FROM ' . BOOKACTI_TABLE_EVENTS . ' WHERE id = %d';
+	$query = $wpdb->prepare($query, $event_id);
+	$availability = $wpdb->get_var($query);
+	if ($booked >= $availability) {
 		return true;
 	}
 	return false;

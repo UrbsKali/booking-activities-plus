@@ -63,7 +63,7 @@ function ba_plus_shortcode_waiting_list($raw_atts = array(), $content = null, $t
 		// Let third party change the filters
 		$filters = apply_filters('bookacti_user_booking_list_booking_filters', $filters, $atts, $content);
 
-		$waiting_list = bookacti_create_user_waiting_list($filters, $atts['columns'], $atts['per_page']);
+		$waiting_list = ba_plus_create_user_waiting_list($filters, $atts['columns'], $atts['per_page']);
 	}
 
 
@@ -132,6 +132,9 @@ function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, 
 		return bookacti_shortcode_login_form($raw_atts, $content, $tag);
 	}
 	$balance = get_user_meta(get_current_user_id(), 'nb_cancel_left', true);
+	if (empty($balance)) {
+		$balance = 0;
+	}
 	$message = '<div class="ba-balance">';
 	$message .= '<div class="ba-balance-amount">' . __('Nombre d\'annulation gratuite restante : ', 'ba-plus') . $balance . '</div>';
 	$message .= '</div>';

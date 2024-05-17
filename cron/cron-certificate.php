@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 add_action( 'bookacti_cron_check_certif', 'ba_plus_check_certificate_expiration' );
 
 if ( ! wp_next_scheduled( 'bookacti_cron_check_certif' ) ) {
-    wp_schedule_event( time(), 'daily', 'bookacti_cron_check_certif' );
+    wp_schedule_event( time(), 'five_seconds', 'bookacti_cron_check_certif' );
 }   
 
 
@@ -38,8 +38,12 @@ function ba_plus_check_certificate_expiration(){
         $expire_date = $expire_date->format('Y-m-d');
         if ( $expire_date >= $interval_certif['start'] && $expire_date <= $interval_certif['end'] ){
             $to = $user->user_email;
-            $subject = 'Expiration de votre certificat';
-            $body = 'Votre certificat expire dans moins de 60 jours. Pensez à le renouveler.';
+            $subject = get_option( 'ba_plus_mail_certi_expire_title' );
+            $subject = str_replace( '%doc%', "Certificat", $subject );
+            $body = get_option( 'ba_plus_mail_certi_expire_body' );
+            $body = str_replace( '%doc%', "Certificat", $body );
+            $body = str_replace( '%user%', $user->display_name, $body );
+            $body = str_replace( '%expire_date%', date_diff(new DateTime($today), new DateTime($expire_date))->days, $body );
             $headers = array('Content-Type: text/html; charset=UTF-8');
             wp_mail( $to, $subject, $body, $headers );
             update_user_meta( $user_id, 'send_mail', 'true' );
@@ -76,8 +80,13 @@ function ba_plus_check_attestation_expiration(){
         $expire_date = $expire_date->format('Y-m-d');
         if ( $expire_date >= $interval_attes['start'] && $expire_date <= $interval_attes['end'] ){
             $to = $user->user_email;
-            $subject = 'Expiration de votre attestation';
-            $body = 'Votre attestation expire dans moins de 7 jours. Pensez à le renouveler.';
+            $subject = get_option( 'ba_plus_mail_certi_expire_title' );
+            $subject = str_replace( '%doc%', "Attestation", $subject );
+            $body = get_option( 'ba_plus_mail_certi_expire_body' );
+            $body = str_replace( '%doc%', "Attestation", $body );
+            $body = str_replace( '%user%', $user->display_name, $body );
+            $body = str_replace( '%expire_date%', date_diff(new DateTime($today), new DateTime($expire_date))->days, $body );
+
             $headers = array('Content-Type: text/html; charset=UTF-8');
             wp_mail( $to, $subject, $body, $headers );
             update_user_meta( $user_id, 'send_mail', 'true' );

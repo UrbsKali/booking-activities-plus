@@ -83,11 +83,30 @@ function ba_plus_get_user_waiting_list($user_id)
  * Remove an user from the waiting list 
  * @version 1.0
  * @global wpdb $wpdb
+ * @param int $waiting_id
+ * @param int $user_id
+ * @return int
+ */
+function ba_plus_remove_waiting_list($waiting_id, $user_id)
+{
+    global $wpdb;
+
+    $query = 'DELETE FROM ' . BOOKACTI_TABLE_WAITING_LIST . ' WHERE id = %d AND user_id = %d';
+    $query = $wpdb->prepare($query, $waiting_id, $user_id);
+    $wpdb->query($query);
+
+    return $wpdb->rows_affected;
+}
+
+/**
+ * Remove an user from the waiting list 
+ * @version 1.0
+ * @global wpdb $wpdb
  * @param int $event_id
  * @param int $user_id
  * @return int
  */
-function ba_plus_remove_waiting_list($event_id, $user_id)
+function ba_plus_remove_waiting_list_by_event_id($event_id, $user_id)
 {
     global $wpdb;
 

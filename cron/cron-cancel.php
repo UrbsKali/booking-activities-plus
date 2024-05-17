@@ -18,8 +18,9 @@ function ba_plus_check_cancel(){
         $send_mail = get_user_meta( $user->id, 'send_mail_cancel', true );
         if ( $user_nb_cancle == 3 && $send_mail == 'false') {
             $to = $user->user_email;
-            $subject = 'Votre Abonnment';
-            $body = 'Il ne reste plus que 3 annulation grartuite possible sur votre abonnement. Pensez à le renouveler.';
+            $subject = get_option( 'ba_plus_mail_tree_cancel_left_title' );
+            $body = get_option( 'ba_plus_mail_tree_cancel_left_body' );
+            $body = str_replace( '%user%', $user->display_name, $body );
             $headers = array('Content-Type: text/html; charset=UTF-8');
             wp_mail( $to, $subject, $body, $headers );
             update_user_meta( $user->id, 'send_mail_cancel', 'true' );
