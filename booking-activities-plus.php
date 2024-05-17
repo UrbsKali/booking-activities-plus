@@ -55,14 +55,6 @@ require_once ('cron/cron-certificate.php');
 require_once ('cron/cron-cancel.php');
 
 
-// # ---------------- HOOKS ---------------- # //
-add_filter("bookacti_validate_picked_event", "ba_plus_validate_picked_event", 5, 3);
-add_filter("bookacti_validate_picked_events", "ba_plus_validate_picked_events", 5, 3);
-add_filter( "bookacti_booking_can_be_cancelled", "ba_plus_can_cancel_event", 5, 4 );
-add_action("bookacti_booking_form_before_booking", "ba_plus_add_user_to_waiting_list", 5, 3);
-
-
-
 
 // # ---------------- JS SCRIPTS ---------------- # //
 function ba_plus_enqueue_scripts()

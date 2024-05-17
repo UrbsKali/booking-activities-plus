@@ -21,7 +21,7 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
     $user_id = get_current_user_id();
 
     // check if event is fully booked
-    if (!ba_plus_check_if_event_is_full($event_id)){
+    if (!ba_plus_check_if_event_is_full($event_id)) {
         return $validated;
     }
 
@@ -42,6 +42,8 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
 
     return $validated;
 }
+add_filter("bookacti_validate_picked_event", "ba_plus_validate_picked_event", 5, 3);
+
 
 /**
  * Validate the picked events
@@ -68,7 +70,7 @@ function ba_plus_validate_picked_events($validated, $picked_events, $args)
     }
     return $validated;
 }
-
+add_filter("bookacti_validate_picked_events", "ba_plus_validate_picked_events", 5, 3);
 
 
 
@@ -114,6 +116,8 @@ function ba_plus_add_user_to_waiting_list($form_id, $booking_form_values, $retur
     $return_array['message'] = implode('</li><li>', $return_array['messages']);
     bookacti_send_json($return_array, 'submit_booking_form');	 // return success
 }
+add_action("bookacti_booking_form_before_booking", "ba_plus_add_user_to_waiting_list", 5, 3);
+
 
 
 /**
@@ -121,22 +125,65 @@ function ba_plus_add_user_to_waiting_list($form_id, $booking_form_values, $retur
  */
 function ba_plus_can_cancel_event($is_allowed, $booking, $context, $allow_grouped_booking)
 {
-    // check the usermeta to see if the nb_cancelled_events is less than 3
-    $user_id = get_current_user_id();
-    $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
-    if (empty($nb_cancelled_events)) {
-        $nb_cancelled_events = 0;
-    }
-    // get the current hours, if under 24 h before event retrun false
+    // get the current hours, if under 24 h before event return false
     $event_start = strtotime($booking->event_start);
     $current_time = time();
     $diff = $event_start - $current_time;
-    if ($diff < get_option( 'ba_plus_refund_delay', 24) * 3600) {
+    if ($diff < get_option('ba_plus_refund_delay', 24) * 3600) {
         return false;
     }
-    if ($nb_cancelled_events > 0) {
-        return true;
-    } else {
+    if ($booking->state == 'cancelled') {
         return false;
     }
+    return $is_allowed;
 }
+add_filter("bookacti_booking_can_be_cancelled", "ba_plus_can_cancel_event", 5, 4);
+
+
+/**
+ * Cancel the event
+ */
+function ba_plus_cancel_event_individual($booking, $new_state, $is_admin)
+{
+    if ($new_state != 'cancelled') {
+        return;
+    }
+    $user_id = $booking->user_id;
+    $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
+    if (empty($nb_cancelled_events)) {
+        return;
+    } else if ($nb_cancelled_events <= 0) {
+        return;
+    }
+
+    $nb_cancelled_events--;
+    update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
+    // refund the cost of the event (1)
+    $filters = array(
+        'user_id' => $user_id,
+        'event_id' => $booking->event_id
+    );
+    $filters = bapap_format_booking_pass_filters($filters);
+    $pass = bapap_get_booking_passes($filters);
+    if (empty($pass)) {
+        return;
+    }
+    foreach ($pass as $p) {
+        $pass = $p;
+        break;
+    }
+    $pass->credits_current += 1;
+    bapap_update_booking_pass_data($pass->id, array('credits_current' => $pass->credits_current));
+    update_user_meta( $user_id, "debug", $pass->id ." + ". $pass->credits_total);
+    // add to the log 
+    $log_data = array( 
+        'credits_current' => $pass->credits_current,
+        'credits_total' => $pass->credits_total,
+        'reason' => "Annulation de l'événement - Remboursement d'un crédit",
+        'context' => 'updated_from_server',
+        'lang_switched' => 1
+    );
+    bapap_add_booking_pass_log( $pass->id, $log_data );
+
+}
+add_action("bookacti_booking_state_changed", "ba_plus_cancel_event_individual", 10, 3);

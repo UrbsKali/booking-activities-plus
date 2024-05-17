@@ -81,3 +81,12 @@ function ba_plus_check_if_event_is_full($event_id)
 	}
 	return false;
 }
+
+function ba_plus_get_booking($booking_id)
+{
+	global $wpdb;
+	$query = 'SELECT * FROM ' . BOOKACTI_TABLE_BOOKINGS . ' WHERE id = %d';
+	$query = $wpdb->prepare($query, $booking_id);
+	$booking = $wpdb->get_row($query, OBJECT);
+	return $booking;
+}
