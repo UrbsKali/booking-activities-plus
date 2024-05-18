@@ -22,13 +22,13 @@ add_action('bookacti_cron_remove_empty_events', 'ba_plus_remove_empty_events');
 add_action('bookacti_cron_auto_add_wl', 'ba_plus_auto_register_waiting_list');
 
 if (!wp_next_scheduled('bookacti_cron_clean_waiting_list')) {
-    wp_schedule_event(time(), 'five_seconds', 'bookacti_cron_clean_waiting_list');
+    wp_schedule_event(time(), 'hourly', 'bookacti_cron_clean_waiting_list');
 }
 if (!wp_next_scheduled('bookacti_cron_remove_empty_events')) {
-    wp_schedule_event(time(), 'five_seconds', 'bookacti_cron_remove_empty_events');
+    wp_schedule_event(time(), 'hourly', 'bookacti_cron_remove_empty_events');
 }
 if (!wp_next_scheduled('bookacti_cron_auto_add_wl')) {
-    wp_schedule_event(time(), 'five_seconds', 'bookacti_cron_auto_add_wl');
+    wp_schedule_event(time(), 'hourly', 'bookacti_cron_auto_add_wl');
 }
 
 
