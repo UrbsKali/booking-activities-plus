@@ -23,7 +23,6 @@ function ba_plus_prevent_form(e) {
     };
     xhr.send(data);
 }
-
 let form = document.querySelector('#ba_plus_settings_form');
 form.addEventListener('submit', ba_plus_prevent_form);
 

@@ -151,7 +151,7 @@ function ba_plus_cancel_event_individual($booking, $new_state, $is_admin)
     $event_start = strtotime($booking->event_start);
     $current_time = time();
     $diff = $event_start - $current_time;
-    if ($diff < get_option('ba_plus_refund_delay', 24) * 3600){
+    if ($diff < get_option('ba_plus_refund_delay', 24) * 3600) {
         return;
     }
 
@@ -173,16 +173,76 @@ function ba_plus_cancel_event_individual($booking, $new_state, $is_admin)
     }
     $pass->credits_current += 1;
     bapap_update_booking_pass_data($pass->id, array('credits_current' => $pass->credits_current));
-    update_user_meta( $user_id, "debug", $pass->id ." + ". $pass->credits_total);
+    update_user_meta($user_id, "debug", $pass->id . " + " . $pass->credits_total);
     // add to the log 
-    $log_data = array( 
+    $log_data = array(
         'credits_current' => $pass->credits_current,
         'credits_total' => $pass->credits_total,
         'reason' => "Annulation de l'événement - Remboursement d'un crédit",
         'context' => 'updated_from_server',
         'lang_switched' => 1
     );
-    bapap_add_booking_pass_log( $pass->id, $log_data );
+    bapap_add_booking_pass_log($pass->id, $log_data);
 
 }
 add_action("bookacti_booking_state_changed", "ba_plus_cancel_event_individual", 10, 3);
+
+
+/**
+ * Book an event - ADMIN ONLY
+ */
+function ba_plus_admin_book_event()
+{
+    $user_id = intval($_POST['user_id']);
+    $event_id = intval($_POST['event_id']);
+
+    $return_array = array(
+        'status' => 'error',
+        'messages' => array()
+    );
+
+    if ($user_id == 0) {
+        $return_array['error'] = 'no_user';
+        $return_array['messages']['no_user'] = "Veuillez renseigner un utilisateur";
+        $return_array['message'] = implode('</li><li>', $return_array['messages']);
+        bookacti_send_json($return_array, 'submit_booking_form');	 // return success
+    }
+
+    if ($event_id == 0) {
+        $return_array['error'] = 'no_event';
+        $return_array['messages']['no_event'] = "Veuillez renseigner un événement";
+        $return_array['message'] = implode('</li><li>', $return_array['messages']);
+        bookacti_send_json($return_array, 'submit_booking_form');	 // return success
+    }
+
+    $event = bookacti_get_event_by_id($event_id);
+    $user = get_user_by('id', $user_id);
+
+    
+    
+
+    $booking_data = array(
+        'user_id' => $user_id,
+        'form_id' => $event->template_id,
+        'event_id' => $event_id,
+        'event_start' => $event->start,
+        'event_end' => $event->end,
+        'quantity' => 1,
+        'status' => 'booked',
+        'payment_status' => 'paid',
+        'active' => 'according_to_status'
+    );
+
+    $booking_data = bookacti_sanitize_booking_data($booking_data);
+    $booking_id = bookacti_insert_booking($booking_data);
+    if ($booking_id) {
+        $return_array['status'] = 'success';
+        $return_array['messages']['booked'] = "L'événement a bien été réservé pour " . $user->display_name;
+    } else {
+        $return_array['error'] = 'unknown';
+        $return_array['messages']['unknown'] = esc_html__('An error occurred, please try again.', 'booking-activities');
+    }
+    $return_array['message'] = implode('</li><li>', $return_array['messages']);
+    bookacti_send_json($return_array, 'submit_booking_form');	 // return success    
+}
+add_action("wp_ajax_baPlusAddResa", "ba_plus_admin_book_event");

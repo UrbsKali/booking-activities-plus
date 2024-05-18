@@ -168,7 +168,7 @@ function ba_plus_auto_register_waiting_list()
                     'event_end' => $waiting->end,
                     'quantity' => 1,
                     'status' => "pending",
-                    'payment_status' => "none",
+                    'payment_status' => "paid",
                     'active' => 'according_to_status'
                 ));
             $booking_id = bookacti_insert_booking($booking_data);

@@ -69,6 +69,7 @@ function ba_plus_enqueue_admin_scripts()
 {
     wp_enqueue_script('ba-wl-admin', plugins_url('js/admin-settings.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_enqueue_script('ba-wl-cancel-admin', plugins_url('js/admin-cancel-wl.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
+    wp_enqueue_script('ba-wl-resa-admin', plugins_url('js/admin-resa.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
 }
 add_action('admin_enqueue_scripts', 'ba_plus_enqueue_admin_scripts');
 
