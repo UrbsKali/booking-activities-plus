@@ -20,11 +20,13 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
     $event_id = $picked_event['events'][0]["id"];
     $user_id = get_current_user_id();
 
-    // check if event is fully booked
-    if (!ba_plus_check_if_event_is_full($event_id)) {
+
+    if (!isset($validated["messages"]["users_sup_to_max"]) && !isset($validated["messages"]["no_availability"]) && !isset($validated["messages"]["qty_sup_to_max"])) {
         return $validated;
     }
-
+    if (isset($validated["messages"])){
+        unset($validated["messages"]);
+    }
 
 
     if (!empty(ba_plus_check_if_user_is_in_waiting_list($user_id, $event_id))) {
