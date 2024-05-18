@@ -24,7 +24,7 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
     if (!isset($validated["messages"]["users_sup_to_max"]) && !isset($validated["messages"]["no_availability"]) && !isset($validated["messages"]["qty_sup_to_max"])) {
         return $validated;
     }
-    if (isset($validated["messages"])){
+    if (isset($validated["messages"])) {
         unset($validated["messages"]);
     }
 
@@ -187,7 +187,30 @@ function ba_plus_cancel_event_individual($booking, $new_state, $is_admin)
     bapap_add_booking_pass_log($pass->id, $log_data);
 
 }
-add_action("bookacti_booking_state_changed", "ba_plus_cancel_event_individual", 10, 3);
+//add_action("bookacti_booking_state_changed", "ba_plus_cancel_event_individual", 10, 3);
+
+function ba_plus_filters_refund($credits, $booking, $booking_type)
+{
+    $event_start = strtotime($booking->event_start);
+    $current_time = time();
+    $diff = $event_start - $current_time;
+    if ($diff < get_option('ba_plus_refund_delay', 24) * 3600) {
+        return 0;
+    }
+
+    $user_id = $booking->user_id;
+    $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
+    if (empty($nb_cancelled_events)) {
+        return 0;
+    } else if ($nb_cancelled_events <= 0) {
+        return 0;
+    }
+
+    $nb_cancelled_events--;
+    update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
+    return $credits;
+}
+add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund", 10, 3);
 
 
 /**
@@ -220,8 +243,8 @@ function ba_plus_admin_book_event()
     $event = bookacti_get_event_by_id($event_id);
     $user = get_user_by('id', $user_id);
 
-    
-    
+
+
 
     $booking_data = array(
         'user_id' => $user_id,
