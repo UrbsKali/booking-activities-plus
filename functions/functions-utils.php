@@ -28,7 +28,14 @@ function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_pag
 
     $booking_list_items = bookacti_get_user_booking_list_items($filters, $columns);
 
-    $waiting_list = ba_plus_get_user_waiting_list(get_current_user_id());
+    $user_id = get_current_user_id();
+
+    if ($filters['user_id'] && $filters['user_id'] !== 'current') {
+        $user_id = $filters['user_id'];
+    }
+
+
+    $waiting_list = ba_plus_get_user_waiting_list($user_id);
 
 
     foreach ($waiting_list as $key => $value) {
