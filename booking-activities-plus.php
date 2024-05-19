@@ -38,6 +38,7 @@ require_once ('functions/functions-utils.php');
 require_once ('functions/functions-booking.php');
 require_once ('functions/functions-booking-system.php');
 require_once ('functions/functions-passes.php');
+require_once ('functions/functions-um.php');
 
 // -- CONTROLLERS -- //
 require_once ('controller/controller-shortcodes.php');

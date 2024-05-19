@@ -18,6 +18,8 @@ if (!defined('ABSPATH')) {
 function ba_plus_validate_picked_event($validated, $picked_event, $args)
 {
     $event_id = $picked_event['events'][0]["id"];
+    $start_date = $picked_event['events'][0]["start"];
+    $end_date = $picked_event['events'][0]["end"];
     $user_id = get_current_user_id();
 
 
@@ -29,7 +31,7 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
     }
 
 
-    if (!empty(ba_plus_check_if_user_is_in_waiting_list($user_id, $event_id))) {
+    if (!empty(ba_plus_check_if_user_is_in_waiting_list($user_id, $event_id, $start_date, $end_date))) {
         $error = 'already_in_waiting_list';
         $validated['messages'][$error] = array('Vous êtes déjà dans la liste d\'attente pour cet événement');
         $validated['status'] = 'error';

@@ -67,10 +67,10 @@ function ba_plus_check_if_already_booked($user_id, $event_id)
 	return false;
 }
 
-function ba_plus_check_if_event_is_full($event_id)
+function ba_plus_check_if_event_is_full($event_id, $start_date, $end_date)
 {
 	global $wpdb;
-	$query = 'SELECT COUNT(*) as booked FROM ' . BOOKACTI_TABLE_BOOKINGS . ' WHERE event_id = %d AND active = 1'; 
+	$query = 'SELECT COUNT(*) as booked FROM ' . BOOKACTI_TABLE_BOOKINGS . ' WHERE event_id = %d AND active = 1 AND start_date = %s AND end_date = %s'; 
 	$query = $wpdb->prepare($query, $event_id);
 	$booked = $wpdb->get_var($query);
 	$query = 'SELECT availability FROM ' . BOOKACTI_TABLE_EVENTS . ' WHERE id = %d';

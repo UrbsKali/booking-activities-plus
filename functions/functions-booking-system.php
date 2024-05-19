@@ -8,10 +8,10 @@ if (!defined('ABSPATH')) {
  */
 function ba_plus_get_waiting_data($booking_system_data, $atts)
 {
-    $booking_system_data['test'] = "test";
     for ($i = 0; $i < count($booking_system_data['events']); $i++) {
         $event_id = $booking_system_data['events'][$i]['id'];
-        $waiting_list = ba_plus_get_waiting_list_count($event_id);
+
+        $waiting_list = ba_plus_get_waiting_list_count($event_id, $start_date, $end_date);
         $booking_system_data['events_data'][$event_id]['waiting_list'] = $waiting_list;
     }
     return $booking_system_data;
@@ -24,7 +24,6 @@ add_filter("bookacti_booking_system_data", "ba_plus_get_waiting_data", 2, 2);
  */
 function ba_plus_get_waiting_data_template($booking_system_data, $atts)
 {
-    $booking_system_data['test'] = "test";
     $waiting_list = ba_plus_get_all_waiting_list();
     $booking_system_data['waiting_list'] = array();
     foreach ($waiting_list as $waiting) {
@@ -35,11 +34,12 @@ function ba_plus_get_waiting_data_template($booking_system_data, $atts)
         if (!isset($booking_system_data['waiting_list'][$event_id])) {
             $booking_system_data['waiting_list'][$event_id] = array();
         }
-        $booking_system_data['waiting_list'][$event_id][] = array(
+        $booking_system_data['waiting_list'][$event_id][$waiting->start_date] = array(
             'user_id' => $waiting->user_id,
             'user_name' => $user_name,
             'waiting_id' => $waiting->id,
-            'date' => $waiting->date
+            'start_date' => $waiting->start_date,
+            'end_date' => $waiting->end_date,
         );
     }
     return $booking_system_data;

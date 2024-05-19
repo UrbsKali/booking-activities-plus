@@ -40,14 +40,15 @@ function add_waiting_number() {
     console.log(event_col)
     event_col.forEach(element => {
         id = element.parentElement.parentElement.dataset.eventId;
-        if (id === null) {
+        start_date = element.parentElement.parentElement.dataset.eventStart;
+        if (id === null || start_date === null) {
             return;
         }
         // get first child of booking_system
         tmp = bookacti.booking_system
         tmp = tmp[Object.keys(tmp)[0]]
         // get the event
-        wl = tmp.events_data[id].waiting_list
+        wl = tmp.waiting_list[id][start_date];
         if (wl == '0') {
             return;
         }

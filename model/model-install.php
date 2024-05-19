@@ -20,6 +20,8 @@ function ba_plus_create_tables()
 		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 		user_id VARCHAR(64),
 		event_id BIGINT UNSIGNED,
+        start_date DATETIME,
+        end_date DATETIME,
 		PRIMARY KEY(id),
 		KEY event_id(event_id),
 		KEY user_id(user_id)

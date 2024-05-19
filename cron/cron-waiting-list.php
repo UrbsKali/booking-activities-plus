@@ -47,10 +47,11 @@ function ba_plus_clean_waiting_list()
     $waiting_list = ba_plus_get_all_waiting_list();
     foreach ($waiting_list as $waiting) {
         $event_id = $waiting->event_id;
-        $event_start = $waiting->start;
+        $event_start = $waiting->start_date;
+        $event_end = $waiting->end_date;
 
         if ($event_start < date('Y-m-d h:i:s', strtotime('-10 hour'))) {
-            ba_plus_remove_all_waiting_list($event_id);
+            ba_plus_remove_all_waiting_list($event_id, $event_start, $event_end);
         }
     }
 }
@@ -137,9 +138,11 @@ function ba_plus_auto_register_waiting_list()
     $waiting_list = ba_plus_get_all_waiting_list();
     foreach ($waiting_list as $waiting) {
         $event_id = $waiting->event_id;
+        $event_start = $waiting->start_date;
+        $event_end = $waiting->end_date;
 
         // auto register the user if there is a spot available
-        $booked = ba_plus_check_if_event_is_full($event_id);
+        $booked = ba_plus_check_if_event_is_full($event_id, $event_start, $event_end);
         if (!$booked) {
             // check user balance 
             $filters = array(
@@ -157,7 +160,7 @@ function ba_plus_auto_register_waiting_list()
                 continue;
             }
 
-            ba_plus_remove_waiting_list_by_event_id($event_id, $waiting->user_id);
+            ba_plus_remove_waiting_list_by_event_id($event_id, $waiting->user_id, $event_start, $event_end);
             // add the user to the event
             $booking_data = bookacti_sanitize_booking_data(
                 array(
@@ -179,6 +182,7 @@ function ba_plus_auto_register_waiting_list()
                 bapap_update_booking_pass_data($pass->id, array('credits_current' => $pass->credits_current));
                 // add to the log
                 $log_data = array(
+                    'credits_delta' => '-1',
                     'credits_current' => $pass->credits_current,
                     'credits_total' => $pass->credits_total,
                     'reason' => "Inscription automatique (via liste d'attente) - Retrait d'un crédit",
@@ -186,7 +190,6 @@ function ba_plus_auto_register_waiting_list()
                     'lang_switched' => 1
                 );
                 bapap_add_booking_pass_log($pass->id, $log_data);
-
 
 
                 // Send email to user

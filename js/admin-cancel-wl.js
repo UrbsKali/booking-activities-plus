@@ -8,6 +8,8 @@ $j('.ba-plus-cancel-waiting-list').click(function () {
             action: 'baPlusCancelWaitingList',
             waiting_id: waiting_id,
             user_id: user_id,
+            start_date: $j(this).data('start-date'),
+            end_date: $j(this).data('end_date'),
             nonce: bookacti_localized.nonce
         },
         dataType: 'json',
