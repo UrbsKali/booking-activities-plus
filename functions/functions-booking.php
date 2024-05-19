@@ -30,12 +30,11 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
         unset($validated["messages"]);
     }
 
-
     if (!empty(ba_plus_check_if_user_is_in_waiting_list($user_id, $event_id, $start_date, $end_date))) {
         $error = 'already_in_waiting_list';
         $validated['messages'][$error] = array('Vous êtes déjà dans la liste d\'attente pour cet événement');
         $validated['status'] = 'error';
-    } else if (ba_plus_check_if_already_booked($user_id, $event_id)) {
+    } else if (ba_plus_check_if_already_booked($user_id, $event_id, $start_date, $end_date)) {
         $error = 'already_booked';
         $validated['messages'][$error] = array('Vous avez déjà réservé cet événement');
         $validated['status'] = 'error';
@@ -109,13 +108,13 @@ function ba_plus_add_user_to_waiting_list($form_id, $booking_form_values, $retur
             'active' => 'according_to_status'
         )
     );
-    $waiting_list_id = ba_plus_insert_waiting_list($booking_data["user_id"], $booking_data["event_id"]);
+    $waiting_list_id = ba_plus_insert_waiting_list($booking_data["user_id"], $booking_data["event_id"], $booking_data["event_start"], $booking_data["event_end"]);
     if ($waiting_list_id) {
         $return_array['status'] = 'success';
         $return_array['messages']['booked'] = "Vous êtes bien dans la liste d'attente !";
     } else {
         $return_array['error'] = 'unknown';
-        $return_array['messages']['unknown'] = esc_html__('An error occurred, please try again.', 'booking-activities');
+        $return_array['messages']['unknown'] = esc_html__('An error occurred, please try again.', 'booking-activities');        
     }
     $return_array['message'] = implode('</li><li>', $return_array['messages']);
     bookacti_send_json($return_array, 'submit_booking_form');	 // return success
@@ -161,32 +160,6 @@ function ba_plus_cancel_event_individual($booking, $new_state, $is_admin)
 
     $nb_cancelled_events--;
     update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
-    // refund the cost of the event (1)
-    $filters = array(
-        'user_id' => $user_id,
-        'active' => 1
-    );
-    $filters = bapap_format_booking_pass_filters($filters);
-    $pass = bapap_get_booking_passes($filters);
-    if (empty($pass)) {
-        return;
-    }
-    foreach ($pass as $p) {
-        $pass = $p;
-        break;
-    }
-    $pass->credits_current += 1;
-    bapap_update_booking_pass_data($pass->id, array('credits_current' => $pass->credits_current));
-    update_user_meta($user_id, "debug", $pass->id . " + " . $pass->credits_total);
-    // add to the log 
-    $log_data = array(
-        'credits_current' => $pass->credits_current,
-        'credits_total' => $pass->credits_total,
-        'reason' => "Annulation de l'événement - Remboursement d'un crédit",
-        'context' => 'updated_from_server',
-        'lang_switched' => 1
-    );
-    bapap_add_booking_pass_log($pass->id, $log_data);
 
 }
 //add_action("bookacti_booking_state_changed", "ba_plus_cancel_event_individual", 10, 3);
@@ -196,7 +169,7 @@ function ba_plus_filters_refund($credits, $booking, $booking_type)
     $event_start = strtotime($booking->event_start);
     $current_time = time();
     $diff = $event_start - $current_time;
-    if ($diff < get_option('ba_plus_refund_delay', 24) * 3600) {
+    if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600)) {
         return 0;
     }
 

@@ -12,12 +12,12 @@ if (!defined('ABSPATH')) {
  * @param int $user_id
  * @return int
  */
-function ba_plus_insert_waiting_list($user_id, $event_id)
+function ba_plus_insert_waiting_list($user_id, $event_id, $start_date, $end_date)
 {
     global $wpdb;
 
-    $query = 'INSERT INTO ' . BOOKACTI_TABLE_WAITING_LIST . ' (user_id, event_id ) VALUES ( %d, %d )';
-    $query = $wpdb->prepare($query, $user_id, $event_id);
+    $query = 'INSERT INTO ' . BOOKACTI_TABLE_WAITING_LIST . ' (user_id, event_id, start_date, end_date) VALUES (%d, %d, %s, %s)';
+    $query = $wpdb->prepare($query, $user_id, $event_id, $start_date, $end_date);
     $wpdb->query($query);
 
     return !empty($wpdb->insert_id) ? $wpdb->insert_id : 0;

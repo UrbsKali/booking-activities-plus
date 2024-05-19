@@ -37,7 +37,6 @@ function add_waiting_number() {
     if (event_col.length === 0) {
         return;
     }
-    console.log(event_col)
     event_col.forEach(element => {
         id = element.parentElement.parentElement.dataset.eventId;
         start_date = element.parentElement.parentElement.dataset.eventStart;
@@ -48,10 +47,14 @@ function add_waiting_number() {
         tmp = bookacti.booking_system
         tmp = tmp[Object.keys(tmp)[0]]
         // get the event
-        wl = tmp.waiting_list[id][start_date];
-        if (wl == '0') {
+        if (tmp.waiting_list[id] == undefined) {
             return;
         }
+        wl = tmp.waiting_list[id][start_date];
+        if (wl == undefined || wl == 0) {
+            return;
+        }
+        wl = wl.length;
         element.firstChild.classList.remove('bookacti-booked');
         element.firstChild.classList.remove('bookacti-full');
         element.firstChild.firstChild.innerHTML = wl;

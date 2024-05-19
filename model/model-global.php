@@ -55,10 +55,10 @@ function ba_plus_cancel_event($event_id)
 	$wpdb->query($query);
 }
 
-function ba_plus_check_if_already_booked($user_id, $event_id)
+function ba_plus_check_if_already_booked($user_id, $event_id, $start_date, $end_date)
 {
 	global $wpdb;
-	$query = 'SELECT * FROM ' . BOOKACTI_TABLE_BOOKINGS . ' WHERE user_id = %d AND event_id = %d and active = 1';
+	$query = 'SELECT * FROM ' . BOOKACTI_TABLE_BOOKINGS . ' WHERE user_id = %d AND event_id = %d AND active = 1 AND event_start = %s AND event_end = %s';
 	$query = $wpdb->prepare($query, $user_id, $event_id);
 	$booking = $wpdb->get_row($query, OBJECT);
 	if (!empty($booking)) {
