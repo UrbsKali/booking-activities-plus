@@ -27,34 +27,6 @@ if (!defined('BOOKACTI_TABLE_PASSES_TEMPLATES')) {
 	define('BOOKACTI_TABLE_PASSES_TEMPLATES', $db_prefix . 'bookacti_passes_templates');
 }
 
-function ba_plus_cancel_event($event_id)
-{
-	global $wpdb;
-	// remove all users from the event and send them a mail
-	//$query = 'SELECT * FROM ' . BOOKACTI_TABLE_BOOKINGS . ' as B LEFT JOIN ' . $wpdb->users . ' as U ON B.user_id = U.id LEFT JOIN ' . BOOKACTI_TABLE_EVENTS . ' as E ON E.id = B.event_id WHERE B.event_id = %d';
-	$query = "SELECT * FROM wp_bookacti_bookings as B LEFT JOIN wp_users as U ON B.user_id = U.id LEFT JOIN wp_bookacti_events as E ON E.id = B.event_id WHERE B.event_id = %d;";
-	$query = $wpdb->prepare($query, $event_id);
-	$bookings = $wpdb->get_results($query, OBJECT);
-
-	if (!empty($bookings)) {
-		foreach ($bookings as $booking) {
-			$to = $booking->user_email;
-			$subject = 'Event Cancelled';
-			$body = 'The event ' . $booking->title . ' you have booked has been cancelled. We are sorry for the inconvenience.';
-			$headers = array('Content-Type: text/html; charset=UTF-8');
-			wp_mail($to, $subject, $body, $headers);
-		}
-	}
-	// remove all bookings
-	$query = 'DELETE FROM ' . BOOKACTI_TABLE_BOOKINGS . ' WHERE event_id = %d';
-	$query = $wpdb->prepare($query, $event_id);
-	$wpdb->query($query);
-	// remove the event
-	$query = 'DELETE FROM ' . BOOKACTI_TABLE_EVENTS . ' WHERE id = %d';
-	$query = $wpdb->prepare($query, $event_id);
-	$wpdb->query($query);
-}
-
 function ba_plus_check_if_already_booked($user_id, $event_id, $start_date, $end_date)
 {
 	global $wpdb;
@@ -70,7 +42,7 @@ function ba_plus_check_if_already_booked($user_id, $event_id, $start_date, $end_
 function ba_plus_check_if_event_is_full($event_id, $start_date, $end_date)
 {
 	global $wpdb;
-	$query = 'SELECT COUNT(*) as booked FROM ' . BOOKACTI_TABLE_BOOKINGS . ' WHERE event_id = %d AND active = 1 AND start_date = %s AND end_date = %s'; 
+	$query = 'SELECT COUNT(*) as booked FROM ' . BOOKACTI_TABLE_BOOKINGS . ' WHERE event_id = %d AND active = 1 AND event_start = %s AND event_end = %s'; 
 	$query = $wpdb->prepare($query, $event_id, $start_date, $end_date);
 	$booked = $wpdb->get_var($query);
 	$query = 'SELECT availability FROM ' . BOOKACTI_TABLE_EVENTS . ' WHERE id = %d';
@@ -89,4 +61,14 @@ function ba_plus_get_booking($booking_id)
 	$query = $wpdb->prepare($query, $booking_id);
 	$booking = $wpdb->get_row($query, OBJECT);
 	return $booking;
+}
+
+function ba_plus_set_refunded_booking( $booking_id ) {
+	global $wpdb;
+
+	$query = 'UPDATE ' . BOOKACTI_TABLE_BOOKINGS . ' SET state = "refunded", active = 0 WHERE id = %d AND active = 1';
+	$prep  = $wpdb->prepare( $query, $booking_id );
+	$cancelled = $wpdb->query( $prep );
+
+	return $cancelled;
 }

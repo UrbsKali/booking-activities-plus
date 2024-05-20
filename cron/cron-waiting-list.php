@@ -71,9 +71,10 @@ function ba_plus_remove_empty_events()
     );
     $args = array(
         'interval' => $interval,
+        'active' => 1
     );
     // get all events that are empty
-    $events = bookacti_fetch_events($args);
+    $events = bookacti_fetch_booked_events($args);
     foreach ($events["data"] as $event) {
         $booked = -bookacti_get_event_availability($event["id"], $event['start'], $event['end']) + $event['availability'];
         if ($booked < 3 && $event['start'] < date('Y-m-d h:i:s', strtotime('+24 hour'))) {
@@ -92,7 +93,7 @@ function ba_plus_remove_empty_events()
                 // if quantity is more than 1, remove the quantity
 
                 // cancel the booking
-                $cancelled = bookacti_cancel_booking($id);
+                $cancelled = ba_plus_set_refunded_booking($id);
 
                 // refund the user
                 $filters = array(

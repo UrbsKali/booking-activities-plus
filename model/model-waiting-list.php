@@ -35,7 +35,7 @@ function ba_plus_get_event_waiting_list($event_id, $start_date, $end_date)
     global $wpdb;
 
     $query = 'SELECT * FROM ' . BOOKACTI_TABLE_WAITING_LIST . ' WHERE event_id = %d AND start_date = %s AND end_date = %s';
-    $query = $wpdb->prepare($query, $event_id);
+    $query = $wpdb->prepare($query, $event_id, $start_date, $end_date);
     $waiting_list = $wpdb->get_results($query, OBJECT);
 
     return $waiting_list;
@@ -111,7 +111,7 @@ function ba_plus_remove_waiting_list_by_event_id($event_id, $user_id, $start_dat
     global $wpdb;
 
     $query = 'DELETE FROM ' . BOOKACTI_TABLE_WAITING_LIST . ' WHERE event_id = %d AND user_id = %d AND start_date = %s AND end_date = %s';
-    $query = $wpdb->prepare($query, $event_id, $user_id);
+    $query = $wpdb->prepare($query, $event_id, $user_id, $start_date, $end_date);
     $wpdb->query($query);
 
     return $wpdb->rows_affected;
@@ -142,7 +142,7 @@ function ba_plus_remove_all_waiting_list($event_id, $start_date, $end_date)
     global $wpdb;
 
     $query = 'DELETE FROM ' . BOOKACTI_TABLE_WAITING_LIST . ' WHERE event_id = %d AND start_date = %s AND end_date = %s';
-    $query = $wpdb->prepare($query, $event_id);
+    $query = $wpdb->prepare($query, $event_id, $start_date, $end_date);
     $wpdb->query($query);
 
     return $wpdb->rows_affected;

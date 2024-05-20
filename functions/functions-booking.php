@@ -138,58 +138,35 @@ function ba_plus_can_cancel_event($is_allowed, $booking, $context, $allow_groupe
 }
 add_filter("bookacti_booking_can_be_cancelled", "ba_plus_can_cancel_event", 5, 4);
 
-
-/**
- * Cancel the event
- */
-function ba_plus_cancel_event_individual($booking, $new_state, $is_admin)
-{
-    if ($new_state != 'cancelled') {
-        return;
-    }
-    $user_id = $booking->user_id;
-    $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
-    if (empty($nb_cancelled_events)) {
-        return;
-    } else if ($nb_cancelled_events <= 0) {
-        return;
-    }
-    $event_start = strtotime($booking->event_start);
-    $current_time = time();
-    $diff = $event_start - $current_time;
-    if ($diff < get_option('ba_plus_refund_delay', 24) * 3600) {
-        return;
-    }
-
-    $nb_cancelled_events--;
-    update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
-
-}
-//add_action("bookacti_booking_state_changed", "ba_plus_cancel_event_individual", 10, 3);
-
 function ba_plus_filters_refund($credits, $booking, $booking_type)
 {
+    $user_id = $booking->user_id;
+    update_user_meta($user_id, 'debug', "start");
+
     $event_start = strtotime($booking->event_start);
     $current_time = time();
     $diff = $event_start - $current_time;
     if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600)) {
+        update_user_meta($user_id, 'debug', "return due to delay");
         return 0;
     }
 
-    $user_id = $booking->user_id;
     $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
     if (empty($nb_cancelled_events)) {
+        update_user_meta($user_id, 'debug', "return due to no free cancelation");
         return 0;
     } else if ($nb_cancelled_events <= 0) {
+        update_user_meta($user_id, 'debug', "return due to no more free cancelation");
+
         return 0;
     }
+    update_user_meta($user_id, 'debug', "hehe boii - ". $credits);
 
     $nb_cancelled_events--;
     update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
-    update_user_meta($user_id, 'debug', print_r($booking, true));
     return $credits;
 }
-//add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund", 10, 3);
+add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund", 10, 3);
 
 
 /**
