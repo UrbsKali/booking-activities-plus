@@ -20,7 +20,7 @@ function ba_plus_usermeta_form_field_certificat($user)
             </th>
             <td>
                 <input type="date" class="regular-text ltr" id="certificat_expire_date" name="certificat_expire_date"
-                    value="<?= esc_attr(get_user_meta($user->ID, 'certificat_expire_date', true)) ?>"
+                    value="<?= esc_attr(get_user_meta($user->ID, 'certif_med', true)) ?>"
                     title="Please use YYYY-MM-DD as the date format."
                     pattern="(19[0-9][0-9]|20[0-9][0-9])-(1[0-2]|0[1-9])-(3[01]|[21][0-9]|0[1-9])" required>
                 <p class="description">
@@ -34,7 +34,7 @@ function ba_plus_usermeta_form_field_certificat($user)
             </th>
             <td>
                 <input type="date" class="regular-text ltr" id="attestation_expire_date" name="attestation_expire_date"
-                    value="<?= esc_attr(get_user_meta($user->ID, 'attestation_expire_date', true)) ?>"
+                    value="<?= esc_attr(get_user_meta($user->ID, 'attest_med', true)) ?>"
                     title="Please use YYYY-MM-DD as the date format."
                     pattern="(19[0-9][0-9]|20[0-9][0-9])-(1[0-2]|0[1-9])-(3[01]|[21][0-9]|0[1-9])" required>
                 <p class="description">
@@ -97,12 +97,12 @@ function ba_plus_usermeta_form_field_certificate_update($user_id)
 
     update_user_meta(
         $user_id,
-        'certificat_expire_date',
+        'certif_med',
         $_POST['certificat_expire_date']
     );
     update_user_meta(
         $user_id,
-        'attestation_expire_date',
+        'attest_med',
         $_POST['attestation_expire_date']
     );
     update_user_meta(
@@ -122,12 +122,12 @@ function ba_plus_create_user_certificate($user_id)
 {
     update_user_meta(
         $user_id,
-        'certificat_expire_date',
+        'certif_med',
         $_POST['certificat_expire_date']
     );
     update_user_meta(
         $user_id,
-        'attestation_expire_date',
+        'attest_med',
         $_POST['attestation_expire_date']
     );
     update_user_meta(

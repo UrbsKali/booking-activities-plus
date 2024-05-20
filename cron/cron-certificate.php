@@ -28,8 +28,8 @@ function ba_plus_check_certificate_expiration(){
     );
     foreach($users as $user){
         $user_id = $user->ID;
-        $expire_date = get_user_meta($user_id, 'certificat_expire_date', true);
-        $send_mail = get_user_meta( $user_id, 'send_mail_certif_expire', true );
+        $expire_date = get_user_meta($user_id, 'certif_med', true); // certif_med
+        $send_mail = get_user_meta( $user_id, 'send_mail_certif_expire', true ); 
         // check if null 
         if ( $expire_date == '' || $send_mail == '' ){
             continue;
@@ -70,7 +70,7 @@ function ba_plus_check_attestation_expiration(){
     );
     foreach($users as $user){
         $user_id = $user->ID;
-        $expire_date = get_user_meta($user_id, 'attestation_expire_date', true);
+        $expire_date = get_user_meta($user_id, 'attest_med', true); // attest_med
         $send_mail = get_user_meta( $user_id, 'send_mail_attes_expire', true );
         // check if null 
         if ( $expire_date == '' || $send_mail == '' ){

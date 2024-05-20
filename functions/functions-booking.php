@@ -26,6 +26,9 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
     if (!isset($validated["messages"]["users_sup_to_max"]) && !isset($validated["messages"]["no_availability"]) && !isset($validated["messages"]["qty_sup_to_max"])) {
         return $validated;
     }
+    if (!ba_plus_check_if_event_is_full($event_id, $start_date, $end_date)){
+        return $validated;
+    }
     if (isset($validated["messages"])) {
         unset($validated["messages"]);
     }

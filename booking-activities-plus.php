@@ -63,6 +63,7 @@ function ba_plus_enqueue_scripts()
     wp_enqueue_script('ba-wl-enable', plugins_url('js/enable-waiting-list.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_enqueue_script('ba-wl-sort', plugins_url('js/sort-by-date.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_enqueue_script('ba-wl-btn', plugins_url('js/send-cancel-wl.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
+    wp_enqueue_script('ba-wl-page-resa', plugins_url('js/planning.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
 }
 add_action('wp_enqueue_scripts', 'ba_plus_enqueue_scripts');
 

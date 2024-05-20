@@ -88,8 +88,8 @@ function ba_plus_shortcode_certificate($raw_atts = array(), $content = null, $ta
 		$user_id = intval($raw_atts['user_id']);
 	}
 
-	$certificate_expire_date = get_user_meta($user_id, 'certificat_expire_date', true);
-	$attestation_expire_date = get_user_meta($user_id, 'attestation_expire_date', true);
+	$certificate_expire_date = get_user_meta($user_id, 'certif_med', true);
+	$attestation_expire_date = get_user_meta($user_id, 'attest_med', true);
 
 	$error_certif = false;
 	$error_attest = false;

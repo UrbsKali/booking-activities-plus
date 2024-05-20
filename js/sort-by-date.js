@@ -7,8 +7,16 @@ function sort_booking_by_date(reverse = false) {
     let rows_array = Array.from(rows);
     rows_array.shift(); // remove the header
     rows_array.sort((a, b) => {
-        let text_a = a.querySelector('td').querySelector('span.bookacti-booking-event-start').innerText;
-        let text_b = b.querySelector('td').querySelector('span.bookacti-booking-event-start').innerText;
+        let text_a = "vendredi 1 janvier 1970 10h00"
+        let text_b = "vendredi 1 janvier 1970 10h00"
+        try {
+            text_a = a.querySelector('td').querySelector('span.bookacti-booking-event-start').innerText;
+            text_b = b.querySelector('td').querySelector('span.bookacti-booking-event-start').innerText;
+        } catch (error) {
+            console.log(error);
+        }
+
+
         let date_a = parse_date(text_a);
         let date_b = parse_date(text_b);
         if (reverse) {
@@ -54,7 +62,8 @@ function main() {
             if (event_col === null) {
                 return;
             }
-            event_col.innerHTML = 'Événements <span class="sort-by-date" style="cursor:pointer;">▲</span>';
+            event_col.innerHTML = 'Événements <span class="sort-by-date" style="cursor:pointer;">▲</span><style>.bookacti-column-title-events:after{visibility:hidden;}</style>';
+            event_col.style.visibility = 'visible';
             sort_booking_by_date();
             let sort_btn = event_col.querySelector('.sort-by-date');
             sort_btn.addEventListener('click', click_callback);

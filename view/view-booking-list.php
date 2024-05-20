@@ -30,7 +30,7 @@ function ba_plus_show_waiting_list()
                     <tr>
                         <td><?php echo $user_name; ?></td>
                         <td><?php echo $waiting->title; ?></td>
-                        <td><?php echo $waiting->start; ?></td>
+                        <td><?php echo $waiting->start_date; ?></td>
                         <td><a href="#" class="ba-plus-cancel-waiting-list" data-waiting-id="<?php echo $waiting->id; ?>"
                                 data-user-id="<?php echo $waiting->user_id; ?>">Supprimer</a></td>
                     </tr>

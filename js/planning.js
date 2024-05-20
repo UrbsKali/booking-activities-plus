@@ -1,5 +1,8 @@
-function main(){
-    let tables = document.querySelectorAll('.bookacti-user-booking-list-table');
+function main() {
+
+    if (tables.length <= 5) {
+        return;
+    }
 
     tables.forEach(table => {
         // get all the .bookacti-column-start_date children of the table
@@ -32,6 +35,21 @@ function main(){
         trsArray.forEach(tr => {
             thead.appendChild(tr);
         });
-                
+
     });
 }
+
+let is_enabled = false;
+let tables = document.querySelectorAll('.bookacti-user-booking-list-table');
+// on load
+document.addEventListener('DOMContentLoaded', function () {
+    for (let i = 0; i < 5; i++) {
+        setTimeout(function () {
+            tables = document.querySelectorAll('.bookacti-user-booking-list-table');
+            if (tables.length > 5 && !is_enabled) {
+                main();
+                is_enabled = true;
+            }
+        }, 50 * i);
+    }
+});

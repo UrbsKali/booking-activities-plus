@@ -50,7 +50,7 @@ function ba_plus_clean_waiting_list()
         $event_start = $waiting->start_date;
         $event_end = $waiting->end_date;
 
-        if ($event_start < date('Y-m-d h:i:s', strtotime('-10 hour'))) {
+        if ($event_start < date('Y-m-d h:i:s', strtotime('-24 hour'))) {
             ba_plus_remove_all_waiting_list($event_id, $event_start, $event_end);
         }
     }
@@ -109,6 +109,7 @@ function ba_plus_remove_empty_events()
                 bapap_update_booking_pass_data($pass->id, array('credits_current' => $pass->credits_current));
                 // add to the log
                 $log_data = array(
+                    'credits_delta' => '+1',
                     'credits_current' => $pass->credits_current,
                     'credits_total' => $pass->credits_total,
                     'reason' => "Annulation automatique (manque de participants) - Remboursement d'un crédit",
