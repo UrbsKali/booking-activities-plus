@@ -19,6 +19,7 @@ function ba_plus_booking_pass_created($booking_pass_id, $booking_pass_data)
         $free_cancellation = 22;
     }
     update_user_meta($user_id, 'nb_cancel_left', $free_cancellation);
+    update_user_meta($user_id, 'send_mail_cancel', 'false');
 } 
 add_action('bapap_booking_pass_created','ba_plus_booking_pass_created', 10, 2);
 

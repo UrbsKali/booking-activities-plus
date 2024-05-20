@@ -86,7 +86,7 @@ function ba_plus_admin_book()
                 $filters = bookacti_format_booking_filters($filters);
                 $events = bookacti_fetch_events($filters);
                 foreach ($events['data'] as $event) {
-                    echo '<option value="' . $event['id'] . '" data-start-date="' . $event["start"] . '" data-end-date="' . $event["endx"] . '">' . $event['title'] . " - " . $event['start'] . '</option>';
+                    echo '<option value="' . $event['id'] . '#' . $event["start"] . '#' . $event["end"] . '">' . $event['title'] . " - " . $event['start'] . '</option>';
                 }
                 ?>
             </select>

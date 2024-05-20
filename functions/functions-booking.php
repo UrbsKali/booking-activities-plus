@@ -26,7 +26,7 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
     if (!isset($validated["messages"]["users_sup_to_max"]) && !isset($validated["messages"]["no_availability"]) && !isset($validated["messages"]["qty_sup_to_max"])) {
         return $validated;
     }
-    if (!ba_plus_check_if_event_is_full($event_id, $start_date, $end_date)){
+    if (!ba_plus_check_if_event_is_full($event_id, $start_date, $end_date)) {
         return $validated;
     }
     if (isset($validated["messages"])) {
@@ -61,16 +61,16 @@ add_filter("bookacti_validate_picked_event", "ba_plus_validate_picked_event", 5,
 function ba_plus_validate_picked_events($validated, $picked_events, $args)
 {
     // check if user certificate is not expired
-    $certi_date = get_user_meta(get_current_user_id(), "certificat_expire_date", true);
-    $attest_date = get_user_meta(get_current_user_id(), "attestation_expire_date", true);
+    $certi_date = get_user_meta(get_current_user_id(), "certif_med", true);
+    $attest_date = get_user_meta(get_current_user_id(), "attest_med", true);
     if (empty($certi_date) || empty($attest_date)) {
         // send error message
         $validated['status'] = 'error';
         $validated['messages']['no_certificate'] = array('Vous devez renseigner vos informations médicales pour pouvoir réserver un événement (Certificat médical et Attestation)');
-    } else if (date('Y-m-d', strtotime($certi_date)) < date('Y-m-d')) {
+    } else if (date('Y/m/d', strtotime($certi_date)) < date('Y/m/d')) {
         $validated['status'] = 'error';
         $validated['messages']['old_certificate'] = array('Votre certificat médical est expiré, veuillez le renouveler pour pouvoir réserver un événement');
-    } else if (date('Y-m-d', strtotime($attest_date)) < date('Y-m-d')) {
+    } else if (date('Y/m/d', strtotime($attest_date)) < date('Y/m/d')) {
         $validated['status'] = 'error';
         $validated['messages']['old_attestation'] = array('Votre attestation médical est expiré, veuillez le renouveler pour pouvoir réserver un événement');
     }
@@ -186,9 +186,10 @@ function ba_plus_filters_refund($credits, $booking, $booking_type)
 
     $nb_cancelled_events--;
     update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
+    update_user_meta($user_id, 'debug', print_r($booking, true));
     return $credits;
 }
-add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund", 10, 3);
+//add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund", 10, 3);
 
 
 /**

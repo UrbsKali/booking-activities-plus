@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Booking Activities Plus
- * Plugin URI: https://github.com/Urbskali/booking-activities
+ * Plugin URI: https://github.com/Urbskali/booking-activities-plus
  * Description: A plugin to add a waiting list, among many other features, to the Booking Activities plugin
- * Version: 1.0
+ * Version: 1.0.0
  * Author: Urbskali
  * Author URI: https://github.com/urbskali
  * License: Mine :) (No touchy!)
@@ -125,15 +125,22 @@ function ba_plus_activate()
     add_option('ba_plus_version', BA_PLUS_VERSION);
     add_option('ba_plus_install_date', time());
     add_option('ba_plus_refund_delay', 24);
-    add_option('ba_plus_mail_cancel_body', "Bonjour %user%, \nL'évènement %event% à été annulé par manque de participant\nVeuillez nous excuser du dérangement");
+
     add_option('ba_plus_mail_cancel_title', 'Scéance annulée');
-    add_option('ba_plus_mail_waiting_list_body', "Bonjour %user%, \nCe mail à pour but des vous rappeler votre mise en file d'attente pour %event%\nA Bientôt");
+    add_option('ba_plus_mail_cancel_body', "Bonjour %user%, \nL'évènement %event% à été annulé par manque de participant\nVeuillez nous excuser du dérangement");
+
     add_option('ba_plus_mail_waiting_list_title', "Vous êtes toujours dans la file d'attente");
-    add_option('ba_plus_mail_certi_expire_body', 'Bonjour %user%,\nVotre %doc% expire dans %expire_date% jours, pensez à le renouveler !\nA bientôt');
-    add_option('ba_plus_mail_tree_cancel_left_title', 'Plus que trois annulations');
-    add_option('ba_plus_mail_tree_cancel_left_body', "Bonjour %user%, \nCe mail à pour but de vous informer qu'il ne vous reste plus que 3 annulations gratuites\nA Bientôt");
-    
+    add_option('ba_plus_mail_waiting_list_body', "Bonjour %user%, \nVous êtes toujours en alerte sur le cours %event%, si vous n\'êtes plus disponible, pensez à supprimer cette alerte, sinon vous risquez de ne plus pouvoir vous annuler sans frais.\nMerci de votre confiance.");
+   
+    add_option('ba_plus_mail_booked_title', "Vous avez été inscrit automatiquement à un cours");
+    add_option('ba_plus_mail_booked_body', "Bonjour %user%, \nVous avez été inscit(e) sur le cours %event%, à la suite de votre alerte. Vous avez la possiblité de vous annuler sans frais à plus de 24 heures. \nMerci de votre confiance.");
+
     add_option('ba_plus_mail_certi_expire_title', 'Votre %doc% expire bientôt');
+    add_option('ba_plus_mail_certi_expire_body', 'Bonjour %user%,\nVotre %doc% arrivera à échéance dans %expire_date% jours, pensez à le renouveler et à nous l\'envoyer scanné pour ne pas que votre copte soit bloqué. Les modèles de docuements à remplir sont dans le CGU. \nA bientôt');
+
+    add_option('ba_plus_mail_tree_cancel_left_title', 'Plus que trois annulations');
+    add_option('ba_plus_mail_tree_cancel_left_body', "Bonjour %user%, \nAttention, il ne vous reste plus que 3 annulations sans frais sur le quota attribué à votre forfait en cours.\nMerci de votre confiance.");
+    
 
     // Add rewrite rules
     flush_rewrite_rules();

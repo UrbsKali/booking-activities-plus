@@ -2,15 +2,17 @@ $j('.ba-plus-add-resa-btn').click(function (e) {
     e.preventDefault();
     let form = $j(this).closest('form');
     let user_id = form.find('select[name="user_id"]').val();
-    let evend_id = form.find('select[name="event_id"]').val();
-    if (!evend_id) {
-        evend_id = document.querySelectorAll("#ba-plus-add-resa-popup option[value]")[1].value
-        if (parseInt(evend_id) == NaN) {
-            evend_id = document.querySelectorAll("#ba-plus-add-resa-popup option[value]")[2].value
+    let data = form.find('select[name="event_id"]').val();
+    let evend_id = data.split('#')[0];
+    let start_date = data.split('#')[1];
+    let end_date = data.split('#')[2];
+
+    if (!user_id) {
+        user_id = document.querySelectorAll("#ba-plus-add-resa-popup option[value]")[1].value
+        if (isNaN(parseInt(user_id))) {
+            user_id = document.querySelectorAll("#ba-plus-add-resa-popup option[value]")[2].value
         }
     }
-    let start_date = form.find('select[name="event_id"]').data('start-date');
-    let end_date = form.find('select[name="event_id"]').data('end-date');
     $j.ajax({
         url: ajaxurl,
         type: 'POST',
@@ -25,7 +27,7 @@ $j('.ba-plus-add-resa-btn').click(function (e) {
         dataType: 'json',
         success: function (response) {
             if (response.status === 'success') {
-                location.reload();
+                //location.reload();
             } else {
                 console.log('PHP ERROR');
                 console.log(response);

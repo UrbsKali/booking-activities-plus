@@ -115,13 +115,13 @@ function ba_plus_shortcode_certificate($raw_atts = array(), $content = null, $ta
 
 	// add warning if attestation is expired
 	$str_date_att = datefmt_format($date, strtotime($attestation_expire_date));
-	if (date('Y-m-d', strtotime($attestation_expire_date)) < date('Y-m-d') && !$error_attest) {
+	if (date('Y/m/d', strtotime($attestation_expire_date)) < date('Y/m/d') && !$error_attest) {
 		$msg .= '<div class="ba-error">' . __('Votre attestation est expiré depuis le ', 'ba-plus') . $str_date_att . '</div>';
 		$error_attest = true;
 	}
 	// add warning if certificate is expired
 	$str_date_certif = datefmt_format($date, strtotime($certificate_expire_date));
-	if (date('Y-m-d', strtotime($certificate_expire_date)) < date('Y-m-d') && !$error_certif) {
+	if (date('Y/m/d', strtotime($certificate_expire_date)) < date('Y/m/d') && !$error_certif) {
 		$msg .= '<div class="ba-error">' . __('Votre certificat est expiré depuis le ', 'ba-plus') . $str_date_certif . '</div>';
 		$error_certif = true;
 	}
