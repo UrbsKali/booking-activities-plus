@@ -140,27 +140,22 @@ add_filter("bookacti_booking_can_be_cancelled", "ba_plus_can_cancel_event", 5, 4
 
 function ba_plus_filters_refund($credits, $booking, $booking_type)
 {
+    $booking = $booking[0];
     $user_id = $booking->user_id;
-    update_user_meta($user_id, 'debug', "start");
 
     $event_start = strtotime($booking->event_start);
     $current_time = time();
     $diff = $event_start - $current_time;
     if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600)) {
-        update_user_meta($user_id, 'debug', "return due to delay");
         return 0;
     }
 
     $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
     if (empty($nb_cancelled_events)) {
-        update_user_meta($user_id, 'debug', "return due to no free cancelation");
         return 0;
     } else if ($nb_cancelled_events <= 0) {
-        update_user_meta($user_id, 'debug', "return due to no more free cancelation");
-
         return 0;
     }
-    update_user_meta($user_id, 'debug', "hehe boii - ". $credits);
 
     $nb_cancelled_events--;
     update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
@@ -168,6 +163,14 @@ function ba_plus_filters_refund($credits, $booking, $booking_type)
 }
 add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund", 10, 3);
 
+
+function ba_plus_wtf($true, $booking, $context){
+    if ($booking->state == 'cancelled' && $context == 'front' && $booking->payment_status == 'paid') {
+        return true;
+    }
+    return $true;
+}
+//add_filter( "bookacti_booking_can_be_refunded", "ba_plus_wtf", 10, 3 );
 
 /**
  * Book an event - ADMIN ONLY

@@ -93,3 +93,12 @@ function load_btn() {
 
 
 document.addEventListener('DOMContentLoaded', main);
+
+
+row = $j( '.bookacti-refund-booking[data-booking-id="' + booking_id + '"]' ).closest( 'tr' );
+row.first().on( 'bookacti_booking_action_data', function(data, booking_id, booking_type, type) {
+    if (data["refund_action"] == undefined) {
+        data["refund_action"] = "booking_pass";
+    }
+    console.log(data);
+});
