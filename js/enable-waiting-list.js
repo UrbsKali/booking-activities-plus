@@ -1,5 +1,9 @@
 let button_next = document.querySelector('.fc-next-button');
 let button_prev = document.querySelector('.fc-prev-button');
+let week_btn = document.querySelector('.fc-timeGridWeek-button');
+let day_btn = document.querySelector('.fc-timeGridDay-button');
+let month_btn = document.querySelector('.fc-dayGridMonth-button');
+
 let btn_init = false;
 let is_enable = false;
 
@@ -15,7 +19,6 @@ $j('.bookacti-booking-form').on('bookacti_validate_picked_events', function (inf
         valid_form.send = true;
     }
     console.log(valid_form);
-
 });
 
 // enable waiting list by removing 
@@ -70,9 +73,16 @@ function load_btn() {
     button_next = document.querySelector('.fc-next-button');
     button_prev = document.querySelector('.fc-prev-button');
 
-    if (button_next !== null && button_prev !== null) {
+    week_btn = document.querySelector('.fc-timeGridWeek-button');
+    day_btn = document.querySelector('.fc-timeGridDay-button');
+    month_btn = document.querySelector('.fc-dayGridMonth-button');
+
+    if (button_next !== null && button_prev !== null && week_btn !== null && day_btn !== null && month_btn !== null) {
         button_next.addEventListener('click', add_waiting_number);
         button_prev.addEventListener('click', add_waiting_number);
+        week_btn.addEventListener('click', add_waiting_number);
+        day_btn.addEventListener('click', add_waiting_number);
+        month_btn.addEventListener('click', add_waiting_number);
         btn_init = true;
     }
 }

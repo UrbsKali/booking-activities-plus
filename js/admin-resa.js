@@ -5,7 +5,12 @@ $j('.ba-plus-add-resa-btn').click(function (e) {
     let evend_id = form.find('select[name="event_id"]').val();
     if (!evend_id) {
         evend_id = document.querySelectorAll("#ba-plus-add-resa-popup option[value]")[1].value
+        if (parseInt(evend_id) == NaN) {
+            evend_id = document.querySelectorAll("#ba-plus-add-resa-popup option[value]")[2].value
+        }
     }
+    let start_date = form.find('select[name="event_id"]').data('start-date');
+    let end_date = form.find('select[name="event_id"]').data('end-date');
     $j.ajax({
         url: ajaxurl,
         type: 'POST',
@@ -13,6 +18,8 @@ $j('.ba-plus-add-resa-btn').click(function (e) {
             action: 'baPlusAddResa',
             event_id: evend_id,
             user_id: user_id,
+            start_date: start_date,
+            end_date: end_date,
             nonce: bookacti_localized.nonce
         },
         dataType: 'json',

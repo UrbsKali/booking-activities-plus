@@ -38,14 +38,14 @@ function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_pag
     $waiting_list = ba_plus_get_user_waiting_list($user_id);
 
 
-    foreach ($waiting_list as $key => $value) {
-        if ($value->event_id == 0)
+    foreach ($waiting_list as $key => $waiting) {
+        if ($waiting->event_id == 0)
             continue; // Skip if event id is 0 (no event id)
 
-        $event = bookacti_get_event_by_id($value->event_id);
+        $event = bookacti_get_event_by_id($waiting->event_id);
         $waiting_list[$key]->event_name = $event->title;
-        $waiting_list[$key]->event_start = $event->start;
-        $waiting_list[$key]->event_end = $event->end;
+        $waiting_list[$key]->event_start = $waiting->start_date;
+        $waiting_list[$key]->event_end = $waiting->end_date;
     }
 
     ob_start();
@@ -89,6 +89,7 @@ function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_pag
                         <td>
                             <?php
                             $actions = bookacti_get_waiting_list_actions_html($list_item);
+                            
                             echo $actions;
                             ?>
                         </td>
@@ -162,7 +163,7 @@ function bookacti_get_waiting_list_actions_html($waiting_item)
     <div class='bookacti-booking-actions'>
         <?php
         // cancel waiting list
-        echo "<a href='#' class='bookacti-cancel-waiting-list' data-waiting-id='" . $waiting_item->id . "'>Annuler</a>";
+        echo "<a href='#' class='bookacti-cancel-waiting-list' data-waiting-id='" . $waiting_item->id . "' data-start-date='" . $waiting_item->start_date . "' data-end-date='" . $waiting_item->end_date . "' >Annuler</a>";
         ?>
     </div>
     <?php

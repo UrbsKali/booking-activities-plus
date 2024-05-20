@@ -8,6 +8,7 @@ function ba_plus_cancel_waiting_list_booking()
     $waiting_id = intval($_POST['waiting_id']);
     $user_id = $_POST['user_id'];
 
+
     if (!isset($user_id)){
         $user_id = get_current_user_id();
         $result = ba_plus_remove_waiting_list($waiting_id, $user_id);

@@ -48,27 +48,31 @@ add_action("bookacti_after_booking_list", "ba_plus_show_waiting_list");
 function ba_plus_admin_book()
 {
     ?>
-    <br><br>    <button id="ba-plus-add-resa" class="button button-primary" onclick="document.querySelector('#ba-plus-add-resa-popup').classList.toggle('open');">Faire une réservation</button>
+    <br><br> <button id="ba-plus-add-resa" class="button button-primary"
+        onclick="document.querySelector('#ba-plus-add-resa-popup').classList.toggle('open');">Faire une réservation</button>
     <div id="ba-plus-add-resa-popup">
         <form id="ba-plus-add-resa-form">
             <!-- close btn -->
-            <button type="button" class="button" onclick="document.querySelector('#ba-plus-add-resa-popup').classList.toggle('open');" style="position: absolute; top: 10px; right: 10px;">X</button>
+            <button type="button" class="button"
+                onclick="document.querySelector('#ba-plus-add-resa-popup').classList.toggle('open');"
+                style="position: absolute; top: 10px; right: 10px;">X</button>
             <h2>Ajouter une réservation</h2>
             <label for="ba-plus-add-resa-user">Utilisateur</label>
-                <?php
-                $selected_user = isset( $_REQUEST[ 'user_id' ] ) ? esc_attr( $_REQUEST[ 'user_id' ] ) : '';
-                $args = apply_filters( 'bookacti_booking_list_user_selectbox_args', array(
-                    'name'				=> 'user_id',
-                    'id'				=> 'bookacti-booking-filter-customer',
-                    'show_option_all'	=> esc_html__( 'All', 'booking-activities' ),
-                    'option_label'		=> array( 'first_name', ' ', 'last_name', ' (', 'user_login', ' / ', 'user_email', ')' ),
-                    'selected'			=> $selected_user,
-                    'allow_clear'		=> 1,
-                    'allow_tags'		=> 1,
-                    'echo'				=> 1
-                ));
-                bookacti_display_user_selectbox( $args );
-                ?>
+            <?php
+            $selected_user = isset($_REQUEST['user_id']) ? esc_attr($_REQUEST['user_id']) : '';
+            $args = apply_filters('bookacti_booking_list_user_selectbox_args', array(
+                'name' => 'user_id',
+                'id' => 'bookacti-booking-filter-customer',
+                'show_option_all' => esc_html__('All', 'booking-activities'),
+                'option_label' => array('first_name', ' ', 'last_name', ' (', 'user_login', ' / ', 'user_email', ')'),
+                'selected' => $selected_user,
+                'allow_clear' => 1,
+                'allow_tags' => 1,
+                'echo' => 1
+            )
+            );
+            bookacti_display_user_selectbox($args);
+            ?>
             <label for="ba-plus-add-resa-event">Événement</label>
             <select name="event_id" id="ba-plus-add-resa-event">
                 <option value="">Sélectionner un événement</option>
@@ -82,10 +86,10 @@ function ba_plus_admin_book()
                 $filters = bookacti_format_booking_filters($filters);
                 $events = bookacti_fetch_events($filters);
                 foreach ($events['data'] as $event) {
-                    echo '<option value="' . $event['id'] . '">' . $event['title'] . " - " . $event['start'] . '</option>';
+                    echo '<option value="' . $event['id'] . '" data-start-date="' . $event["start"] . '" data-end-date="' . $event["endx"] . '">' . $event['title'] . " - " . $event['start'] . '</option>';
                 }
                 ?>
-                </select>
+            </select>
             <button type="submit" class="button button-primary ba-plus-add-resa-btn">Ajouter</button>
         </form>
     </div>
@@ -103,20 +107,24 @@ function ba_plus_admin_book()
             z-index: 1000;
             transition: all 0.3s ease-in-out;
         }
+
         #ba-plus-add-resa-popup label {
             display: block;
             margin-bottom: 5px;
         }
+
         #ba-plus-add-resa-popup select {
             width: 100%;
             padding: 5px;
             margin-bottom: 10px;
         }
+
         #ba-plus-add-resa-popup .select2 {
             width: 100%;
             padding: 5px;
             margin-bottom: 10px;
         }
+
         #ba-plus-add-resa-popup button {
             padding: 5px 10px;
         }
@@ -124,6 +132,7 @@ function ba_plus_admin_book()
         #ba-plus-add-resa-popup.open {
             display: block;
         }
+
         body:has(#ba-plus-add-resa-popup.open) {
             overflow: hidden;
         }

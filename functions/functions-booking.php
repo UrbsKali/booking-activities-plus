@@ -195,6 +195,8 @@ function ba_plus_admin_book_event()
 {
     $user_id = intval($_POST['user_id']);
     $event_id = intval($_POST['event_id']);
+    $start_date = $_POST['start_date'];
+    $end_date = $_POST['end_date'];
 
     $return_array = array(
         'status' => 'error',
@@ -225,8 +227,8 @@ function ba_plus_admin_book_event()
         'user_id' => $user_id,
         'form_id' => $event->template_id,
         'event_id' => $event_id,
-        'event_start' => $event->start,
-        'event_end' => $event->end,
+        'event_start' => $start_date,
+        'event_end' => $end_date,
         'quantity' => 1,
         'status' => 'booked',
         'payment_status' => 'paid',
