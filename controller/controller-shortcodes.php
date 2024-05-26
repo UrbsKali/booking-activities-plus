@@ -6,7 +6,8 @@ if (!defined('ABSPATH')) {
 
 add_shortcode('bookingactivities_waitinglist', 'ba_plus_shortcode_waiting_list');
 add_shortcode('bookingactivities_certificate', 'ba_plus_shortcode_certificate');
-add_shortcode( 'boockinactivities_cancel_balance', 'ba_plus_shortcode_cancel_balance' );
+add_shortcode( 'bookingactivities_cancel_balance', 'ba_plus_shortcode_cancel_balance' );
+add_shortcode( 'bookingactivities_planning', 'ba_plus_planning' );
 
 
 function ba_plus_shortcode_waiting_list($raw_atts = array(), $content = null, $tag = '')
@@ -163,4 +164,15 @@ function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, 
 	$message .= '<div class="ba-balance-amount">' . __('Nombre d\'annulation gratuite restante : ', 'ba-plus') . $balance . '</div>';
 	$message .= '</div>';
 	return $message;
+}
+
+function ba_plus_planning( $atts = array(), $content = null, $tag = '' ) {
+	// Check if user is admin
+	if (!is_user_logged_in()) {
+		return bookacti_shortcode_login_form($atts, $content, $tag);
+	}
+	$user_id = get_current_user_id();
+
+	$planning = ba_plus_create_planning( $atts, $content, $user_id );
+	return $planning;
 }

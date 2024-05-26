@@ -89,7 +89,7 @@ function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_pag
                         <td>
                             <?php
                             $actions = bookacti_get_waiting_list_actions_html($list_item);
-                            
+
                             echo $actions;
                             ?>
                         </td>
@@ -154,7 +154,7 @@ function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_pag
  * Get the rows for the waiting list
  * @since 1.7.6
  * @version 1.8.0
- * @return html
+ * @return string
  */
 function bookacti_get_waiting_list_actions_html($waiting_item)
 {
@@ -166,6 +166,167 @@ function bookacti_get_waiting_list_actions_html($waiting_item)
         echo "<a href='#' class='bookacti-cancel-waiting-list' data-waiting-id='" . $waiting_item->id . "' data-start-date='" . $waiting_item->start_date . "' data-end-date='" . $waiting_item->end_date . "' >Annuler</a>";
         ?>
     </div>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Create the admin planning 
+ * @return string
+ */
+function ba_plus_create_planning($args)
+{
+    $today = new DateTime();
+    $today = $today->format('Y-m-d h:i:s');
+    $next_week = new DateTime();
+    $next_week = date('Y-m-d H:i:s', strtotime('+7 day'));
+    $interval = array(
+        'start' => $today,
+        'end' => $next_week
+    );
+    $args = array(
+        'interval' => $interval,
+        'active' => 1
+    );
+
+    $events = bookacti_fetch_events($args);
+    $events_by_day = array();
+    $events = $events['events'];
+    foreach ($events as $event) {
+        // check start date of the event
+        for ($i = 1; $i <= 7; $i++) {
+            $after = date('Y-m-d', strtotime('+' . $i . ' day'));
+            $before = date('Y-m-d', strtotime('+' . $i-1 . ' day'));
+            if (!isset($events_by_day[$before]))
+                $events_by_day[$before] = array();
+            if ($event['start'] > $before && $event['start'] < $after) {
+                $events_by_day[$before][] = $event;
+            }
+        }
+    }
+
+    ob_start();
+    ?>
+    <div class="ba-planning">
+        <?php
+        foreach ($events_by_day as $day => $events) {
+            echo ba_plus_create_day_col($events, $day);
+        }
+
+        ?>
+    </div>
+    <?php
+    return ob_get_clean() . ba_plus_style_planning();
+}
+
+/**
+ * Create an day column, with multiple events in it
+ * @param array $events the events to display, agregated with user booked and waiting list
+ * @return string
+ */
+function ba_plus_create_day_col($events, $day)
+{
+    $date = datefmt_create(
+        "fr-FR",
+        IntlDateFormatter::FULL,
+        IntlDateFormatter::NONE,
+        'Europe/Paris',
+        IntlDateFormatter::GREGORIAN
+    );
+    $str_date = datefmt_format($date, strtotime($day));
+
+    ob_start();
+    ?>
+    <div class="ba-planning-col">
+        <h3><?php echo $str_date; ?></h3>
+        <div class="ba-planning-col">
+            <?php
+            foreach ($events as $event) {
+                echo ba_plus_create_event_div($event);
+            }
+            ?>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Create an event box, with Event name, and list of booked users
+ * @param array $event the event to display, agregated with user booked and waiting list
+ * @return string
+ */
+function ba_plus_create_event_div($event)
+{
+    $id = $event['id'];
+    $start = $event['start'];
+    $end = $event['end'];
+
+    $pretty_start = date('H:i', strtotime($start));
+    $pretty_end = date('H:i', strtotime($end));
+
+    // get the booking list
+    $filters = array('event_id' => $id, 'status' => 'booked');
+    $filters = bookacti_format_booking_filters($filters);
+    $event['booked'] = bookacti_get_bookings($filters);
+    $event['waiting'] = ba_plus_get_event_waiting_list($id, $start, $end);
+
+    ob_start();
+    ?>
+    <div class="ba-planning-event-box">
+        <h4><?php echo $event['title'] . " - " . $pretty_start . " → " . $pretty_end; ?></h4>
+        <ul>
+            <?php
+            foreach ($event['booked'] as $booked) {
+                $user = get_user_by('id', $booked->user_id);
+                echo "<li>" . $user->display_name . "</li>";
+            }
+            ?>
+        </ul>
+        <hr>
+        <ul>
+            <?php
+            foreach ($event['waiting'] as $waiting) {
+                $user = get_user_by('id', $booked->user_id);
+                echo "<li>" . $user->display_name . "</li>";
+            }
+            ?>
+        </ul>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Return the style for the planning
+ * @return string
+ */
+function ba_plus_style_planning(){
+    ob_start();
+    ?>
+    <style>
+        .ba-planning {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+
+        }
+
+        .ba-planning-col:has(h3) {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 100px 1fr;
+
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        .ba-planning-event-box {
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
     <?php
     return ob_get_clean();
 }
