@@ -300,6 +300,15 @@ function ba_plus_create_event_div($event)
         data-event-end="<? echo $end; ?>">
         <p><?php echo $pretty_start . "/" . $pretty_end; ?></p>
         <p><?php echo $event['title']; ?></p>
+        <div class="ba-plus-action">
+            <button class="ba-plus-add-btn ba-plus-btn">
+                Ajouter un participant
+            </button>
+            <button class="ba-plus-edit-btn ba-plus-btn">
+                Modifier le cours
+            </button>
+        </div>
+
         <?php if (count($event['booked']) > 0) {
             echo '<p class="ba-booked-title">Inscrits</p>';
         } ?>
@@ -333,6 +342,39 @@ function ba_plus_script_planning()
     ob_start();
     ?>
     <script>
+        $j(".ba-plus-edit-btn").click(function (e) {
+            e.preventDefault();
+            var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
+            var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
+            var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
+            var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
+            // open the popup
+            $j('.ba-planning-popup-bg').css('display', 'block');
+            // set the popup header
+            $j('.ba-planning-popup-header h3').text('Modifier le cours');
+            $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
+            // add a form to edit the event and add a dropdown to select state of the event
+            //             $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><input type="datetime-local" name="event_start" value="' + event_start + '" /><input type="datetime-local" name="event_end" value="' + event_end + '" /><button id="ba-plus-edit-event-send">Modifier</button></form>');
+
+            $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><input type="datetime-local" name="event_start" value="' + event_start + '" /><input type="datetime-local" name="event_end" value="' + event_end + '" /><select name="event_state"><option value="1">Actif</option><option value="0">Inactif</option></select><button id="ba-plus-edit-event-send">Modifier</button></form>');
+        });
+        $j('.ba-plus-add-btn').click(function (e){
+            e.preventDefault();
+            var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
+            var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
+            var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
+            var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
+            // open the popup
+            $j('.ba-planning-popup-bg').css('display', 'block');
+            // set the popup header
+            $j('.ba-planning-popup-header h3').text('Ajouter un participant');
+            $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
+            // add a user search input
+            $j('.ba-planning-popup-content').html('<input type="text" id="ba-plus-user-search" placeholder="Rechercher un utilisateur" /><div id="ba-plus-user-search-results"></div>');
+            // add send btn
+            $j('.ba-planning-popup-content').append('<button id="ba-plus-user-search-send">Ajouter</button>');
+        });
+
         $j('.ba-booked li').click(function (e) {
             e.preventDefault();
             // open the popup
@@ -573,6 +615,23 @@ function ba_plus_style_planning()
             text-align: center;
         }
 
+        .ba-plus-action{
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        #ba-plus-edit-event-form{
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        #ba-plus-edit-event-form * {
+            margin: 5px;
+        }
+       
+
+
         /*Popup style*/
         .ba-planning-popup-bg {
             display: none;
@@ -621,6 +680,9 @@ function ba_plus_style_planning()
             padding: 10px;
             display: flex;
             justify-content: space-around;
+        }
+        .ba-planning-popup-content * {
+            margin: 0 5px;
         }
 
         .ba-planning-popup-close {
