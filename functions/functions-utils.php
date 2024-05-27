@@ -196,7 +196,7 @@ function ba_plus_create_planning($args)
         // check start date of the event
         for ($i = 1; $i <= 7; $i++) {
             $after = date('Y-m-d', strtotime('+' . $i . ' day'));
-            $before = date('Y-m-d', strtotime('+' . $i-1 . ' day'));
+            $before = date('Y-m-d', strtotime('+' . $i - 1 . ' day'));
             if (!isset($events_by_day[$before]))
                 $events_by_day[$before] = array();
             if ($event['start'] > $before && $event['start'] < $after) {
@@ -210,13 +210,30 @@ function ba_plus_create_planning($args)
     <div class="ba-planning">
         <?php
         foreach ($events_by_day as $day => $events) {
+            // sort by start date
+            usort($events, function ($a, $b) {
+                return strtotime($a['start']) - strtotime($b['start']);
+            });
             echo ba_plus_create_day_col($events, $day);
         }
 
         ?>
     </div>
+    <div class="ba-planning-popup-bg">
+        <div class="ba-planning-popup">
+            <!-- Close btn -->
+            <div class="ba-planning-popup-close">X</div>
+            <div class="ba-planning-popup-header">
+                <h3>TMP</h3>
+                <p>lorem ipsum</p>
+            </div>
+            <div class="ba-planning-popup-content">
+
+            </div>
+        </div>
+    </div>
     <?php
-    return ob_get_clean() . ba_plus_style_planning();
+    return ob_get_clean() . ba_plus_style_planning() . ba_plus_script_planning();
 }
 
 /**
@@ -234,6 +251,10 @@ function ba_plus_create_day_col($events, $day)
         IntlDateFormatter::GREGORIAN
     );
     $str_date = datefmt_format($date, strtotime($day));
+    $str_date = ucfirst($str_date);
+    $str_date = explode(" ", $str_date);
+    $str_date = $str_date[0] . " " . $str_date[1] . " " . $str_date[2];
+
 
     ob_start();
     ?>
@@ -264,31 +285,41 @@ function ba_plus_create_event_div($event)
 
     $pretty_start = date('H:i', strtotime($start));
     $pretty_end = date('H:i', strtotime($end));
+    $pretty_start = str_replace(":", "h", $pretty_start);
+    $pretty_end = str_replace(":", "h", $pretty_end);
 
     // get the booking list
-    $filters = array('event_id' => $id, 'status' => 'booked');
+    $filters = array('event_id' => $id, 'status' => 'booked', 'from' => $start, 'to' => $end);
     $filters = bookacti_format_booking_filters($filters);
     $event['booked'] = bookacti_get_bookings($filters);
     $event['waiting'] = ba_plus_get_event_waiting_list($id, $start, $end);
 
     ob_start();
     ?>
-    <div class="ba-planning-event-box">
-        <h4><?php echo $event['title'] . " - " . $pretty_start . " → " . $pretty_end; ?></h4>
-        <ul>
+    <div class="ba-planning-event-box" data-event-id="<? echo $id; ?>" data-event-start="<? echo $start; ?>"
+        data-event-end="<? echo $end; ?>">
+        <p><?php echo $pretty_start . "/" . $pretty_end; ?></p>
+        <p><?php echo $event['title']; ?></p>
+        <?php if (count($event['booked']) > 0) {
+            echo '<p class="ba-booked-title">Inscrits</p>';
+        } ?>
+
+        <ul class="ba-booked">
             <?php
             foreach ($event['booked'] as $booked) {
                 $user = get_user_by('id', $booked->user_id);
-                echo "<li>" . $user->display_name . "</li>";
+                echo "<li data-user-id='" . $booked->user_id . "' data-booking-id='" . $booked->id . "'>" . $user->display_name . "</li>";
             }
             ?>
         </ul>
-        <hr>
-        <ul>
+        <?php if (count($event['waiting']) > 0) {
+            echo "<p class=\"ba-wl-title\">En attente</p>";
+        } ?>
+        <ul class="ba-wl">
             <?php
             foreach ($event['waiting'] as $waiting) {
-                $user = get_user_by('id', $booked->user_id);
-                echo "<li>" . $user->display_name . "</li>";
+                $user = get_user_by('id', $waiting->user_id);
+                echo "<li data-user-id='" . $waiting->user_id . "' data-waiting-id='" . $waiting->id . "'>" . $user->display_name . "</li>";
             }
             ?>
         </ul>
@@ -297,34 +328,306 @@ function ba_plus_create_event_div($event)
     return ob_get_clean();
 }
 
+function ba_plus_script_planning()
+{
+    ob_start();
+    ?>
+    <script>
+        $j('.ba-booked li').click(function (e) {
+            e.preventDefault();
+            // open the popup
+            $j('.ba-planning-popup-bg').css('display', 'block');
+            // get the user id
+            var user_id = $j(this).data('user-id');
+            // get the user name
+            var user_name = $j(this).text();
+            // get the event id
+            var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
+            // get the event name
+            var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
+            // get the event start date
+            var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
+            // get the event end date
+            var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
+            var booking_id = $j(this).data('booking-id');
+
+            // set the data to the popup
+            $j('.ba-planning-popup-content').data('event-id', event_id);
+            $j('.ba-planning-popup-content').data('user-id', user_id);
+            $j('.ba-planning-popup-content').data('event-start', event_start);
+            $j('.ba-planning-popup-content').data('event-end', event_end);
+            $j('.ba-planning-popup-content').data('booking-id', booking_id);
+
+            // set the popup header
+            $j('.ba-planning-popup-header h3').text(user_name);
+            $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
+            // add two button to the popup
+            $j('.ba-planning-popup-content').html('<button class="ba-planning-popup-booking-delete">Supprimer</button><button class="ba-planning-popup-booking-refund">Rembourser</button>');
+            $j('.ba-planning-popup-booking-delete').click(ba_plus_cancel_booking_callback);
+            $j('.ba-planning-popup-booking-refund').click(ba_plus_refund_booking_callback);
+        });
+        $j('.ba-planning-popup-close').click(function (e) {
+            e.preventDefault();
+            // close the popup
+            $j('.ba-planning-popup-bg').css('display', 'none');
+        });
+
+
+        $j('.ba-wl li').click(function (e) {
+            e.preventDefault();
+            // open the popup
+            $j('.ba-planning-popup-bg').css('display', 'block');
+            // get the user id
+            var user_id = $j(this).data('user-id');
+            // get the user name
+            var user_name = $j(this).text();
+            // get the event id
+            var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
+            // get the event name
+            var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
+            // get the event start date
+            var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
+            // get the event end date
+            var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
+
+            // set the data to the popup
+            $j('.ba-planning-popup-content').data('event-id', event_id);
+            $j('.ba-planning-popup-content').data('user-id', user_id);
+            $j('.ba-planning-popup-content').data('event-start', event_start);
+            $j('.ba-planning-popup-content').data('event-end', event_end);
+
+            // set the popup header
+            $j('.ba-planning-popup-header h3').text(user_name);
+            $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
+            // add two button to the popup
+            $j('.ba-planning-popup-content').html('<button class="ba-planning-popup-wl-delete">Supprimer</button>');
+            $j('.ba-planning-popup-wl-delete').click(ba_plus_cancel_wl_callback);
+
+        });
+
+        function ba_plus_cancel_booking_callback(e) {
+            console.log('cancel booking');
+            e.preventDefault();
+            // get the user id
+            var user_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-header h3').text();
+            // get the event id
+            var event_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-header p').text();
+            // get the booking id
+            var booking_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('booking-id');
+            // send the ajax request
+            $j.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'bookactiDeleteBooking',
+                    user_id: user_id,
+                    booking_id: booking_id,
+                    context: 'admin_booking_list',
+                    nonce: '<?php echo wp_create_nonce('bookacti_delete_booking'); ?>'
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        console.log(response);
+                    }
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        }
+
+        function ba_plus_refund_booking_callback(e) {
+            e.preventDefault();
+            // get the user id
+            var user_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('user-id');
+            // get the event data
+            var event_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('event-id');
+            var booking_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('booking-id');
+            // send the ajax request
+            $j.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'bookactiRefundBooking',
+                    user_id: user_id,
+                    event_id: event_id,
+                    booking_id: booking_id,
+                    nonce: '<?php echo wp_create_nonce('bookacti_refund_booking'); ?>',
+                    is_admin: 1,
+                    refund_action: 'booking_pass'
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        console.log(response);
+                    }
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        }
+
+        function ba_plus_cancel_wl_callback(e) {
+            e.preventDefault();
+            // get the user id
+            var user_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('user-id');
+            // get the event data
+            var event_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('event-id');
+            var event_start = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('event-start');
+            var event_end = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('event-end');
+
+            // send the ajax request
+            $j.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'baPlusCancelWaitingList',
+                    user_id: user_id,
+                    waiting_id: event_id,
+                    start_date: event_start,
+                    end_date: event_end,
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        console.log(response);
+                    }
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        }
+
+    </script>
+
+    <?php
+    return ob_get_clean();
+}
+
 /**
  * Return the style for the planning
  * @return string
  */
-function ba_plus_style_planning(){
+function ba_plus_style_planning()
+{
     ob_start();
     ?>
     <style>
         .ba-planning {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-
+            max-width: 100vw !important;
         }
 
         .ba-planning-col:has(h3) {
             display: grid;
             grid-template-columns: 1fr;
-            grid-template-rows: 100px 1fr;
-
+            grid-template-rows: 50px 1fr;
             border: 1px solid black;
+            border-right: 0px solid black;
             padding: 10px;
-            margin: 10px;
+        }
+
+        .ba-planning-col:has(h3):last-child {
+            border: 1px solid black;
+        }
+
+        .ba-planning-col h3 {
+            margin: 0;
+            font-size: 1em;
         }
 
         .ba-planning-event-box {
             border: 1px solid black;
             padding: 10px;
             margin: 10px;
+        }
+
+        .ba-planning-event-box h4 {
+            margin: 0;
+        }
+
+        .ba-planning-event-box ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .ba-planning-event-box li {
+            cursor: pointer;
+        }
+
+        .ba-planning-event-box li:hover {
+            background-color: #f1f1f1;
+        }
+
+        .ba-planning-event-box p {
+            margin: 0;
+            font-size: 1em;
+            color: #333;
+            text-align: center;
+        }
+
+        /*Popup style*/
+        .ba-planning-popup-bg {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .ba-planning-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 40px;
+            border-radius: 10px;
+            background-color: white;
+            z-index: 1001;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .ba-planning-popup-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr;
+        }
+
+        .ba-planning-popup-header h3 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .ba-planning-popup-header p {
+            margin: 0;
+            font-size: 1em;
+            color: #333;
+            text-align: right;
+        }
+
+        .ba-planning-popup-content {
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .ba-planning-popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
         }
     </style>
     <?php
