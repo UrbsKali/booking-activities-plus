@@ -207,6 +207,9 @@ function ba_plus_create_planning($args)
 
     ob_start();
     ?>
+    <script>
+        nonce_delete_booking = '<?php echo wp_create_nonce('bookacti_delete_booking'); ?>';
+    </script>
     <div class="ba-planning">
         <?php
         foreach ($events_by_day as $day => $events) {
@@ -228,12 +231,32 @@ function ba_plus_create_planning($args)
                 <p>lorem ipsum</p>
             </div>
             <div class="ba-planning-popup-content">
-
+                
             </div>
+            <div class="user-add-popup">
+                    <?php
+                    $selected_user = isset($_REQUEST['user_id']) ? esc_attr($_REQUEST['user_id']) : '';
+                    $args = apply_filters(
+                        'bookacti_booking_list_user_selectbox_args',
+                        array(
+                            'name' => 'user_id',
+                            'id' => 'bookacti-booking-filter-customer',
+                            'show_option_all' => esc_html__('All', 'booking-activities'),
+                            'option_label' => array('first_name', ' ', 'last_name', ' (', 'user_login', ' / ', 'user_email', ')'),
+                            'selected' => $selected_user,
+                            'allow_clear' => 1,
+                            'allow_tags' => 1,
+                            'echo' => 1
+                        )
+                    );
+                    bookacti_display_user_selectbox($args);
+                    ?>
+                    <button id="ba-plus-user-search-send">Ajouter</button>
+                </div>
         </div>
     </div>
     <?php
-    return ob_get_clean() . ba_plus_style_planning() . ba_plus_script_planning();
+    return ob_get_clean();
 }
 
 /**
@@ -337,361 +360,31 @@ function ba_plus_create_event_div($event)
     return ob_get_clean();
 }
 
-function ba_plus_script_planning()
-{
-    ob_start();
-    ?>
-    <script>
-        $j(".ba-plus-edit-btn").click(function (e) {
-            e.preventDefault();
-            var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
-            var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
-            var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
-            var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
-            // open the popup
-            $j('.ba-planning-popup-bg').css('display', 'block');
-            // set the popup header
-            $j('.ba-planning-popup-header h3').text('Modifier le cours');
-            $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
-            // add a form to edit the event and add a dropdown to select state of the event
-            //             $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><input type="datetime-local" name="event_start" value="' + event_start + '" /><input type="datetime-local" name="event_end" value="' + event_end + '" /><button id="ba-plus-edit-event-send">Modifier</button></form>');
-
-            $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><input type="datetime-local" name="event_start" value="' + event_start + '" /><input type="datetime-local" name="event_end" value="' + event_end + '" /><select name="event_state"><option value="1">Actif</option><option value="0">Inactif</option></select><button id="ba-plus-edit-event-send">Modifier</button></form>');
-        });
-        $j('.ba-plus-add-btn').click(function (e){
-            e.preventDefault();
-            var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
-            var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
-            var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
-            var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
-            // open the popup
-            $j('.ba-planning-popup-bg').css('display', 'block');
-            // set the popup header
-            $j('.ba-planning-popup-header h3').text('Ajouter un participant');
-            $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
-            // add a user search input
-            $j('.ba-planning-popup-content').html('<input type="text" id="ba-plus-user-search" placeholder="Rechercher un utilisateur" /><div id="ba-plus-user-search-results"></div>');
-            // add send btn
-            $j('.ba-planning-popup-content').append('<button id="ba-plus-user-search-send">Ajouter</button>');
-        });
-
-        $j('.ba-booked li').click(function (e) {
-            e.preventDefault();
-            // open the popup
-            $j('.ba-planning-popup-bg').css('display', 'block');
-            // get the user id
-            var user_id = $j(this).data('user-id');
-            // get the user name
-            var user_name = $j(this).text();
-            // get the event id
-            var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
-            // get the event name
-            var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
-            // get the event start date
-            var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
-            // get the event end date
-            var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
-            var booking_id = $j(this).data('booking-id');
-
-            // set the data to the popup
-            $j('.ba-planning-popup-content').data('event-id', event_id);
-            $j('.ba-planning-popup-content').data('user-id', user_id);
-            $j('.ba-planning-popup-content').data('event-start', event_start);
-            $j('.ba-planning-popup-content').data('event-end', event_end);
-            $j('.ba-planning-popup-content').data('booking-id', booking_id);
-
-            // set the popup header
-            $j('.ba-planning-popup-header h3').text(user_name);
-            $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
-            // add two button to the popup
-            $j('.ba-planning-popup-content').html('<button class="ba-planning-popup-booking-delete">Supprimer</button><button class="ba-planning-popup-booking-refund">Rembourser</button>');
-            $j('.ba-planning-popup-booking-delete').click(ba_plus_cancel_booking_callback);
-            $j('.ba-planning-popup-booking-refund').click(ba_plus_refund_booking_callback);
-        });
-        $j('.ba-planning-popup-close').click(function (e) {
-            e.preventDefault();
-            // close the popup
-            $j('.ba-planning-popup-bg').css('display', 'none');
-        });
-
-
-        $j('.ba-wl li').click(function (e) {
-            e.preventDefault();
-            // open the popup
-            $j('.ba-planning-popup-bg').css('display', 'block');
-            // get the user id
-            var user_id = $j(this).data('user-id');
-            // get the user name
-            var user_name = $j(this).text();
-            // get the event id
-            var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
-            // get the event name
-            var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
-            // get the event start date
-            var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
-            // get the event end date
-            var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
-
-            // set the data to the popup
-            $j('.ba-planning-popup-content').data('event-id', event_id);
-            $j('.ba-planning-popup-content').data('user-id', user_id);
-            $j('.ba-planning-popup-content').data('event-start', event_start);
-            $j('.ba-planning-popup-content').data('event-end', event_end);
-
-            // set the popup header
-            $j('.ba-planning-popup-header h3').text(user_name);
-            $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
-            // add two button to the popup
-            $j('.ba-planning-popup-content').html('<button class="ba-planning-popup-wl-delete">Supprimer</button>');
-            $j('.ba-planning-popup-wl-delete').click(ba_plus_cancel_wl_callback);
-
-        });
-
-        function ba_plus_cancel_booking_callback(e) {
-            console.log('cancel booking');
-            e.preventDefault();
-            // get the user id
-            var user_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-header h3').text();
-            // get the event id
-            var event_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-header p').text();
-            // get the booking id
-            var booking_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('booking-id');
-            // send the ajax request
-            $j.ajax({
-                url: ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'bookactiDeleteBooking',
-                    user_id: user_id,
-                    booking_id: booking_id,
-                    context: 'admin_booking_list',
-                    nonce: '<?php echo wp_create_nonce('bookacti_delete_booking'); ?>'
-                },
-                success: function (response) {
-                    if (response.status === 'success') {
-                        location.reload();
-                    } else {
-                        console.log(response);
-                    }
-                },
-                error: function (response) {
-                    console.log(response);
-                }
-            });
-        }
-
-        function ba_plus_refund_booking_callback(e) {
-            e.preventDefault();
-            // get the user id
-            var user_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('user-id');
-            // get the event data
-            var event_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('event-id');
-            var booking_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('booking-id');
-            // send the ajax request
-            $j.ajax({
-                url: ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'bookactiRefundBooking',
-                    user_id: user_id,
-                    event_id: event_id,
-                    booking_id: booking_id,
-                    nonce: '<?php echo wp_create_nonce('bookacti_refund_booking'); ?>',
-                    is_admin: 1,
-                    refund_action: 'booking_pass'
-                },
-                success: function (response) {
-                    if (response.status === 'success') {
-                        location.reload();
-                    } else {
-                        console.log(response);
-                    }
-                },
-                error: function (response) {
-                    console.log(response);
-                }
-            });
-        }
-
-        function ba_plus_cancel_wl_callback(e) {
-            e.preventDefault();
-            // get the user id
-            var user_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('user-id');
-            // get the event data
-            var event_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('event-id');
-            var event_start = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('event-start');
-            var event_end = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('event-end');
-
-            // send the ajax request
-            $j.ajax({
-                url: ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'baPlusCancelWaitingList',
-                    user_id: user_id,
-                    waiting_id: event_id,
-                    start_date: event_start,
-                    end_date: event_end,
-                },
-                success: function (response) {
-                    if (response.status === 'success') {
-                        location.reload();
-                    } else {
-                        console.log(response);
-                    }
-                },
-                error: function (response) {
-                    console.log(response);
-                }
-            });
-        }
-
-    </script>
-
-    <?php
-    return ob_get_clean();
-}
-
 /**
- * Return the style for the planning
- * @return string
+ * Remove <br> and <p> tags from shortcodes content
  */
-function ba_plus_style_planning()
+function html_shorttag_filter($content)
 {
-    ob_start();
-    ?>
-    <style>
-        .ba-planning {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            max-width: 100vw !important;
+    // Based on: https://wordpress.org/plugins/lct-temporary-wpautop-disable-shortcode/
+    $new_content = '';
+    $pieces = preg_split('/(\[html\].*?\[\/html\])/is', $content, -1, PREG_SPLIT_DELIM_CAPTURE);
+    // don't interfere with plugin that disables wpautop on the entire page
+    // see: https://plugins.svn.wordpress.org/toggle-wpautop/tags/1.2.2/toggle-wpautop.php
+    $autop_disabled = get_post_meta(get_the_ID(), '_lp_disable_wpautop', true);
+    foreach ($pieces as $piece) {
+        if (preg_match('/\[html\](.*?)\[\/html\]/is', $piece, $matches)) {
+            $new_content .= $matches[1];
+        } else {
+            $new_content .= $autop_disabled ? $piece : wpautop($piece);
         }
-
-        .ba-planning-col:has(h3) {
-            display: grid;
-            grid-template-columns: 1fr;
-            grid-template-rows: 50px 1fr;
-            border: 1px solid black;
-            border-right: 0px solid black;
-            padding: 10px;
-        }
-
-        .ba-planning-col:has(h3):last-child {
-            border: 1px solid black;
-        }
-
-        .ba-planning-col h3 {
-            margin: 0;
-            font-size: 1em;
-        }
-
-        .ba-planning-event-box {
-            border: 1px solid black;
-            padding: 10px;
-            margin: 10px;
-        }
-
-        .ba-planning-event-box h4 {
-            margin: 0;
-        }
-
-        .ba-planning-event-box ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .ba-planning-event-box li {
-            cursor: pointer;
-        }
-
-        .ba-planning-event-box li:hover {
-            background-color: #f1f1f1;
-        }
-
-        .ba-planning-event-box p {
-            margin: 0;
-            font-size: 1em;
-            color: #333;
-            text-align: center;
-        }
-
-        .ba-plus-action{
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-
-        #ba-plus-edit-event-form{
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-        #ba-plus-edit-event-form * {
-            margin: 5px;
-        }
-       
-
-
-        /*Popup style*/
-        .ba-planning-popup-bg {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            backdrop-filter: blur(2px);
-            z-index: 1000;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .ba-planning-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 40px;
-            border-radius: 10px;
-            background-color: white;
-            z-index: 1001;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
-        }
-
-        .ba-planning-popup-header {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr;
-        }
-
-        .ba-planning-popup-header h3 {
-            margin: 0;
-            font-size: 1.5em;
-        }
-
-        .ba-planning-popup-header p {
-            margin: 0;
-            font-size: 1em;
-            color: #333;
-            text-align: right;
-        }
-
-        .ba-planning-popup-content {
-            overflow-y: auto;
-            padding: 10px;
-            display: flex;
-            justify-content: space-around;
-        }
-        .ba-planning-popup-content * {
-            margin: 0 5px;
-        }
-
-        .ba-planning-popup-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-        }
-    </style>
-    <?php
-    return ob_get_clean();
+    }
+    // remove the wpautop filter, but only do it if the other plugin won't do it for us
+    if (!$autop_disabled) {
+        remove_filter('the_content', 'wpautop');
+        remove_filter('the_excerpt', 'wpautop');
+    }
+    return $new_content;
 }
+// idea to use 9 is from: https://plugins.svn.wordpress.org/wpautop-control/trunk/wpautop-control.php
+add_filter('the_content', 'html_shorttag_filter', 9);
+add_filter('the_excerpt', 'html_shorttag_filter', 9);
