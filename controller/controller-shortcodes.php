@@ -173,6 +173,9 @@ function ba_plus_planning( $atts = array(), $content = null, $tag = '' ) {
 	}
 	$user_id = get_current_user_id();
 
+	wp_enqueue_style('ba-planning-style');
+	wp_enqueue_script('ba-planning');
+
 	$planning = ba_plus_create_planning( $atts, $content, $user_id );
 	return $planning;
 }

@@ -65,9 +65,8 @@ function ba_plus_enqueue_scripts()
     wp_enqueue_script('ba-wl-sort', plugins_url('js/sort-by-date.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_enqueue_script('ba-wl-btn', plugins_url('js/send-cancel-wl.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_enqueue_script('ba-wl-page-resa', plugins_url('js/planning.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
-    wp_enqueue_script('ba-planning', plugins_url('js/admin-planning.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
+    wp_register_script('ba-planning', plugins_url('js/admin-planning.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_register_style('ba-planning-style', plugins_url('css/planning.css', __FILE__), BA_PLUS_VERSION, true);
-    wp_enqueue_style('ba-planning-style');
 }
 add_action('wp_enqueue_scripts', 'ba_plus_enqueue_scripts');
 

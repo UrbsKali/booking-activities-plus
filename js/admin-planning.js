@@ -17,7 +17,10 @@ $j(".ba-plus-edit-btn").click(function (e) {
     $j('.ba-planning-popup-header h3').text('Modifier le cours');
     $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
     // add a form to edit the event and add a dropdown to select state of the event
-    $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><select name="event_state"><option value="1">Actif</option><option value="0">Inactif</option></select><button id="ba-plus-edit-event-send">Modifier</button></form>');
+    $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><select name="event_state"><option value="actif">Actif</option><option value="complet">Complet</option><option value="ferme">Fermé</option></select><button id="ba-plus-edit-event-send">Modifier</button></form>');
+
+    // add the event listener to the btn
+    document.querySelector('#ba-plus-edit-event-send').addEventListener('click', ba_plus_update_event_callback);
 });
 
 // Click on add user btn
@@ -222,6 +225,38 @@ function ba_plus_update_event_callback(e) {
     e.preventDefault();
     // send info to action bookactiUpdateActivity
     // data : title, availability
+    // check if field has been edit or not
+    var event_name = document.querySelector('#ba-plus-edit-event-form input[name="event_name"]').value;
+    var event_state = document.querySelector('#ba-plus-edit-event-form select[name="event_state"]').value;
+    var old_name = $j('.ba-planning-popup-content').find('p').text().split(' - ')[0];
+    if (event_name === '' || event_state === '') {
+        console.log('error');
+        return;
+    }
+    var event_id = $j('.ba-planning-popup-content').data('event-id');
+    var data = {
+        action: 'baPlusUpdateEvent',
+        event_id: event_id,
+        event_title : event_name,
+        event_state : event_state
+    };
+
+    $j.ajax({
+        url: ajaxurl,
+        type: 'POST',
+        data: data,
+        success: function (response) {
+            if (response.data.status === 'success') {
+                location.reload();
+            } else {
+                console.log(response);
+            }
+        },
+        error: function (response) {
+            console.log(response);
+        }
+    });
+
 }
 
 function ba_plus_add_user_callback(e) {

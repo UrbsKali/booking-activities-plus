@@ -14,6 +14,9 @@ define('BOOKACTI_TABLE_WAITING_LIST', $db_prefix . 'bookacti_waiting_list');
 if (!defined('BOOKACTI_TABLE_EVENTS')) {
 	define('BOOKACTI_TABLE_EVENTS', $db_prefix . 'bookacti_events');
 }
+if (!defined('BOOKACTI_TABLE_ACTIVITIES')) {
+	define('BOOKACTI_TABLE_ACTIVITIES', $db_prefix . 'bookacti_activities');
+}
 if (!defined('BOOKACTI_TABLE_BOOKINGS')) {
 	define('BOOKACTI_TABLE_BOOKINGS', $db_prefix . 'bookacti_bookings');
 }
@@ -71,4 +74,36 @@ function ba_plus_set_refunded_booking( $booking_id ) {
 	$cancelled = $wpdb->query( $prep );
 
 	return $cancelled;
+}
+
+function ba_plus_change_event_title($event_id, $event_title){
+	global $wpdb;
+	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET title = %s WHERE id = %d';
+	$query = $wpdb->prepare($query, $event_title, $event_id);
+	$updated = $wpdb->query($query);
+	return $updated;
+}
+
+function ba_plus_change_event_availability($event_id, $availability){
+	global $wpdb;
+	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET availability = %d WHERE id = %d';
+	$query = $wpdb->prepare($query, $availability, $event_id);
+	$updated = $wpdb->query($query);
+	return $updated;
+}
+
+function ba_plus_restore_event_availability($event_id){
+	global $wpdb;
+	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . 'as E SET availability = (SELECT availability FROM ' . BOOKACTI_TABLE_ACTIVITIES . ' WHERE id = E.activity_id) WHERE id = %d';
+	$query = $wpdb->prepare($query, $event_id);
+	$updated = $wpdb->query($query);
+	return $updated;
+}
+
+function ba_plus_disable_event($event_id){
+	global $wpdb;
+	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET active = 0 WHERE id = %d';
+	$query = $wpdb->prepare($query, $event_id);
+	$updated = $wpdb->query($query);
+	return $updated;
 }

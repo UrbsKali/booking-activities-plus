@@ -54,25 +54,25 @@ function ba_plus_ajax_edit_event(){
     }
 
     // Check if all required parameters are set (event_id, event_title, event_start, event_end, event_dispo)
-    if (!isset($_POST['event_id']) || !isset($_POST['event_start']) || !isset($_POST['event_end'])) {
+    if (!isset($_POST['event_id']) || !isset($_POST['event_title']) || !isset($_POST['event_state'])){
         wp_send_json_error(array('status' => 'error', 'message' => 'Missing parameters.'));
     }
 
     // Sanitize all parameters
-    $event_id = sanitize_text_field($_POST['event_id']);
-    $event_start = sanitize_text_field($_POST['event_start']);
-    $event_end = sanitize_text_field($_POST['event_end']);
-    if (isset($_POST['event_title'])) {
-        $event_title = sanitize_text_field($_POST['event_title']);
+    $event_id = sanitize_text_field($_POST['event_id']);;
+
+    $event_title = sanitize_text_field($_POST['event_title']);
+    $ret = ba_plus_change_event_title($event_id, $event_title);
+
+    $event_state = sanitize_text_field($_POST['event_state']);
+    if ($event_state == 'actif') {
+        $ret = ba_plus_restore_event_availability($event_id);
+    } else if ($event_state == 'complet') {
+        $ret = ba_plus_change_event_availability($event_id, 0);
+    } else if ($event_state == 'ferme') {
+        $ret = ba_plus_disable_event($event_id);
     }
-    if (isset($_POST['event_availability'])) {
-        $event_dispo = sanitize_text_field($_POST['event_availability']);
-    }
-
-
-
-    // Update event
-
-
+    wp_send_json_success(array('status' => 'success', 'message' => 'Event edited successfully.'));
 
 }
+add_action('wp_ajax_baPlusUpdateEvent', 'ba_plus_ajax_edit_event');
