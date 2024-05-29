@@ -1,3 +1,4 @@
+// Click on Edit course btn
 $j(".ba-plus-edit-btn").click(function (e) {
     e.preventDefault();
     var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
@@ -18,6 +19,8 @@ $j(".ba-plus-edit-btn").click(function (e) {
     // add a form to edit the event and add a dropdown to select state of the event
     $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><select name="event_state"><option value="1">Actif</option><option value="0">Inactif</option></select><button id="ba-plus-edit-event-send">Modifier</button></form>');
 });
+
+// Click on add user btn
 $j('.ba-plus-add-btn').click(function (e) {
     e.preventDefault();
     var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
@@ -43,6 +46,7 @@ $j('.ba-plus-add-btn').click(function (e) {
     document.querySelector('#ba-plus-user-search-send').addEventListener('click', ba_plus_add_user_callback);
 });
 
+// Click on booked user
 $j('.ba-booked li').click(function (e) {
     e.preventDefault();
     // open the popup
@@ -83,7 +87,7 @@ $j('.ba-planning-popup-close').click(function (e) {
     document.querySelector('.user-add-popup').style.display = 'none';
 });
 
-
+// Click on waiting user
 $j('.ba-wl li').click(function (e) {
     e.preventDefault();
     // open the popup

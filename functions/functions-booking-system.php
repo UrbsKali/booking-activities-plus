@@ -10,7 +10,6 @@ function ba_plus_get_waiting_data($booking_system_data, $atts)
 {
     $waiting_list = ba_plus_get_all_waiting_list();
     $booking_system_data['waiting_list'] = array();
-    $booking_system_data['test'] = array("bite", "couille");
     foreach ($waiting_list as $waiting) {
         $event_id = $waiting->event_id;
         $user = get_userdata($waiting->user_id);
