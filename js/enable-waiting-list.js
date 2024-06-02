@@ -11,6 +11,15 @@ let is_enable = false;
 $j('.bookacti-booking-form').on('bookacti_trigger_event_click', function (info, trigger) {
     trigger.click = true;
 });
+$j('.bookacti-booking-form').on('bookacti_update_quantity', function (info, qty_data) {
+    if( qty_data.avail == 0 ) { 
+        document.querySelector('.bookacti-submit-form.button').value = 'Ajouter à la liste d\'attente';
+    } else {
+        document.querySelector('.bookacti-submit-form.button').value = 'Réserver';
+    }
+});
+
+
 
 
 $j('.bookacti-booking-form').on('bookacti_validate_picked_events', function (info, valid_form) {

@@ -70,7 +70,10 @@ function ba_plus_ajax_edit_event(){
     } else if ($event_state == 'complet') {
         $ret = ba_plus_change_event_availability($event_id, 0);
     } else if ($event_state == 'ferme') {
+        // unlink the event if recurent
+        
         $ret = ba_plus_disable_event($event_id);
+        
     }
     wp_send_json_success(array('status' => 'success', 'message' => 'Event edited successfully.'));
 

@@ -176,10 +176,19 @@ function bookacti_get_waiting_list_actions_html($waiting_item)
  */
 function ba_plus_create_planning($args)
 {
-    $today = new DateTime();
-    $today = $today->format('Y-m-d h:i:s');
-    $next_week = new DateTime();
-    $next_week = date('Y-m-d H:i:s', strtotime('+7 day'));
+    // Get GET parameters for start date
+    if (isset($_GET['start_date'])) {
+        $today = sanitize_text_field($_GET['start_date']);
+        $today = date('Y-m-d h:i:s', strtotime($today));
+    } else {
+        $today = new DateTime();
+        $today = $today->format('Y-m-d h:i:s');
+    }
+
+    
+
+    $next_week = date('Y-m-d h:i:s', strtotime('+1 week', strtotime($today)));
+
     $interval = array(
         'start' => $today,
         'end' => $next_week
@@ -195,8 +204,8 @@ function ba_plus_create_planning($args)
     foreach ($events as $event) {
         // check start date of the event
         for ($i = 1; $i <= 7; $i++) {
-            $after = date('Y-m-d', strtotime('+' . $i . ' day'));
-            $before = date('Y-m-d', strtotime('+' . $i - 1 . ' day'));
+            $after = date('Y-m-d', strtotime('+' . $i . ' day', strtotime($today)));
+            $before = date('Y-m-d', strtotime('+' . $i - 1 . ' day', strtotime($today)));
             if (!isset($events_by_day[$before]))
                 $events_by_day[$before] = array();
             if ($event['start'] > $before && $event['start'] < $after) {
@@ -210,6 +219,14 @@ function ba_plus_create_planning($args)
     <script>
         nonce_delete_booking = '<?php echo wp_create_nonce('bookacti_delete_booking'); ?>';
     </script>
+    <div class="ba-planning-navbar ba-plus-ignore-print">
+        <div>
+            <button id="ba-planning-prev-week"><<</button>
+            <button id="ba-planning-today">Aujourd'hui</button>
+            <button id="ba-planning-next-week">>></button>
+        </div>
+        <button id="ba-planning-print">Imprimer</button>
+    </div>
     <div class="ba-planning">
         <?php
         foreach ($events_by_day as $day => $events) {

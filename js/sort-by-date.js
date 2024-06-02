@@ -10,8 +10,8 @@ function sort_booking_by_date(reverse = false) {
         let text_a = "vendredi 1 janvier 1970 10h00"
         let text_b = "vendredi 1 janvier 1970 10h00"
         try {
-            text_a = a.querySelector('td').querySelector('span.bookacti-booking-event-start').innerText;
-            text_b = b.querySelector('td').querySelector('span.bookacti-booking-event-start').innerText;
+            text_a = a.querySelectorAll('td')[1].querySelector('span.bookacti-booking-event-start').innerText;
+            text_b = b.querySelectorAll('td')[1].querySelector('span.bookacti-booking-event-start').innerText;
         } catch (error) {
             console.log(error);
         }

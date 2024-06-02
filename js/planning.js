@@ -53,3 +53,74 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 50 * i);
     }
 });
+
+let print_btn = document.querySelector('#ba-planning-print');
+print_btn.addEventListener('click', function () {
+    window.print();
+});
+
+let today_btn = document.querySelector('#ba-planning-today');
+today_btn.addEventListener('click', function () {
+    let date = new Date();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    let date_str = day + '-' + month + '-' + year;
+    let url = window.location.href;
+    url = url.split('?')[0];
+    url += '?start_date=' + date_str;
+    window.location.href = url;
+});
+
+let prev_btn = document.querySelector('#ba-planning-prev-week');
+let next_btn = document.querySelector('#ba-planning-next-week');
+
+prev_btn.addEventListener('click', function () {
+    // get the current date
+    let url = window.location.href;
+    let date = url.split('?')[1].split('=')[1];
+    if (date === '') {
+        date = new Date();
+    } else {
+        date = date.split('-');
+        let day = parseInt(date[0]);
+        let month = parseInt(date[1]);
+        let year = parseInt(date[2]);
+        date = new Date(year, month - 1, day);
+    }
+
+    // get the previous week
+    date.setDate(date.getDate() - 7);
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    let date_str = day + '-' + month + '-' + year;
+    url = url.split('?')[0];
+    url += '?start_date=' + date_str;
+    window.location.href = url;
+});
+
+next_btn.addEventListener('click', function () {
+    // get the current date
+    let url = window.location.href;
+    let date = url.split('?')[1].split('=')[1];
+    if (date === '') {
+        date = new Date();
+    } else {
+        date = date.split('-');
+        let day = parseInt(date[0]);
+        let month = parseInt(date[1]);
+        let year = parseInt(date[2]);
+        date = new Date(year, month - 1, day);
+    }
+
+    // get the next week
+    date.setDate(date.getDate() + 7);
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    let date_str = day + '-' + month + '-' + year;
+    url = url.split('?')[0];
+    url += '?start_date=' + date_str;
+    window.location.href = url;
+});

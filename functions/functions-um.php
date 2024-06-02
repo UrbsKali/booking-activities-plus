@@ -3,29 +3,29 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-add_filter('um_account_page_default_tabs_hook', 'my_custom_tab_in_um', 100 );
-function my_custom_tab_in_um( $tabs ) {
-	$tabs[800]['mytab']['icon'] = 'um-faicon-pencil';
-	$tabs[800]['mytab']['title'] = 'Réservations';
-	$tabs[800]['mytab']['custom'] = true;
+add_filter('um_account_page_default_tabs_hook', 'ba_plus_booking_tab', 100 );
+function ba_plus_booking_tab( $tabs ) {
+	$tabs[800]['bookingtab']['icon'] = 'um-faicon-pencil';
+	$tabs[800]['bookingtab']['title'] = 'Réservations';
+	$tabs[800]['bookingtab']['custom'] = true;
 	return $tabs;
 }
 	
 /* make our new tab hookable */
 
-add_action('um_account_tab__mytab', 'um_account_tab__mytab');
-function um_account_tab__mytab( $info ) {
+add_action('um_account_tab__bookingtab', 'um_account_tab__bookingtab');
+function um_account_tab__bookingtab( $info ) {
 	global $ultimatemember;
 	extract( $info );
 
-	$output = $ultimatemember->account->get_tab_output('mytab');
+	$output = $ultimatemember->account->get_tab_output('bookingtab');
 	if ( $output ) { echo $output; }
 }
 
 /* Finally we add some content in the tab */
 
-add_filter('um_account_content_hook_mytab', 'um_account_content_hook_mytab');
-function um_account_content_hook_mytab( $output ){
+add_filter('um_account_content_hook_bookingtab', 'um_account_content_hook_bookingtab');
+function um_account_content_hook_bookingtab( $output ){
 	ob_start();
 	?>
 		
@@ -46,7 +46,7 @@ function um_account_content_hook_mytab( $output ){
         echo do_shortcode( '[bookingactivities_passes user_id='. $user_id . ']');
         echo do_shortcode( "[bookingactivities_certificate user_id='".$user_id."']" );
         echo "<hr>";
-        echo do_shortcode( "[boockinactivities_cancel_balance user_id='".$user_id."']" );
+        echo do_shortcode( "[bookingactivities_cancel_balance user_id='".$user_id."']" );
 
         ?>
 		
@@ -66,7 +66,7 @@ function um_account_content_hook_mytab( $output ){
  * Mostly used to display the user's bookings, waiting lists and passes
  * on the admin frontend
  */
-function ba_plus_test2( $args ) {
+function ba_plus_admin_booking_tab( $args ) {
     $user_id = um_profile_id();
     if ( ! $user_id ) {
         return;
@@ -79,4 +79,4 @@ function ba_plus_test2( $args ) {
     echo "<br><h2>Forfaits</h2><br>";
     echo do_shortcode( '[bookingactivities_passes user_id='. $user_id . ']');
 }
-add_action( "um_profile_content_main_default", "ba_plus_test2", 10, 1 );
+add_action( "um_profile_content_main_default", "ba_plus_admin_booking_tab", 10, 1 );
