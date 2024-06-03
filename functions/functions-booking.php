@@ -117,7 +117,7 @@ function ba_plus_add_user_to_waiting_list($form_id, $booking_form_values, $retur
         $return_array['messages']['booked'] = "Vous êtes bien dans la liste d'attente !";
     } else {
         $return_array['error'] = 'unknown';
-        $return_array['messages']['unknown'] = esc_html__('An error occurred, please try again.', 'booking-activities');        
+        $return_array['messages']['unknown'] = esc_html__('An error occurred, please try again.', 'booking-activities');
     }
     $return_array['message'] = implode('</li><li>', $return_array['messages']);
     bookacti_send_json($return_array, 'submit_booking_form');	 // return success
@@ -138,41 +138,84 @@ function ba_plus_can_cancel_event($is_allowed, $booking, $context, $allow_groupe
 }
 add_filter("bookacti_booking_can_be_cancelled", "ba_plus_can_cancel_event", 5, 4);
 
-function ba_plus_filters_refund($credits, $booking, $booking_type)
+function ba_plus_filters_refund_step2($credits, $booking, $booking_type)
 {
     $booking = $booking[0];
     $user_id = $booking->user_id;
 
-    $event_start = strtotime($booking->event_start);
-    $current_time = time();
-    $diff = $event_start - $current_time;
-    if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600)) {
-        return 0;
-    }
-
     $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
-    if (empty($nb_cancelled_events)) {
-        return 0;
-    } else if ($nb_cancelled_events <= 0) {
-        return 0;
-    }
 
     $nb_cancelled_events--;
     update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
     return $credits;
 }
-add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund", 10, 3);
+add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund_step2", 10, 3);
 
 
-function ba_plus_wtf($true, $booking, $context){
-    if ($booking->state == 'cancelled' && $context == 'front' && $booking->payment_status == 'paid') {
-        return true;
+function ba_plus_filters_refund_step1($refunded, $bookings, $booking_type, $refund_action, $refund_message, $context = '')
+{
+    if ($refund_action !== 'booking_pass') {
+        return $refunded;
     }
-    return $true;
+
+    $booking_pass_id = isset($bookings[0]->booking_pass_id) ? $bookings[0]->booking_pass_id : 0;
+    if (!$booking_pass_id) {
+        return array(
+            'status' => 'failed',
+            'error' => 'refund_no_booking_pass_id',
+            'message' => esc_html__('The booking hasn\'t been made with a booking pass', 'ba-prices-and-credits')
+        );
+    }
+
+    $credits = isset($bookings[0]->booking_pass_credits) ? $bookings[0]->booking_pass_credits : 0;
+    if (!$credits) {
+        return array(
+            'status' => 'failed',
+            'error' => 'refund_booking_pass_no_credits',
+            'message' => esc_html__('The booking has no credits value', 'ba-prices-and-credits')
+        );
+    }
+
+    $booking_pass = bapap_get_booking_pass($booking_pass_id);
+    if (!$booking_pass) {
+        return array(
+            'status' => 'failed',
+            'error' => 'refund_booking_pass_not_exists',
+            'message' => esc_html__('The booking pass used to make the reservation no longer exists.', 'ba-prices-and-credits')
+        );
+    }
+
+
+    $user_id = $bookings[0]->user_id;
+
+    $event_start = strtotime($bookings[0]->event_start);
+    $current_time = time();
+    $diff = $event_start - $current_time;
+    if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600)) {
+        return array(
+            'status' => 'failed',
+            'error' => 'refund_too_late',
+            'message' => esc_html__('Vous ne pouvez plus vous faire rembourser cette réservation', 'ba-prices-and-credits')
+        );
+    }
+
+    $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
+    if (empty($nb_cancelled_events) || $nb_cancelled_events === 0) {
+        return array(
+            'status' => 'failed',
+            'error' => 'no_credits',
+            'message' => esc_html__('Vous n\'avez plus de remboursement sans frais sur votre compte', 'ba-prices-and-credits')
+        );
+    }
+
+    return $refunded;
 }
-//add_filter( "bookacti_booking_can_be_refunded", "ba_plus_wtf", 10, 3 );
+add_filter("bookacti_refund_booking", "ba_plus_filters_refund_step1", 21, 6);
+
+
 
 /**
+ * AJAX Controller
  * Book an event - ADMIN ONLY
  */
 function ba_plus_admin_book_event()

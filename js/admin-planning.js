@@ -5,11 +5,13 @@ $j(".ba-plus-edit-btn").click(function (e) {
     var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
     var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
     var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
+    var is_recurring = $j(this).closest('.ba-planning-event-box').data('is-recurring');
 
     // pass the data to the popup content div
     $j('.ba-planning-popup-content').data('event-id', event_id);
     $j('.ba-planning-popup-content').data('event-start', event_start);
     $j('.ba-planning-popup-content').data('event-end', event_end);
+    $j('.ba-planning-popup-content').data('is-recurring', is_recurring);
 
     // open the popup
     $j('.ba-planning-popup-bg').css('display', 'block');
@@ -123,12 +125,9 @@ $j('.ba-wl li').click(function (e) {
 });
 
 function ba_plus_cancel_booking_callback(e) {
-    console.log('cancel booking');
     e.preventDefault();
     // get the user id
     var user_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-header h3').text();
-    // get the event id
-    var event_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-header p').text();
     // get the booking id
     var booking_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('booking-id');
     // send the ajax request
@@ -157,26 +156,18 @@ function ba_plus_cancel_booking_callback(e) {
 
 function ba_plus_refund_booking_callback(e) {
     e.preventDefault();
-    // get the user id
-    var user_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('user-id');
     // get the event data
-    var event_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('event-id');
     var booking_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('booking-id');
     // send the ajax request
     $j.ajax({
         url: ajaxurl,
         type: 'POST',
         data: {
-            action: 'bookactiRefundBooking',
-            user_id: user_id,
-            event_id: event_id,
+            action: 'baPlusRefundBooking',
             booking_id: booking_id,
-            nonce: bookacti_localized.nonce_refund_booking,
-            is_admin: 1,
-            refund_action: 'booking_pass'
         },
         success: function (response) {
-            if (response.status === 'success') {
+            if (response.data.status === 'success') {
                 location.reload();
             } else {
                 console.log(response);
@@ -227,16 +218,26 @@ function ba_plus_update_event_callback(e) {
     // data : title, availability
     // check if field has been edit or not
     var event_name = document.querySelector('#ba-plus-edit-event-form input[name="event_name"]').value;
+
     var event_state = document.querySelector('#ba-plus-edit-event-form select[name="event_state"]').value;
+    
     var old_name = $j('.ba-planning-popup-content').find('p').text().split(' - ')[0];
     if (event_name === '' || event_state === '') {
         console.log('error');
         return;
     }
     var event_id = $j('.ba-planning-popup-content').data('event-id');
+    var event_start = $j('.ba-planning-popup-content').data('event-start');
+    var event_end = $j('.ba-planning-popup-content').data('event-end');
+    var is_recurring = $j('.ba-planning-popup-content').data('is-recurring');
+
     var data = {
         action: 'baPlusUpdateEvent',
+        ba_action: 'title,state',
         event_id: event_id,
+        event_start: event_start,
+        event_end: event_end,
+        is_recurring: is_recurring,
         event_title : event_name,
         event_state : event_state
     };
@@ -291,3 +292,75 @@ function ba_plus_add_user_callback(e) {
         }
     });
 }
+
+
+let print_btn = document.querySelector('#ba-planning-print');
+print_btn.addEventListener('click', function () {
+    window.print();
+});
+
+let today_btn = document.querySelector('#ba-planning-today');
+today_btn.addEventListener('click', function () {
+    let date = new Date();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    let date_str = day + '-' + month + '-' + year;
+    let url = window.location.href;
+    url = url.split('?')[0];
+    url += '?start_date=' + date_str;
+    window.location.href = url;
+});
+
+let prev_btn = document.querySelector('#ba-planning-prev-week');
+let next_btn = document.querySelector('#ba-planning-next-week');
+
+prev_btn.addEventListener('click', function () {
+    // get the current date
+    let url = window.location.href;
+    let date = url.split('?');
+    if (date.length === 1) {
+        date = new Date();
+    } else {
+        date = date[1].split('=')[1].split('-');
+        let day = parseInt(date[0]);
+        let month = parseInt(date[1]);
+        let year = parseInt(date[2]);
+        date = new Date(year, month - 1, day);
+    }
+
+    // get the previous week
+    date.setDate(date.getDate() - 7);
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    let date_str = day + '-' + month + '-' + year;
+    url = url.split('?')[0];
+    url += '?start_date=' + date_str;
+    window.location.href = url;
+});
+
+next_btn.addEventListener('click', function () {
+    // get the current date
+    let url = window.location.href;
+    let date = url.split('?');
+    if (date.length === 1) {
+        date = new Date();
+    } else {
+        date = date[1].split('=')[1].split('-');
+        let day = parseInt(date[0]);
+        let month = parseInt(date[1]);
+        let year = parseInt(date[2]);
+        date = new Date(year, month - 1, day);
+    }
+
+    // get the next week
+    date.setDate(date.getDate() + 7);
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    let date_str = day + '-' + month + '-' + year;
+    url = url.split('?')[0];
+    url += '?start_date=' + date_str;
+    window.location.href = url;
+});

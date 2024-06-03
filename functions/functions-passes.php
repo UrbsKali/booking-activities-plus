@@ -22,12 +22,3 @@ function ba_plus_booking_pass_created($booking_pass_id, $booking_pass_data)
     update_user_meta($user_id, 'send_mail_cancel', 'false');
 } 
 add_action('bapap_booking_pass_created','ba_plus_booking_pass_created', 10, 2);
-
-// bapap_booking_pass_updated 
-
-// do_action( 'bapap_booking_pass_deleted', $booking_pass_id );
-
-// 		do_action( 'bapap_booking_pass_deactivated', $booking_pass_id );
-
-
-// 		do_action( 'bapap_booking_pass_restored', $booking_pass_id );

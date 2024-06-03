@@ -67,10 +67,10 @@ function ba_plus_shortcode_waiting_list($raw_atts = array(), $content = null, $t
 		$waiting_list = ba_plus_create_user_waiting_list($filters, $atts['columns'], $atts['per_page']);
 	}
 
+	wp_enqueue_script('ba-wl-btn');
 
 
 	return apply_filters('bookacti_shortcode_' . $tag . '_output', $waiting_list, $raw_atts, $content);
-	//return "uysdvf";
 }
 
 
@@ -176,6 +176,6 @@ function ba_plus_planning( $atts = array(), $content = null, $tag = '' ) {
 	wp_enqueue_style('ba-planning-style');
 	wp_enqueue_script('ba-planning');
 
-	$planning = ba_plus_create_planning( $atts, $content, $user_id );
+	$planning = ba_plus_create_planning( $atts );
 	return $planning;
 }

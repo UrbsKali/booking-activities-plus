@@ -76,34 +76,34 @@ function ba_plus_set_refunded_booking( $booking_id ) {
 	return $cancelled;
 }
 
-function ba_plus_change_event_title($event_id, $event_title){
+function ba_plus_change_event_title($event_id, $event_start, $event_end, $event_title){
 	global $wpdb;
-	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET title = %s WHERE id = %d';
-	$query = $wpdb->prepare($query, $event_title, $event_id);
+	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET title = %s WHERE id = %d and start = %s and end = %s';
+	$query = $wpdb->prepare($query, $event_title, $event_id, $event_start, $event_end);
 	$updated = $wpdb->query($query);
 	return $updated;
 }
 
-function ba_plus_change_event_availability($event_id, $availability){
+function ba_plus_change_event_availability($event_id, $event_start, $event_end, $availability){
 	global $wpdb;
-	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET availability = %d WHERE id = %d';
-	$query = $wpdb->prepare($query, $availability, $event_id);
+	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET availability = %d WHERE id = %d and start = %s and end = %s';
+	$query = $wpdb->prepare($query, $availability, $event_id, $event_start, $event_end);
 	$updated = $wpdb->query($query);
 	return $updated;
 }
 
-function ba_plus_restore_event_availability($event_id){
+function ba_plus_restore_event_availability($event_id, $event_start, $event_end){
 	global $wpdb;
-	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . 'as E SET availability = (SELECT availability FROM ' . BOOKACTI_TABLE_ACTIVITIES . ' WHERE id = E.activity_id) WHERE id = %d';
-	$query = $wpdb->prepare($query, $event_id);
+	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . 'as E SET availability = (SELECT availability FROM ' . BOOKACTI_TABLE_ACTIVITIES . ' WHERE id = E.activity_id) WHERE id = %d and start = %s and end = %s';
+	$query = $wpdb->prepare($query, $event_id, $event_start, $event_end);
 	$updated = $wpdb->query($query);
 	return $updated;
 }
 
-function ba_plus_disable_event($event_id){
+function ba_plus_disable_event($event_id, $event_start, $event_end){
 	global $wpdb;
-	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET active = 0 WHERE id = %d';
-	$query = $wpdb->prepare($query, $event_id);
+	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET active = 0 WHERE id = %d and start = %s and end = %s';
+	$query = $wpdb->prepare($query, $event_id, $event_start, $event_end);
 	$updated = $wpdb->query($query);
 	return $updated;
 }

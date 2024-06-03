@@ -30,12 +30,22 @@ function ba_plus_get_waiting_data($booking_system_data, $atts)
 }
 add_filter("bookacti_booking_system_data", "ba_plus_get_waiting_data", 2, 2);
 
-
 /**
- * Add waiting users to the booking list
+ * Add js to the booking list of the user
  */
-function ba_plus_get_booking_list($booking_list, $filters, $filters_raw, $columns, $atts)
-{
+function ba_plus_booking_list_scripts($booking_list, $raw_atts, $content){
+    wp_enqueue_script('ba-wl-sort');
     return $booking_list;
 }
-//add_filter("bookacti_events_booking_lists", "ba_plus_get_booking_list", 5, 5);
+add_filter("bookacti_shortcode_bookingactivities_list_output", "ba_plus_booking_list_scripts", 5, 3);
+
+
+/**
+ * Add js to the booking forms
+ */
+function ba_plus_booking_forms_scripts($output, $raw_atts, $content){
+    wp_enqueue_script('ba-wl-enable');
+    return $output;
+}
+add_filter("bookacti_shortcode_bookingactivities_form_output", "ba_plus_booking_forms_scripts", 5, 3);
+

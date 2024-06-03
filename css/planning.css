@@ -58,6 +58,11 @@
     justify-content: space-around;
     flex-wrap: nowrap;
 }
+@media screen and (max-width: 1600px) {
+    .ba-plus-action {
+        flex-wrap: wrap;
+    }
+}
 
 #ba-plus-edit-event-form {
     display: flex;

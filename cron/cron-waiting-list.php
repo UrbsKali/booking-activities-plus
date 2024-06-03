@@ -87,39 +87,29 @@ function ba_plus_remove_empty_events()
             $event['bookings'] = bookacti_get_bookings($filters);
             // Remove all bookings, refund, and send email to all users TD& 
             foreach ($event['bookings'] as $id => $booking) {
-                if ($booking->state == "cancelled") {
+                if ($booking->state == "cancelled" || $booking->state == "refunded") {
                     continue;
                 }
-                // if quantity is more than 1, remove the quantity
+                $booking = bookacti_get_booking_by_id($booking->id, true);               
 
                 // cancel the booking
                 $cancelled = ba_plus_set_refunded_booking($id);
 
                 // refund the user
-                $filters = array(
-                    'user_id' => $booking->user_id,
-                    'active' => 1
-                );
-                $filters = bapap_format_booking_pass_filters($filters);
-                $pass = bapap_get_booking_passes($filters);
+                $booking_pass = bapap_get_booking_pass($booking->booking_pass_id);
 
-                foreach ($pass as $p) {
-                    $pass = $p;
-                    break;
-                }
-
-                $pass->credits_current += 1;
-                bapap_update_booking_pass_data($pass->id, array('credits_current' => $pass->credits_current));
+                $booking_pass['credits_current'] += intval($booking->booking_pass_credits);
+                $credited = bapap_add_booking_pass_credits($booking->booking_pass_id, intval($booking->booking_pass_credits));
                 // add to the log
                 $log_data = array(
                     'credits_delta' => '1',
-                    'credits_current' => $pass->credits_current,
-                    'credits_total' => $pass->credits_total,
+                    'credits_current' => $booking_pass['credits_current'],
+                    'credits_total' => $booking_pass['credits_total'],
                     'reason' => "Annulation automatique (manque de participants) -" . $event['title'] ." (". $event['start'] .")",
                     'context' => 'updated_from_server',
                     'lang_switched' => 1
                 );
-                bapap_add_booking_pass_log($pass->id, $log_data);
+                bapap_add_booking_pass_log($booking->booking_pass_id, $log_data);
 
 
                 // send mail

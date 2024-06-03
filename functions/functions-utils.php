@@ -200,8 +200,10 @@ function ba_plus_create_planning($args)
 
     $events = bookacti_fetch_events($args);
     $events_by_day = array();
+    $data = $events["data"];
     $events = $events['events'];
     foreach ($events as $event) {
+        $event["repeat_freq"] = $data[$event["id"]]["repeat_freq"];
         // check start date of the event
         for ($i = 1; $i <= 7; $i++) {
             $after = date('Y-m-d', strtotime('+' . $i . ' day', strtotime($today)));
@@ -334,10 +336,11 @@ function ba_plus_create_event_div($event)
     $event['booked'] = bookacti_get_bookings($filters);
     $event['waiting'] = ba_plus_get_event_waiting_list($id, $start, $end);
 
+    $is_recurring = $event['repeat_freq'] == "none" ? 0 : 1;
     ob_start();
     ?>
     <div class="ba-planning-event-box" data-event-id="<? echo $id; ?>" data-event-start="<? echo $start; ?>"
-        data-event-end="<? echo $end; ?>">
+        data-event-end="<? echo $end; ?>" data-is-recurring="<? echo $is_recurring; ?>">
         <p><?php echo $pretty_start . "/" . $pretty_end; ?></p>
         <p><?php echo $event['title']; ?></p>
         <div class="ba-plus-action">
@@ -353,7 +356,7 @@ function ba_plus_create_event_div($event)
             echo '<p class="ba-booked-title">Inscrits</p>';
         } ?>
 
-        <ul class="ba-booked">
+        <ul class="ba-booked"> 
             <?php
             foreach ($event['booked'] as $booked) {
                 $user = get_user_by('id', $booked->user_id);
