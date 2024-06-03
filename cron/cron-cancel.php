@@ -8,6 +8,12 @@ if ( ! wp_next_scheduled( 'bookacti_cron_check_cancel' ) ) {
     wp_schedule_event( time(), 'five_seconds', 'bookacti_cron_check_cancel' );
 }
 
+add_action( 'bookacti_cron_test', 'ba_plus_test_cron' );
+
+if ( ! wp_next_scheduled( 'bookacti_cron_test' ) ) {
+    wp_schedule_event( time(), 'five_seconds', 'bookacti_cron_test' );
+}
+
 function ba_plus_check_cancel(){
     echo "Checking for cancel number<br>";
     global $wpdb;
@@ -30,4 +36,10 @@ function ba_plus_check_cancel(){
             update_user_meta( $user->id, 'send_mail_cancel', 'false' );
         }
     }
+}
+
+
+function ba_plus_test_cron(){
+    echo "Test cron<br>";
+    wp_mail( "urbain.lantres@gmail.com", "Test", "body" );
 }

@@ -102,7 +102,7 @@ function ba_plus_remove_empty_events()
                 $credited = bapap_add_booking_pass_credits($booking->booking_pass_id, intval($booking->booking_pass_credits));
                 // add to the log
                 $log_data = array(
-                    'credits_delta' => '1',
+                    'credits_delta' => $booking->booking_pass_credits,
                     'credits_current' => $booking_pass['credits_current'],
                     'credits_total' => $booking_pass['credits_total'],
                     'reason' => "Annulation automatique (manque de participants) -" . $event['title'] ." (". $event['start'] .")",
@@ -122,6 +122,18 @@ function ba_plus_remove_empty_events()
                 $headers = array('Content-Type: text/html; charset=UTF-8');
                 wp_mail($to, $subject, $body, $headers);
             }
+            // unbind the event
+            $event_id = $event['id'];
+            if ($event['repeat_freq'] != "none"){
+                $event_new = bookacti_get_event_by_id($event['id']);
+                $new_id = bookacti_unbind_selected_event_occurrence($event_new, $event['start'], $event['end']);
+                if ($new_id) {
+                    $event_id = $new_id;
+                }
+            }
+            
+            // deactivate the event
+            bookacti_deactivate_event($event_id);
         }
     }
 }
