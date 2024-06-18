@@ -187,10 +187,9 @@ function ba_plus_create_planning($args)
     </script>
     <div class="ba-planning-navbar ba-plus-ignore-print">
         <div>
-            <button id="ba-planning-prev-week">
-                <<
-                    <button id="ba-planning-today">Aujourd'hui</button>
-                    <button id="ba-planning-next-week">>></button>
+            <button id="ba-planning-prev-week"><<</button>
+            <button id="ba-planning-today">Aujourd'hui</button>
+            <button id="ba-planning-next-week">>></button>
         </div>
         <button id="ba-planning-print">Imprimer</button>
     </div>

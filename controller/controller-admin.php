@@ -154,16 +154,6 @@ function ba_plus_ajax_refund_booking()
     do_action('bookacti_booking_state_changed', $booking, 'refunded', array('is_admin' => true, 'refund_action' => "booking_passes"));
 
 
-    // Send mail
-    $user = get_user_by('id', $booking->user_id);
-    $to = $user->user_email;
-    $subject = get_option('ba_plus_mail_admin_refund_title');
-    $body = get_option('ba_plus_mail_admin_refund_body');
-    $body = str_replace('%event%', $booking->event_title, $body);
-    $body = str_replace('%user%', $user->display_name, $body);
-    $headers = array('Content-Type: text/html; charset=UTF-8');
-    wp_mail($to, $subject, $body, $headers);
-
     wp_send_json_success(array('status' => 'success', 'message' => 'Booking refunded successfully.'));
 }
 add_action('wp_ajax_baPlusRefundBooking', 'ba_plus_ajax_refund_booking');

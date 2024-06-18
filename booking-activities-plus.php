@@ -133,10 +133,6 @@ function ba_plus_activate()
     add_option('ba_plus_mail_cancel_title', 'Scéance annulée');
     add_option('ba_plus_mail_cancel_body', "Bonjour %user%, <br>L'évènement %event% à été annulé par manque de participant<br>Veuillez nous excuser du dérangement");
 
-    add_option('ba_plus_mail_admin_refund_title', 'Scéance remboursée');
-    add_option('ba_plus_mail_admin_refund_body', "Bonjour %user%, <br>L'évènement %event% à été remboursé par l'administrateur<br>Veuillez nous excuser du dérangement");
-
-
     add_option('ba_plus_mail_waiting_list_title', "Vous êtes toujours dans la file d'attente");
     add_option('ba_plus_mail_waiting_list_body', "Bonjour %user%, <br>Vous êtes toujours en alerte sur le cours %event%, si vous n\'êtes plus disponible, pensez à supprimer cette alerte, sinon vous risquez de ne plus pouvoir vous annuler sans frais.<br>Merci de votre confiance.");
 

@@ -98,7 +98,7 @@ function ba_plus_text_field_0_render()
 	?>
 	<label for="ba_plus_mail_certi_expire_title">Titre</label><br>
 	<input type="text" name="ba_plus_mail_certi_expire_title"
-		value="<?php echo get_option('ba_plus_mail_certi_expire_title', "Votre %doc% expire bientôt"); ?>"></input><br>
+		value="<?php echo get_option('ba_plus_mail_certi_expire_title'); ?>"></input><br>
 	<?php
 
 }
@@ -110,7 +110,7 @@ function ba_plus_textarea_field_1_render()
 	?>
 	<label for="ba_plus_mail_certi_expire_body">Corps</label><br>
 	<textarea name="ba_plus_mail_certi_expire_body" rows="10"
-		cols="50"><?php echo get_option('ba_plus_mail_certi_expire_body', "Bonjour %user%,\nVotre %doc% expire dans %expire_date% jours, pensez à le renouveler !\nA bientôt"); ?></textarea><br>
+		cols="50"><?php echo get_option('ba_plus_mail_certi_expire_body'); ?></textarea><br>
 
 	<?php
 
@@ -196,6 +196,26 @@ function ba_plus_text_field_8_render()
 
 	<label for="ba_plus_refund_delay">Pré avis minimium d'annulation gratuite (en heures)</label>
 	<input type="number" name="ba_plus_refund_delay" value="<?php echo get_option('ba_plus_refund_delay'); ?>">
+	<?php
+
+}
+
+
+function ba_plus_text_field_9_render()
+{
+	?>
+	<label for="ba_plus_mail_tree_cancel_left_title">Titre</label><br>
+	<input type="text" name="ba_plus_mail_tree_cancel_left_title"
+		value="<?php echo get_option('ba_plus_mail_tree_cancel_left_title', "Plus que trois annulations"); ?>"></input><br>
+	<?php
+}
+function ba_plus_textarea_field_10_render()
+{
+	?>
+	<label for="ba_plus_mail_tree_cancel_left_body">Corps</label><br>
+	<textarea name="ba_plus_mail_tree_cancel_left_body" rows="10"
+		cols="50"><?php echo get_option('ba_plus_mail_tree_cancel_left_body', "Bonjour %user%, \nCe mail à pour but de vous informer qu'il ne vous reste plus que 3 annulations gratuites\nA Bientôt"); ?></textarea><br>
+
 	<?php
 
 }
