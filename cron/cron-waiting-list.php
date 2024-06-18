@@ -85,7 +85,7 @@ function ba_plus_remove_empty_events()
             );
             $filters = bookacti_format_booking_filters($filters);
             $event['bookings'] = bookacti_get_bookings($filters);
-            // Remove all bookings, refund, and send email to all users TD& 
+            // Remove all bookings, refund, and send email to all users
             foreach ($event['bookings'] as $id => $booking) {
                 if ($booking->state == "cancelled" || $booking->state == "refunded") {
                     continue;
@@ -195,7 +195,7 @@ function ba_plus_auto_register_waiting_list()
                     'event_start' => $waiting->start_date,
                     'event_end' => $waiting->end_date,
                     'quantity' => 1,
-                    'status' => "pending",
+                    'status' => "booked",
                     'payment_status' => "paid",
                     'active' => 'according_to_status'
                 ));

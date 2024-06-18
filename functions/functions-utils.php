@@ -108,42 +108,6 @@ function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_pag
                 ?>
             </tbody>
         </table>
-        <?php
-
-        if ($page_max > 1) { ?>
-            <div class='bookacti-user-booking-list-pagination'>
-                <?php
-                if ($page_nb > 1) {
-                    ?>
-                    <span class='bookacti-user-booking-list-previous-page'>
-                        <a href='<?php echo esc_url(add_query_arg('bookacti_booking_list_paged_' . $bookacti_booking_list_count, ($page_nb - 1))); ?>'
-                            class='button'>
-                            <?php esc_html_e('Previous', 'booking-activities'); ?>
-                        </a>
-                    </span>
-                    <?php
-                }
-                ?>
-                <span class='bookacti-user-booking-list-current-page'>
-                    <span class='bookacti-user-booking-list-page-counter'><strong><?php echo $page_nb; ?></strong><span> /
-                        </span><em><?php echo $page_max; ?></em></span>
-                    <span
-                        class='bookacti-user-booking-list-total-bookings'><?php /* translators: %s is the number of bookings */ echo esc_html(sprintf(_n('%s booking', '%s bookings', $bookings_nb, 'booking-activities'), $bookings_nb)); ?></span>
-                </span>
-                <?php
-                if ($page_nb < $page_max) {
-                    ?>
-                    <span class='bookacti-user-booking-list-next-page'>
-                        <a href='<?php echo esc_url(add_query_arg('bookacti_booking_list_paged_' . $bookacti_booking_list_count, ($page_nb + 1))); ?>'
-                            class='button'>
-                            <?php esc_html_e('Next', 'booking-activities'); ?>
-                        </a>
-                    </span>
-                    <?php
-                }
-                ?>
-            </div>
-        <?php } ?>
     </div>
     <?php
 
@@ -185,7 +149,7 @@ function ba_plus_create_planning($args)
         $today = $today->format('Y-m-d h:i:s');
     }
 
-    
+
 
     $next_week = date('Y-m-d h:i:s', strtotime('+1 week', strtotime($today)));
 
@@ -223,9 +187,10 @@ function ba_plus_create_planning($args)
     </script>
     <div class="ba-planning-navbar ba-plus-ignore-print">
         <div>
-            <button id="ba-planning-prev-week"><<</button>
-            <button id="ba-planning-today">Aujourd'hui</button>
-            <button id="ba-planning-next-week">>></button>
+            <button id="ba-planning-prev-week">
+                <<
+                    <button id="ba-planning-today">Aujourd'hui</button>
+                    <button id="ba-planning-next-week">>></button>
         </div>
         <button id="ba-planning-print">Imprimer</button>
     </div>
@@ -250,28 +215,28 @@ function ba_plus_create_planning($args)
                 <p>lorem ipsum</p>
             </div>
             <div class="ba-planning-popup-content">
-                
+
             </div>
             <div class="user-add-popup">
-                    <?php
-                    $selected_user = isset($_REQUEST['user_id']) ? esc_attr($_REQUEST['user_id']) : '';
-                    $args = apply_filters(
-                        'bookacti_booking_list_user_selectbox_args',
-                        array(
-                            'name' => 'user_id',
-                            'id' => 'bookacti-booking-filter-customer',
-                            'show_option_all' => esc_html__('All', 'booking-activities'),
-                            'option_label' => array('first_name', ' ', 'last_name', ' (', 'user_login', ' / ', 'user_email', ')'),
-                            'selected' => $selected_user,
-                            'allow_clear' => 1,
-                            'allow_tags' => 1,
-                            'echo' => 1
-                        )
-                    );
-                    bookacti_display_user_selectbox($args);
-                    ?>
-                    <button id="ba-plus-user-search-send">Ajouter</button>
-                </div>
+                <?php
+                $selected_user = isset($_REQUEST['user_id']) ? esc_attr($_REQUEST['user_id']) : '';
+                $args = apply_filters(
+                    'bookacti_booking_list_user_selectbox_args',
+                    array(
+                        'name' => 'user_id',
+                        'id' => 'bookacti-booking-filter-customer',
+                        'show_option_all' => esc_html__('All', 'booking-activities'),
+                        'option_label' => array('first_name', ' ', 'last_name', ' (', 'user_login', ' / ', 'user_email', ')'),
+                        'selected' => $selected_user,
+                        'allow_clear' => 1,
+                        'allow_tags' => 1,
+                        'echo' => 1
+                    )
+                );
+                bookacti_display_user_selectbox($args);
+                ?>
+                <button id="ba-plus-user-search-send">Ajouter</button>
+            </div>
         </div>
     </div>
     <?php
@@ -356,7 +321,7 @@ function ba_plus_create_event_div($event)
             echo '<p class="ba-booked-title">Inscrits</p>';
         } ?>
 
-        <ul class="ba-booked"> 
+        <ul class="ba-booked">
             <?php
             foreach ($event['booked'] as $booked) {
                 $user = get_user_by('id', $booked->user_id);

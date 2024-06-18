@@ -37,9 +37,3 @@ function ba_plus_check_cancel(){
         }
     }
 }
-
-
-function ba_plus_test_cron(){
-    echo "Test cron<br>";
-    wp_mail( "urbain.lantres@gmail.com", "Test", "body" );
-}

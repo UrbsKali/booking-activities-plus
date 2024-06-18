@@ -213,7 +213,6 @@ function ba_plus_filters_refund_step1($refunded, $bookings, $booking_type, $refu
 add_filter("bookacti_refund_booking", "ba_plus_filters_refund_step1", 21, 6);
 
 
-
 /**
  * AJAX Controller
  * Book an event - ADMIN ONLY

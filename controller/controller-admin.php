@@ -118,42 +118,49 @@ function ba_plus_ajax_refund_booking()
     // Sanitize all parameters
     $booking_id = intval(sanitize_text_field($_POST['booking_id']));
 
-    
+
     // Get the booking
     $booking = bookacti_get_booking_by_id($booking_id, true);
-    
+
     // Get the booking pass
-    $booking_pass = bapap_get_booking_pass($booking->booking_pass_id);
-    
-    // Refund the booking    
-    $credited = bapap_add_booking_pass_credits($booking->booking_pass_id, intval($booking->booking_pass_credits));
-    if (!$credited) {
-        wp_send_json_error(array('status' => 'error', 'message' => 'An error occurred while refunding the booking.'));
+    if (!$booking->booking_pass_id) {
+        //wp_send_json_error(array('status' => 'error', 'message' => 'La réservation n\'est pas liée à un pass'));
+    } else {
+        $booking_pass = bapap_get_booking_pass($booking->booking_pass_id);
+
+        // Refund the booking    
+        $credited = bapap_add_booking_pass_credits($booking->booking_pass_id, intval($booking->booking_pass_credits));
+        if (!$credited) {
+            wp_send_json_error(array('status' => 'error', 'message' => 'An error occurred while refunding the booking.'));
+        }
+
+        // add to the log
+        $log_data = array(
+            'credits_delta' => $booking->booking_pass_credits,
+            'credits_current' => intval($booking_pass['credits_current']) + intval($booking->booking_pass_credits),
+            'credits_total' => $booking_pass['credits_total'],
+            'reason' => "Annulation ADMIN (depuis le planning) - " . $booking->event_title . " (" . $booking->event_start . ")",
+            'context' => 'updated_from_server',
+            'lang_switched' => 1
+        );
+        bapap_add_booking_pass_log($booking_pass['id'], $log_data);
     }
-    
-    // add to the log
-    $log_data = array(
-        'credits_delta' => $booking->booking_pass_credits,
-        'credits_current' => intval($booking_pass['credits_current']) + intval($booking->booking_pass_credits),
-        'credits_total' => $booking_pass['credits_total'],
-        'reason' => "Annulation ADMIN (depuis le planning) - " . $booking->event_title . " (" . $booking->event_start . ")",
-        'context' => 'updated_from_server',
-        'lang_switched' => 1
-    );
-    bapap_add_booking_pass_log($booking_pass['id'], $log_data);
 
     $cancelled = ba_plus_set_refunded_booking($booking_id);
 
     if (!$cancelled) {
         wp_send_json_error(array('status' => 'error', 'message' => 'An error occurred while refunding the booking.'));
     }
+    do_action('bookacti_booking_state_changed', $booking, 'refunded', array('is_admin' => true, 'refund_action' => "booking_passes"));
+
 
     // Send mail
     $user = get_user_by('id', $booking->user_id);
     $to = $user->user_email;
-    $subject = get_option('ba_plus_mail_cancel_title');
-    $body = get_option('ba_plus_mail_cancel_body');
+    $subject = get_option('ba_plus_mail_admin_refund_title');
+    $body = get_option('ba_plus_mail_admin_refund_body');
     $body = str_replace('%event%', $booking->event_title, $body);
+    $body = str_replace('%user%', $user->display_name, $body);
     $headers = array('Content-Type: text/html; charset=UTF-8');
     wp_mail($to, $subject, $body, $headers);
 

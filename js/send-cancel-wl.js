@@ -29,3 +29,10 @@ $j('.bookacti-cancel-waiting-list').click(function () {
     });
 });
 
+$j('.bookacti-refund-booking').closest("tr").on("bookacti_booking_action_data", function (event, data, booking_id, booking_type, action) {
+    console.log(data);
+    if (!data.refund_action) {
+        console.log('No refund action, adding booking_pass');
+        data.refund_action = 'booking_pass';
+    }
+});
