@@ -145,9 +145,19 @@ function ba_plus_filters_refund_step2($credits, $booking, $booking_type)
 
     $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
 
-    $nb_cancelled_events--;
-    update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
-    return $credits;
+    $event_start = strtotime($booking->event_start);
+    $current_time = time();
+    $diff = $event_start - $current_time;
+
+    if (empty($nb_cancelled_events) || intval($nb_cancelled_events) <= 0) {
+        return 0;
+    } else if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600)) {
+        return 0;
+    } else {
+        $nb_cancelled_events--;
+        update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
+        return $credits;
+    }
 }
 add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund_step2", 10, 3);
 
@@ -200,11 +210,11 @@ function ba_plus_filters_refund_step1($refunded, $bookings, $booking_type, $refu
     }
 
     $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
-    if (empty($nb_cancelled_events) || $nb_cancelled_events === 0) {
+    if (empty($nb_cancelled_events) || intval($nb_cancelled_events) <= 0) {
         return array(
             'status' => 'failed',
             'error' => 'no_credits',
-            'message' => esc_html__('Vous n\'avez plus de remboursement sans frais sur votre compte', 'ba-prices-and-credits')
+            'message' => esc_html__('Vous n\'avez plus de remboursement sans frais sur votre compte', 'ba-prices-and-credits') #
         );
     }
 

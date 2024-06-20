@@ -116,10 +116,22 @@ function ba_plus_activate()
         wp_die('This plugin requires Booking Activities to be installed and active.');
     }
 
-    // check if the version of Booking Activities is compatible
-    if (version_compare(BOOKACTI_VERSION, '1.0', '<')) {
+    // Check if Booking Activities Notifications is installed
+    if (!defined('BANP_VERSION')) {
         deactivate_plugins(plugin_basename(__FILE__));
-        wp_die('This plugin requires Booking Activities version 1.0 or higher.');
+        wp_die('This plugin requires Booking Activities Notifications to be installed and active.');
+    }
+
+    // CHeck if Booking Activities Passes is installed
+    if (!defined('BAPAP_VERSION')) {
+        deactivate_plugins(plugin_basename(__FILE__));
+        wp_die('This plugin requires Booking Activities Passes to be installed and active.');
+    }
+
+    // check if the version of Booking Activities is compatible
+    if (version_compare(BOOKACTI_VERSION, '1.15.16', '<')) {
+        deactivate_plugins(plugin_basename(__FILE__));
+        wp_die('This plugin requires Booking Activities version 1.15.17 or higher.');
     }
 
     // Create tables in database

@@ -90,14 +90,14 @@ function ba_plus_remove_empty_events()
                 if ($booking->state == "cancelled" || $booking->state == "refunded") {
                     continue;
                 }
-                $booking = bookacti_get_booking_by_id($booking->id, true);               
+                $booking = bookacti_get_booking_by_id($booking->id, true);
 
                 // cancel the booking
                 $cancelled = ba_plus_set_refunded_booking($id);
 
                 // refund the user
                 $booking_pass = bapap_get_booking_pass($booking->booking_pass_id);
-
+                
                 $booking_pass['credits_current'] += intval($booking->booking_pass_credits);
                 $credited = bapap_add_booking_pass_credits($booking->booking_pass_id, intval($booking->booking_pass_credits));
                 // add to the log
@@ -105,7 +105,7 @@ function ba_plus_remove_empty_events()
                     'credits_delta' => $booking->booking_pass_credits,
                     'credits_current' => $booking_pass['credits_current'],
                     'credits_total' => $booking_pass['credits_total'],
-                    'reason' => "Annulation automatique (manque de participants) -" . $event['title'] ." (". $event['start'] .")",
+                    'reason' => "Annulation automatique (manque de participants) -" . $event['title'] . " (" . $event['start'] . ")",
                     'context' => 'updated_from_server',
                     'lang_switched' => 1
                 );
@@ -119,19 +119,39 @@ function ba_plus_remove_empty_events()
                 $subject = get_option('ba_plus_mail_cancel_title');
                 $body = get_option('ba_plus_mail_cancel_body');
                 $body = str_replace('%event%', $event['title'], $body);
+                $body = str_replace('%user%', $user->display_name, $body);
                 $headers = array('Content-Type: text/html; charset=UTF-8');
                 wp_mail($to, $subject, $body, $headers);
+
+                // Send SMS
+                $phone = banp_get_user_phone_number($booking->user_id);
+                if ($phone) {
+                    $message = "Bonjour " . $user->display_name . ",\nL'évènement " . $event['title'] . " a été annulé par manque de participants.\nVeuillez nous excuser du dérangement.";
+
+                    $notif = array(
+                        'id' => 0,
+                        'active' => 1,
+                        'sms' => array(
+                            'active' => 1,
+                            'to' => array($phone),
+                            'message' => $message
+                        )
+                    );
+
+                    $sms_sent = banp_send_sms_notification($notif);
+                    echo "Send SMS for cancel to : " . $phone . " (status:.". $sms_sent .")<br> ";
+                }
             }
             // unbind the event
             $event_id = $event['id'];
-            if ($event['repeat_freq'] != "none"){
+            if ($event['repeat_freq'] != "none") {
                 $event_new = bookacti_get_event_by_id($event['id']);
                 $new_id = bookacti_unbind_selected_event_occurrence($event_new, $event['start'], $event['end']);
                 if ($new_id) {
                     $event_id = $new_id;
                 }
             }
-            
+
             // deactivate the event
             bookacti_deactivate_event($event_id);
         }
@@ -148,7 +168,7 @@ function ba_plus_auto_register_waiting_list()
         $event_end = $waiting->end_date;
 
         $user = get_user_by('id', $waiting->user_id);
-        $is_mail_send = get_user_meta($user->ID, 'send_mail_warning_48h_'. $event_id, true);
+        $is_mail_send = get_user_meta($user->ID, 'send_mail_warning_48h_' . $event_id, true);
 
 
         // check if event is in less than 48 h 
@@ -198,7 +218,8 @@ function ba_plus_auto_register_waiting_list()
                     'status' => "booked",
                     'payment_status' => "paid",
                     'active' => 'according_to_status'
-                ));
+                )
+            );
             $booking_id = bookacti_insert_booking($booking_data);
             if ($booking_id) {
                 // Remove one credit from the user
@@ -209,12 +230,12 @@ function ba_plus_auto_register_waiting_list()
                     'credits_delta' => '-1',
                     'credits_current' => $pass->credits_current,
                     'credits_total' => $pass->credits_total,
-                    'reason' => "Inscription automatique (via liste d'attente) - ". $waiting->title ." (". $waiting->start .")",
+                    'reason' => "Inscription automatique (via liste d'attente) - " . $waiting->title . " (" . $waiting->start . ")",
                     'context' => 'updated_from_server',
                     'lang_switched' => 1
                 );
                 bapap_add_booking_pass_log($pass->id, $log_data);
-                
+
                 echo "User " . $user->display_name . " has been added to the event " . $waiting->title . "<br>";
 
                 // Send email to user
