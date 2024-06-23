@@ -75,25 +75,29 @@ function ba_plus_ajax_edit_event()
         }
     }
 
+    
+    
     $ba_action = sanitize_text_field($_POST['ba_action']);
     $ba_action = explode(',', $ba_action);
+
+
     foreach ($ba_action as $action) {
         $action = sanitize_text_field($action);
         if ($action == 'title') {
             $event_title = sanitize_text_field($_POST['event_title']);
-            $ret = ba_plus_change_event_title($event_id, $event_title);
+            $ret = ba_plus_change_event_title($event_id, $event_start, $event_end, $event_title);
         } else if ($action == 'state') {
             $event_state = sanitize_text_field($_POST['event_state']);
             if ($event_state == 'actif') {
-                $ret = ba_plus_restore_event_availability($event_id);
+                $ret = ba_plus_restore_event_availability($event_id, $event_start, $event_end);
             } else if ($event_state == 'complet') {
-                $ret = ba_plus_change_event_availability($event_id, 0);
+                $ret = ba_plus_change_event_availability($event_id, $event_start, $event_start, 0);
             } else if ($event_state == 'ferme') {
-                $ret = ba_plus_disable_event($event_id);
+                $ret = ba_plus_disable_event($event_id, $event_start, $event_end);
             }
         }
     }
-
+    
     wp_send_json_success(array('status' => 'success', 'message' => 'Event edited successfully.'));
 
 }
@@ -157,3 +161,43 @@ function ba_plus_ajax_refund_booking()
     wp_send_json_success(array('status' => 'success', 'message' => 'Booking refunded successfully.'));
 }
 add_action('wp_ajax_baPlusRefundBooking', 'ba_plus_ajax_refund_booking');
+
+/**
+ * AJAX Controller - Edit Settings by an admin
+ */
+function ba_plus_ajax_edit_settings()
+{
+    // Check if user has permission
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'You do not have permission to perform this action.'));
+    }
+
+    // Check if all required parameters are set (settings)
+    if (!isset($_POST['settings'])) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'Missing parameters.'));
+    }
+
+    // Sanitize all parameters
+    $settings = $_POST['settings'];
+
+    // Update the settings
+    if (!is_array($settings)) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'Invalid settings.'));
+    }
+
+    $updated = false;
+
+    if (isset($settings['free_cancel_delay'])) {
+        $settings['free_cancel_delay'] = intval($settings['free_cancel_delay']);
+        $updated = update_option("ba_plus_refund_delay", $settings['free_cancel_delay']);
+    }
+
+
+
+    if (!$updated) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'An error occurred while updating the settings.'));
+    }
+
+    wp_send_json_success(array('status' => 'success', 'message' => 'Settings updated successfully.'));
+}
+add_action('wp_ajax_baPlusUpdateSettings', 'ba_plus_ajax_edit_settings');

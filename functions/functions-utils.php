@@ -300,11 +300,16 @@ function ba_plus_create_event_div($event)
     $event['booked'] = bookacti_get_bookings($filters);
     $event['waiting'] = ba_plus_get_event_waiting_list($id, $start, $end);
 
+    $availability = 0;
+    
+
+
     $is_recurring = $event['repeat_freq'] == "none" ? 0 : 1;
     ob_start();
     ?>
     <div class="ba-planning-event-box" data-event-id="<? echo $id; ?>" data-event-start="<? echo $start; ?>"
         data-event-end="<? echo $end; ?>" data-is-recurring="<? echo $is_recurring; ?>">
+        <p class="quantity"><? echo $availability; ?></p>
         <p><?php echo $pretty_start . "/" . $pretty_end; ?></p>
         <p><?php echo $event['title']; ?></p>
         <div class="ba-plus-action">

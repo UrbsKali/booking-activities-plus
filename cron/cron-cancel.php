@@ -22,7 +22,7 @@ function ba_plus_check_cancel(){
         // if the user has a cancel number == 3, send mail
         $user_nb_cancle = get_user_meta( $user->id, 'nb_cancel_left', true );
         $send_mail = get_user_meta( $user->id, 'send_mail_cancel', true );
-        if ( $user_nb_cancle <= 3 && $send_mail == 'false') {
+        if ( $user_nb_cancle <= 3 && $send_mail == 'false' && $user_nb_cancle > 0) {
             $to = $user->user_email;
             echo $to . "<br>";
             $subject = get_option( 'ba_plus_mail_tree_cancel_left_title' );

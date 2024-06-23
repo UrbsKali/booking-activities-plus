@@ -8,6 +8,7 @@ add_shortcode('bookingactivities_waitinglist', 'ba_plus_shortcode_waiting_list')
 add_shortcode('bookingactivities_certificate', 'ba_plus_shortcode_certificate');
 add_shortcode( 'bookingactivities_cancel_balance', 'ba_plus_shortcode_cancel_balance' );
 add_shortcode( 'bookingactivities_planning', 'ba_plus_planning' );
+add_shortcode( 'bap_settings', 'ba_plus_admin_refund_delay' );
 
 
 function ba_plus_shortcode_waiting_list($raw_atts = array(), $content = null, $tag = '')
@@ -178,4 +179,26 @@ function ba_plus_planning( $atts = array(), $content = null, $tag = '' ) {
 
 	$planning = ba_plus_create_planning( $atts );
 	return $planning;
+}
+
+function ba_plus_admin_refund_delay($atts = array(), $content = null, $tag = ''){
+	// Check if user is admin
+	if (!is_user_logged_in()) {
+		return bookacti_shortcode_login_form($atts, $content, $tag);
+	}
+	$user_id = get_current_user_id();
+
+	wp_enqueue_script('ba-admin-settings');
+
+	$html = '<div class="ba-admin-settings">';
+	$html .= '<div class="ba-admin-settings-title">' . __('Paramètres de remboursement', 'ba-plus') . '</div>';
+	$html .= '<div class="ba-admin-settings-item">';
+	$html .= '<label for="ba-admin-settings-refund-delay">' . __('Pré avis minimium d\'annulation gratuite', 'ba-plus') . '</label>';
+	$html .= '<input type="number" id="ba-admin-settings-refund-delay" value="' . get_option('ba_plus_refund_delay', 0) . '">';
+	$html .= '</div>';
+	$html .= '</div>';
+	// add a button to save the settings
+	$html .= '<button id="ba-admin-settings-save">' . __('Enregistrer', 'ba-plus') . '</button>';
+	
+	return $html;
 }

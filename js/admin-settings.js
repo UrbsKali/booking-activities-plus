@@ -1,46 +1,31 @@
-function ba_plus_prevent_form(e) {
-    // Prevent submission
+function send_settings(e){
     e.preventDefault();
+    console.log("send_settings");
 
-    // Get form data
-    let form = e.target;
-    let data = ba_plus_parse_forms(form);
-    data["action"] = 'baPlusSaveSettings';
-    console.log(data);
-
-
-    // AJAX request
-    let xhr = new XMLHttpRequest();
-    xhr.open('POST', ajaxurl, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            console.log(xhr.responseText);
-        }
-        else {
-            console.log(xhr);
-        }
-    };
-    xhr.send(data);
-}
-let form = document.querySelector('#ba_plus_settings_form');
-form.addEventListener('submit', ba_plus_prevent_form);
-
-/**
- * Parse form data
- * @param {HTMLElement} form 
- * @returns array of form data
- */
-function ba_plus_parse_forms(form) {
-    let data = {};
-    for (let i = 0; i < form.elements.length; i++) {
-        let element = form.elements[i];
-        let name = element.name;
-        let value = element.value;
-        if (name) {
-            data[name] = value;
-        }
+    var data = {
+        "action": "baPlusUpdateSettings",
+        "free_cancel_delay": document.getElementById("ba-admin-settings-refund-delay").value
     }
-    delete data['action'];
-    return data;
+    
+    // Send the same request with fetch
+    fetch(ajaxurl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload();
+        } else {
+            console.log('PHP ERROR');
+            console.log(data);
+        }
+    })
+
 }
+
+let btn = document.getElementById("ba-admin-settings-save");
+btn.addEventListener("click", send_settings);

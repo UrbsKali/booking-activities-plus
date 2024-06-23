@@ -201,26 +201,6 @@ function ba_plus_text_field_8_render()
 }
 
 
-function ba_plus_text_field_9_render()
-{
-	?>
-	<label for="ba_plus_mail_tree_cancel_left_title">Titre</label><br>
-	<input type="text" name="ba_plus_mail_tree_cancel_left_title"
-		value="<?php echo get_option('ba_plus_mail_tree_cancel_left_title', "Plus que trois annulations"); ?>"></input><br>
-	<?php
-}
-function ba_plus_textarea_field_10_render()
-{
-	?>
-	<label for="ba_plus_mail_tree_cancel_left_body">Corps</label><br>
-	<textarea name="ba_plus_mail_tree_cancel_left_body" rows="10"
-		cols="50"><?php echo get_option('ba_plus_mail_tree_cancel_left_body', "Bonjour %user%, \nCe mail à pour but de vous informer qu'il ne vous reste plus que 3 annulations gratuites\nA Bientôt"); ?></textarea><br>
-
-	<?php
-
-}
-
-
 function ba_plus_settings_section_callback()
 {
 
@@ -232,19 +212,6 @@ function ba_plus_settings_section_callback()
 function ba_plus_settings_page()
 {
 
-	?>
-	<form action='options.php' method='post'>
-
-		<h2>Booking Activities Plus</h2>
-
-		<?php
-		settings_errors();
-		settings_fields('pluginPage');
-		do_settings_sections('pluginPage');
-		submit_button();
-		?>
-
-	</form>
-	<?php
+	echo do_shortcode( "[bap_settings]" );
 
 }

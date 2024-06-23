@@ -8,6 +8,7 @@ function ba_plus_booking_tab( $tabs ) {
 	$tabs[800]['bookingtab']['icon'] = 'um-faicon-pencil';
 	$tabs[800]['bookingtab']['title'] = 'Réservations';
 	$tabs[800]['bookingtab']['custom'] = true;
+    $tabs[800]['bookingtab']['show_button'] = false;
 	return $tabs;
 }
 	
@@ -73,7 +74,7 @@ function ba_plus_admin_booking_tab( $args ) {
     }
     // affiche les shortcodes pour avoir les informations de l'utilisateur (résa, listes d'attente et passes)
     echo "<br><h2>Réservations</h2><br>";
-    echo do_shortcode( '[bookingactivities_list columns="events" user_id='. $user_id . ']' );
+    echo do_shortcode( '[bookingactivities_list columns="status,events" user_id='. $user_id . ']' );
     echo "<br><h2>File d'attente</h2><br>";
     echo do_shortcode( '[bookingactivities_waitinglist columns="events,actions" user_id='. $user_id . ']' );
     echo "<br><h2>Forfaits</h2><br>";

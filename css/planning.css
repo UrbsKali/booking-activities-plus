@@ -154,10 +154,18 @@
     display: none;
 }
 
+.quantity {
+    position: absolute;
+    margin: -11px !important;
+    padding: 0 5px;
+    background-color: #cccccc;
+    border: #333 solid 1px;
+}
+
 
 /* Print style */
 @media print {
-    header, footer, nav, aside, form, .ba-plus-action, .ba-planning-popup-bg, .ba-plus-ignore-print{
+    header, footer, nav, aside, form, .ba-plus-action, .ba-planning-popup-bg, .quantity, .ba-plus-ignore-print{
         display: none !important;
     }
 
