@@ -55,7 +55,7 @@ function ba_plus_ajax_edit_event()
     }
 
     // Check if all required parameters are set (event_id, event_title, event_start, event_end, event_dispo)
-    if (!isset($_POST['event_id']) || !isset($_POST['event_title']) || !isset($_POST['event_state']) || !isset($_POST['event_start']) || !isset($_POST['event_end']) || !isset($_POST['ba_action'])) {
+    if (!isset($_POST['event_id']) || !isset($_POST['event_title']) || !isset($_POST['event_state']) || !isset($_POST['event_start']) || !isset($_POST['event_end'])) {
         wp_send_json_error(array('status' => 'error', 'message' => 'Missing parameters.'));
     }
 
@@ -75,27 +75,22 @@ function ba_plus_ajax_edit_event()
         }
     }
 
-    
-    
-    $ba_action = sanitize_text_field($_POST['ba_action']);
-    $ba_action = explode(',', $ba_action);
 
+    $event_title = sanitize_text_field($_POST['event_title']);
+    $ret = ba_plus_change_event_title($event_id, $event_start, $event_end, $event_title);
 
-    foreach ($ba_action as $action) {
-        $action = sanitize_text_field($action);
-        if ($action == 'title') {
-            $event_title = sanitize_text_field($_POST['event_title']);
-            $ret = ba_plus_change_event_title($event_id, $event_start, $event_end, $event_title);
-        } else if ($action == 'state') {
-            $event_state = sanitize_text_field($_POST['event_state']);
-            if ($event_state == 'actif') {
-                $ret = ba_plus_restore_event_availability($event_id, $event_start, $event_end);
-            } else if ($event_state == 'complet') {
-                $ret = ba_plus_change_event_availability($event_id, $event_start, $event_start, 0);
-            } else if ($event_state == 'ferme') {
-                $ret = ba_plus_disable_event($event_id, $event_start, $event_end);
-            }
-        }
+    $event_state = sanitize_text_field($_POST['event_state']);
+    if ($event_state == 'actif') {
+        $ret = ba_plus_restore_event_availability($event_id, $event_start, $event_end);
+    } else if ($event_state == 'complet') {
+        $ret = ba_plus_change_event_availability($event_id, $event_start, $event_end, 0);
+    } else if ($event_state == 'ferme') {
+        $ret = ba_plus_disable_event($event_id, $event_start, $event_end);
+    }
+
+    if (isset($_POST['new_availability'])) {
+        $availability = intval(sanitize_text_field($_POST['new_availability']));
+        $ret = ba_plus_change_event_availability($event_id, $event_start, $event_end, $availability);
     }
     
     wp_send_json_success(array('status' => 'success', 'message' => 'Event edited successfully.'));

@@ -89,6 +89,7 @@ function ba_plus_change_event_availability($event_id, $event_start, $event_end, 
 	$query = 'UPDATE ' . BOOKACTI_TABLE_EVENTS . ' SET availability = %d WHERE id = %d and start = %s and end = %s';
 	$query = $wpdb->prepare($query, $availability, $event_id, $event_start, $event_end);
 	$updated = $wpdb->query($query);
+	return $query;
 	return $updated;
 }
 
@@ -98,6 +99,14 @@ function ba_plus_restore_event_availability($event_id, $event_start, $event_end)
 	$query = $wpdb->prepare($query, $event_id, $event_start, $event_end);
 	$updated = $wpdb->query($query);
 	return $updated;
+}
+
+function ba_plus_get_event_availability($event_id){
+	global $wpdb;
+	$query = 'SELECT A.availability FROM ' . BOOKACTI_TABLE_ACTIVITIES . ' AS A WHERE A.id IN (SELECT E.activity_id FROM ' . BOOKACTI_TABLE_EVENTS . 'AS E WHERE E.id = %d)';
+	$query = $wpdb->prepare($query, $event_id);
+	$availability = $wpdb->get_row($query, OBJECT);
+	return $availability;
 }
 
 function ba_plus_disable_event($event_id, $event_start, $event_end){

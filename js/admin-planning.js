@@ -2,16 +2,18 @@
 $j(".ba-plus-edit-btn").click(function (e) {
     e.preventDefault();
     var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
-    var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
+    var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(2).text();
     var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
     var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
     var is_recurring = $j(this).closest('.ba-planning-event-box').data('is-recurring');
+    var availability = $j(this).closest('.ba-planning-event-box').find('p.quantity').eq(0).text();
 
     // pass the data to the popup content div
     $j('.ba-planning-popup-content').data('event-id', event_id);
     $j('.ba-planning-popup-content').data('event-start', event_start);
     $j('.ba-planning-popup-content').data('event-end', event_end);
     $j('.ba-planning-popup-content').data('is-recurring', is_recurring);
+    $j('.ba-planning-popup-content').data('availability', availability);
 
     // open the popup
     $j('.ba-planning-popup-bg').css('display', 'block');
@@ -19,7 +21,13 @@ $j(".ba-plus-edit-btn").click(function (e) {
     $j('.ba-planning-popup-header h3').text('Modifier le cours');
     $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
     // add a form to edit the event and add a dropdown to select state of the event
-    $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><select name="event_state"><option value="actif">Actif</option><option value="complet">Complet</option><option value="ferme">Fermé</option></select><button id="ba-plus-edit-event-send">Modifier</button></form>');
+    var options = '';
+    if (availability == "0"){
+        options = '<option value="complet">Complet</option><option value="actif">Actif</option><option value="ferme">Fermé</option>';
+    } else {
+        options = '<option value="actif">Actif</option><option value="complet">Complet</option><option value="ferme">Fermé</option>';
+    }
+    $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><select name="event_state">'+ options +'</select><input type="number" name="new_availability" value="'+ availability +'"/><button id="ba-plus-edit-event-send">Modifier</button></form>');
 
     // add the event listener to the btn
     document.querySelector('#ba-plus-edit-event-send').addEventListener('click', ba_plus_update_event_callback);
@@ -29,7 +37,7 @@ $j(".ba-plus-edit-btn").click(function (e) {
 $j('.ba-plus-add-btn').click(function (e) {
     e.preventDefault();
     var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
-    var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
+    var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(2).text();
     var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
     var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
 
@@ -63,7 +71,7 @@ $j('.ba-booked li').click(function (e) {
     // get the event id
     var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
     // get the event name
-    var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
+    var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(2).text();
     // get the event start date
     var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
     // get the event end date
@@ -104,7 +112,7 @@ $j('.ba-wl li').click(function (e) {
     // get the event id
     var event_id = $j(this).closest('.ba-planning-event-box').data('event-id');
     // get the event name
-    var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(1).text();
+    var event_name = $j(this).closest('.ba-planning-event-box').find('p').eq(2).text();
     // get the event start date
     var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
     // get the event end date
@@ -220,6 +228,11 @@ function ba_plus_update_event_callback(e) {
     var event_name = document.querySelector('#ba-plus-edit-event-form input[name="event_name"]').value;
 
     var event_state = document.querySelector('#ba-plus-edit-event-form select[name="event_state"]').value;
+
+    var new_availability = document.querySelector('#ba-plus-edit-event-form input[name="new_availability"]').value;
+
+    var old_availability = $j('.ba-planning-popup-content').data('availability');
+
     
     var old_name = $j('.ba-planning-popup-content').find('p').text().split(' - ')[0];
     if (event_name === '' || event_state === '') {
@@ -233,14 +246,17 @@ function ba_plus_update_event_callback(e) {
 
     var data = {
         action: 'baPlusUpdateEvent',
-        ba_action: 'title,state',
         event_id: event_id,
         event_start: event_start,
         event_end: event_end,
         is_recurring: is_recurring,
         event_title : event_name,
-        event_state : event_state
+        event_state : event_state,
     };
+
+    if (old_availability !== new_availability){
+        data['new_availability'] = new_availability;
+    }
 
     $j.ajax({
         url: ajaxurl,
