@@ -89,6 +89,12 @@ function ba_plus_ajax_edit_event()
     }
 
     if (isset($_POST['new_availability'])) {
+        if (!is_numeric($_POST['new_availability'])) {
+            wp_send_json_error(array('status' => 'error', 'message' => 'Invalid availability. (must be a number)'));
+        } 
+        if (intval($_POST['new_availability']) < 0) {
+            wp_send_json_error(array('status' => 'error', 'message' => 'Invalid availability. (must be >= 0)'));
+        }
         $availability = intval(sanitize_text_field($_POST['new_availability']));
         $ret = ba_plus_change_event_availability($event_id, $event_start, $event_end, $availability);
     }

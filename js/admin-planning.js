@@ -27,7 +27,7 @@ $j(".ba-plus-edit-btn").click(function (e) {
     } else {
         options = '<option value="actif">Actif</option><option value="complet">Complet</option><option value="ferme">Fermé</option>';
     }
-    $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><select name="event_state">'+ options +'</select><input type="number" name="new_availability" value="'+ availability +'"/><button id="ba-plus-edit-event-send">Modifier</button></form>');
+    $j('.ba-planning-popup-content').html('<form id="ba-plus-edit-event-form" action="" method="post"><input type="text" name="event_name" value="' + event_name + '" /><select name="event_state">'+ options +'</select><input type="number" name="new_availability" value="'+ availability +'" min="0"/><button id="ba-plus-edit-event-send">Modifier</button></form>');
 
     // add the event listener to the btn
     document.querySelector('#ba-plus-edit-event-send').addEventListener('click', ba_plus_update_event_callback);
