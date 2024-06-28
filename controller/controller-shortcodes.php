@@ -189,6 +189,7 @@ function ba_plus_admin_refund_delay($atts = array(), $content = null, $tag = '')
 	$user_id = get_current_user_id();
 
 	wp_enqueue_script('ba-admin-settings');
+	wp_enqueue_style('ba-popup-style');
 
 	$html = '<div class="ba-admin-settings">';
 	$html .= '<div class="ba-admin-settings-title">' . __('Paramètres de remboursement', 'ba-plus') . '</div>';
