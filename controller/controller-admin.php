@@ -189,8 +189,29 @@ function ba_plus_ajax_edit_settings()
     $updated = false;
 
     if (isset($settings['free_cancel_delay'])) {
+        if (!is_numeric($settings['free_cancel_delay'])) {
+            wp_send_json_error(array('status' => 'error', 'message' => 'Invalid free cancel delay. (must be a number)'));
+        } 
+        if (intval($settings['free_cancel_delay']) < 0) {
+            wp_send_json_error(array('status' => 'error', 'message' => 'Invalid free cancel delay. (must be >= 0)'));
+        }
+
         $settings['free_cancel_delay'] = intval($settings['free_cancel_delay']);
         $updated = update_option("ba_plus_refund_delay", $settings['free_cancel_delay']);
+    }
+
+    if (isset($settings['nb_cancel_left'])) {
+        if (!is_numeric($settings['nb_cancel_left'])) {
+            wp_send_json_error(array('status' => 'error', 'message' => 'Invalid number of free cancels. (must be a number)'));
+        }
+        $settings['nb_cancel_left'] = intval($settings['nb_cancel_left']);
+
+        if ($settings['nb_cancel_left'] < 0) {
+            wp_send_json_error(array('status' => 'error', 'message' => 'Invalid number of free cancels. (must be >= 0)'));
+        }
+
+        $user_id = intval($_POST['user_id']);
+        $updated = update_user_meta($user_id, 'nb_cancel_left', $settings['nb_cancel_left']);
     }
 
 

@@ -20,6 +20,5 @@ function ba_plus_booking_pass_created($booking_pass_id, $booking_pass_data)
     }
     update_user_meta($user_id, 'nb_cancel_left', $free_cancellation);
     update_user_meta($user_id, 'send_mail_cancel', 'false');
-    wp_mail( "urbain.lantres@gmail.com", "Création d'un passe", "Un passe a été créé pour l'utilisateur $user_id. <br> Il a $free_cancellation annulations gratuites.", "Content-Type: text/html\r\n");
 } 
 add_action('bapap_booking_pass_created','ba_plus_booking_pass_created', 10, 2);

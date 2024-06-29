@@ -21,10 +21,10 @@ function ba_plus_check_certificate_expiration(){
     global $wpdb;
     $users = get_users();
     $today = new DateTime();
-    $today = $today->format('Y/m/d');
+    $today = $today->format('Y-m-d');
     $interval_certif = array(
         'start' => $today,
-        'end' => date('Y/m/d',strtotime('+60 day'))
+        'end' => date('Y-m-d',strtotime('+60 day'))
     );
     foreach($users as $user){
         $user_id = $user->ID;
@@ -42,7 +42,7 @@ function ba_plus_check_certificate_expiration(){
         } 
 
         $expire_date = new DateTime($expire_date);
-        $expire_date = $expire_date->format('Y/m/d');
+        $expire_date = $expire_date->format('Y-m-d');
         if ( $expire_date >= $interval_certif['start'] && $expire_date <= $interval_certif['end'] ){
             $to = $user->user_email;
             echo "Send mail for certif to : " . $to . "<br>";
@@ -67,10 +67,10 @@ function ba_plus_check_attestation_expiration(){
     global $wpdb;
     $users = get_users();
     $today = new DateTime();
-    $today = $today->format('Y/m/d');
+    $today = $today->format('Y-m-d');
     $interval_attes = array(
         'start' => $today,
-        'end' => date('Y/m/d',strtotime('+7 day'))
+        'end' => date('Y-m-d',strtotime('+7 day'))
     );
     foreach($users as $user){
         $user_id = $user->ID;
@@ -88,7 +88,7 @@ function ba_plus_check_attestation_expiration(){
         } 
         
         $expire_date = new DateTime($expire_date);
-        $expire_date = $expire_date->format('Y/m/d');
+        $expire_date = $expire_date->format('Y-m-d');
         if ( $expire_date >= $interval_attes['start'] && $expire_date <= $interval_attes['end'] ){
             $to = $user->user_email;
             echo "Send mail for attest to : " . $to . "<br>";

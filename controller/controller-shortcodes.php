@@ -153,6 +153,19 @@ function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, 
 
 	$user_id = get_current_user_id();
 
+	// if user is admin, get set the user_id to the one passed in the shortcode, and make it editable
+	if (current_user_can('manage_options') && !empty($raw_atts['user_id'])) {
+		$user_id = intval($raw_atts['user_id']);
+
+		wp_enqueue_script('ba-frontendadmin-settings');
+		wp_enqueue_style('ba-popup-style');
+
+		$message = '<input type="number" id="ba-cancel-balance" value="' . get_user_meta($user_id, 'nb_cancel_left', true) . '" data-user-id="' . $user_id . '">';
+		$message .= '<br><button id="ba-cancel-balance-save">' . __('Enregistrer', 'ba-plus') . '</button>';
+		return $message;
+	}
+
+
 	if (!empty($raw_atts['user_id'])) {
 		$user_id = intval($raw_atts['user_id']);
 	}
