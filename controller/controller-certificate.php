@@ -78,6 +78,29 @@ function ba_plus_usermeta_form_field_certificat_new_user($user)
             </td>
         </tr>
     </table>
+    <h3>Forfait de réservations</h3>
+    <table class="form-table">
+        <tr class="form-required">
+            <?php
+            $booking_pass_templates = bapap_get_booking_pass_templates( bapap_format_booking_pass_template_filters() );
+            $booking_pass_templates_options = array( 'none' => esc_html__( 'Aucun', 'booking-activities' ) );
+            foreach( $booking_pass_templates as $booking_pass_template ) {
+                $booking_pass_templates_options[ $booking_pass_template->id ] = ! empty( $booking_pass_template->title ) ? apply_filters( 'bookacti_translate_text', $booking_pass_template->title ) : sprintf( esc_html__( 'Booking pass template #%s', 'ba-prices-and-credits' ), $booking_pass_template->id );
+            }
+            
+            $current_booking_pass_template_ids = isset( $_GET[ 'booking_pass_template_id' ] ) ? $_GET[ 'booking_pass_template_id' ] : 0;
+            $args = array( 
+                'name'     => 'booking_pass_template_id',
+                'id'       => 'bapap-booking-passes-filter-booking-pass-template',
+                'type'     => 'select',
+                'multiple' => 'maybe',
+                'class'    => 'bookacti-select2-no-ajax',
+                'options'  => $booking_pass_templates_options,
+                'value'    => ! is_array( $current_booking_pass_template_ids ) ? intval( $current_booking_pass_template_ids ) : ( count( $current_booking_pass_template_ids ) > 1 ? array_map( 'intval', $current_booking_pass_template_ids ) : intval( $current_booking_pass_template_ids[ 0 ] ) )
+            );
+            bookacti_display_field( $args );
+            ?>
+        </tr>
     <?php
 }
 
@@ -140,11 +163,49 @@ function ba_plus_create_user_certificate($user_id)
         'send_mail_attes_expire',
         'false'
     );
+
     update_user_meta($user_id, "nb_cancel_left", 0);
     update_user_meta($user_id, 'send_mail_cancel', 'false');
+
+    $booking_pass_template_id = $_POST['booking_pass_template_id'];
+    if ( $booking_pass_template_id != 'none' && $booking_pass_template_id != '' && intval($booking_pass_template_id) > 0) {
+        $booking_pass = bapap_get_booking_pass_template( intval( $booking_pass_template_id ) );
+        if ( ! empty( $booking_pass ) ) {
+            $validity = $booking_pass['validity_period'];
+            $user = get_user_by('id', $user_id);
+            $data = array (
+                'id' => 0,
+                'title' =>  $user->display_name . " - " . $booking_pass['title'],
+                'pass_template_id' => $booking_pass_template_id,
+                'credits_total' => $booking_pass['credits'],
+                'credits_current' => $booking_pass['credits'],
+                'user_id' => $user_id,
+                'creation_date' => date('Y-m-d H:i:s'),
+                'expiration_date' => date('Y-m-d H:i:s', strtotime("+$validity days")),
+            );
+            $data = bapap_sanitize_booking_pass_data( array_merge( $_POST, $data ) );
+            $booking_pass_id = bapap_create_booking_pass( $data );
+
+            if ( $booking_pass_id ) {
+                $log_data = array( 
+                    'credits_current' => $booking_pass['credits'],
+                    'credits_total' => $booking_pass['credits'],
+                    'reason' => esc_html__( 'Booking pass created from the admin panel.', 'ba-prices-and-credits' ),
+                    'context' => 'created_from_admin',
+                    'lang_switched' => 1
+                );
+                bapap_add_booking_pass_log( $booking_pass_id, $log_data );
+            } else {
+                update_user_meta($user_id, 'debug', print_r($data, true));
+            }
+
+        } else {
+            update_user_meta($user_id, 'debug', "error");
+        }
+    }
 }
 
-// # ------------ HOOCKS ------------ #
+// # ------------ HOOKS ------------ #
 
 // Add the field to user profile editing screen.
 add_action(
