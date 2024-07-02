@@ -49,6 +49,21 @@ function ba_plus_usermeta_form_field_certificat($user)
 function ba_plus_usermeta_form_field_certificat_new_user($user)
 {
     ?>
+    <h3>Informations Complémentaires</h3>
+    <table class="form-table">
+        <tr>
+            <th>
+                <label for="expire_date">Numéro de téléphone</label>
+            </th>
+            <td>
+                <input type="tel" name="phone" class="regular-test ltr">
+                <p class="description">
+                    Veuillez entrer votre numéro de téléphone
+                </p>
+            </td>
+        </tr>
+    </table>
+
     <h3>Certificat & Attestation</h3>
     <table class="form-table">
         <tr class="form-required">
@@ -166,6 +181,12 @@ function ba_plus_create_user_certificate($user_id)
 
     update_user_meta($user_id, "nb_cancel_left", 0);
     update_user_meta($user_id, 'send_mail_cancel', 'false');
+
+    update_user_meta(
+        $user_id,
+        'phone',
+        $_POST['phone']
+    );
 
     $booking_pass_template_id = $_POST['booking_pass_template_id'];
     if ( $booking_pass_template_id != 'none' && $booking_pass_template_id != '' && intval($booking_pass_template_id) > 0) {
