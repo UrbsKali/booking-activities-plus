@@ -149,6 +149,9 @@ function ba_plus_create_planning($args)
         $today = $today->format('Y-m-d h:i:s');
     }
 
+    // snap to the beginning of the week
+    if (date('N', strtotime($today)) != 1)
+        $today = date('Y-m-d h:i:s', strtotime('last monday', strtotime($today)));
 
 
     $next_week = date('Y-m-d h:i:s', strtotime('+1 week', strtotime($today)));
@@ -159,7 +162,8 @@ function ba_plus_create_planning($args)
     );
     $args = array(
         'interval' => $interval,
-        'active' => 1
+        'active' => 1,
+        'past_events' => 1,
     );
 
     $events = bookacti_fetch_events($args);
@@ -177,6 +181,13 @@ function ba_plus_create_planning($args)
             if ($event['start'] > $before && $event['start'] < $after) {
                 $events_by_day[$before][] = $event;
             }
+        }
+    }
+    // if no events, return 7 cols on the planning
+    if (count($events) == 0) {
+        for ($i = 1; $i <= 7; $i++) {
+            $before = date('Y-m-d', strtotime('+' . $i - 1 . ' day', strtotime($today)));
+            $events_by_day[$before] = array();
         }
     }
 
