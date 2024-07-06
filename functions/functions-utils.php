@@ -386,3 +386,51 @@ function html_shorttag_filter($content)
 // idea to use 9 is from: https://plugins.svn.wordpress.org/wpautop-control/trunk/wpautop-control.php
 add_filter('the_content', 'html_shorttag_filter', 9);
 add_filter('the_excerpt', 'html_shorttag_filter', 9);
+
+
+/**
+ * Format the mail content, replacing %user% and %event% by the user and event informations
+ * @param string $text the text to format
+ * @param string $start_date the start date of the event
+ * @param string $end_date the end date of the event
+ * @param string $title the title of the event
+ * @param WP_User $user the user to format
+ * @return string
+ */
+function ba_plus_format_mail($text, $start_date, $end_date, $title, $user){
+    $start = ba_plus_get_full_date($start_date);
+    $end = ba_plus_get_full_date($_GETend_date);
+
+    $pretty_day = $start['day'] . " " . $start['number'] . " " . $start['month'];
+    $hour_range = $start['hour'] . " - " . $end['hour'];
+
+    $text = str_replace("%user%", $user->display_name, $text);
+    $text = str_replace("%event%", $title . " du " . $pretty_day . " de " . $hour_range, $text);
+    return $text;
+}
+
+/**
+ * Get the full date in french
+ * @param string $date the date to format
+ * @return array the date formatted
+ */
+function ba_plus_get_full_date($date){
+    $date = datefmt_create(
+        "fr-FR",
+        IntlDateFormatter::FULL,
+        IntlDateFormatter::FULL,
+        'Europe/Paris',
+        IntlDateFormatter::GREGORIAN
+    );
+    $str_date = datefmt_format($date, strtotime($date));
+    $str_date = ucfirst($str_date);
+    $date = explode(" ", $str_date);
+
+    return array(
+        "day" => $date[0],
+        "number" => $date[1],
+        "month" => $date[2],
+        "year" => $date[3],
+        "hour" => $date[4],
+    );s
+}

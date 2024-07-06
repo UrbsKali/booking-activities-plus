@@ -118,23 +118,20 @@ function ba_plus_remove_empty_events()
                 echo "Send mail for cancel to : " . $to . "<br>";
                 $subject = get_option('ba_plus_mail_cancel_title');
                 $body = get_option('ba_plus_mail_cancel_body');
-                $body = str_replace('%event%', $event['title'], $body);
-                $body = str_replace('%user%', $user->display_name, $body);
+                $body = ba_plus_format_mail($body, $event['start'], $event['end'], $event['title'], $user); 
                 $headers = array('Content-Type: text/html; charset=UTF-8');
                 wp_mail($to, $subject, $body, $headers);
 
                 // Send SMS
                 $phone = banp_get_user_phone_number($booking->user_id);
                 if ($phone) {
-                    $message = "Bonjour " . $user->display_name . ",\nL'évènement " . $event['title'] . " a été annulé par manque de participants.\nVeuillez nous excuser du dérangement.";
-
                     $notif = array(
                         'id' => 0,
                         'active' => 1,
                         'sms' => array(
                             'active' => 1,
                             'to' => array($phone),
-                            'message' => $message
+                            'message' => $body
                         )
                     );
 
@@ -174,13 +171,42 @@ function ba_plus_auto_register_waiting_list()
         // check if event is in less than 48 h 
         if ($event_start < date('Y-m-d h:i:s', strtotime('+48 hour')) && !$is_mail_send) {
             // send mail to user
+
+            $date = datefmt_create(
+                "fr-FR",
+                IntlDateFormatter::FULL,
+                IntlDateFormatter::NONE,
+                'Europe/Paris',
+                IntlDateFormatter::GREGORIAN
+            );
+            $str_date = datefmt_format($date, strtotime($event_start));
+            $str_date = ucfirst($str_date);
+            $str_date = explode(" ", $str_date);
+            $str_date = $str_date[0] . " " . $str_date[1] . " " . $str_date[2];
+
             $to = $user->user_email;
             $subject = get_option('ba_plus_mail_waiting_list_title');
             $body = get_option('ba_plus_mail_waiting_list_body');
-            $body = str_replace('%event%', $waiting->title, $body);
-            $body = str_replace('%user%', $user->display_name, $body);
+            $body = ba_plus_format_mail($body, $waiting->start_date, $waiting->end_date, $waiting->title, $user);
             $headers = array('Content-Type: text/html; charset=UTF-8');
             wp_mail($to, $subject, $body, $headers);
+
+            // send sms
+            $phone = banp_get_user_phone_number($waiting->user_id);
+            if ($phone) {
+                $notif = array(
+                    'id' => 0,
+                    'active' => 1,
+                    'sms' => array(
+                        'active' => 1,
+                        'to' => array($phone),
+                        'message' => $body
+                    )
+                );
+
+                $sms_sent = banp_send_sms_notification($notif);
+                echo "Send SMS for still in wl to : " . $phone . " (status:.". $sms_sent .")<br> ";
+            }
             $is_mail_send = true;
             update_user_meta($user->ID, 'send_mail_warning_48h_' . $event_id, $is_mail_send);
             echo "Send mail for still in wl to : " . $to . "<br>";
@@ -243,8 +269,7 @@ function ba_plus_auto_register_waiting_list()
                 $to = $user->user_email;
                 $subject = get_option('ba_plus_mail_booked_title');
                 $body = get_option('ba_plus_mail_booked_body');
-                $body = str_replace('%event%', $waiting->title, $body);
-                $body = str_replace('%user%', $user->display_name, $body);
+                $body = ba_plus_format_mail($body, $waiting->start_date, $waiting->end_date, $waiting->title, $user);
                 $headers = array('Content-Type: text/html; charset=UTF-8');
                 wp_mail($to, $subject, $body, $headers);
             }

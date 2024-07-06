@@ -146,16 +146,16 @@ function ba_plus_activate()
     add_option('ba_plus_refund_delay', 24);
 
     add_option('ba_plus_mail_cancel_title', 'Scéance annulée');
-    add_option('ba_plus_mail_cancel_body', "Bonjour %user%, <br>L'évènement %event% à été annulé par manque de participant<br>Veuillez nous excuser du dérangement");
+    add_option('ba_plus_mail_cancel_body', "Bonjour %user%,<br> Nous sommes au regret de vous informer que le cours %event% est annulé faute d'inscrits en nombre suffisant.<br> Votre compte est recrédité du nombre d'unité correspondant<br>Merci de votre confiance.");
 
     add_option('ba_plus_mail_waiting_list_title', "Vous êtes toujours dans la file d'attente");
-    add_option('ba_plus_mail_waiting_list_body', "Bonjour %user%, <br>Vous êtes toujours en alerte sur le cours %event%, si vous n\'êtes plus disponible, pensez à supprimer cette alerte, sinon vous risquez de ne plus pouvoir vous annuler sans frais.<br>Merci de votre confiance.");
+    add_option('ba_plus_mail_waiting_list_body', "Bonjour %user%,<br> Vous êtes toujours en alerte sur le cours %event%.<br> Si vous n'êtes plus disponible, pensez à supprimer cette alerte, sinon vous risquez de ne plus pouvoir vous annuler sans frais<br>Merci de votre confiance.");
 
     add_option('ba_plus_mail_booked_title', "Vous avez été inscrit automatiquement à un cours");
     add_option('ba_plus_mail_booked_body', "Bonjour %user%, <br>Vous avez été inscit(e) sur le cours %event%, à la suite de votre alerte. Vous avez la possiblité de vous annuler sans frais à plus de 24 heures. <br>Merci de votre confiance.");
 
     add_option('ba_plus_mail_certi_expire_title', 'Votre %doc% expire bientôt');
-    add_option('ba_plus_mail_certi_expire_body', 'Bonjour %user%,<br>Votre %doc% arrivera à échéance dans %expire_date% jours, pensez à le renouveler et à nous l\'envoyer scanné pour ne pas que votre copte soit bloqué. Les modèles de docuements à remplir sont dans le CGU. <br>A bientôt');
+    add_option('ba_plus_mail_certi_expire_body', 'Bonjour %user%,<br>Votre %doc% arrivera à échéance dans %expire_date% jours, pensez à le renouveler et à nous l\'envoyer scanné pour ne pas que votre compte soit bloqué. Les modèles de docuements à remplir sont dans le CGU.<br>Merci de votre confiance.');
 
     add_option('ba_plus_mail_tree_cancel_left_title', 'Plus que trois annulations');
     add_option('ba_plus_mail_tree_cancel_left_body', "Bonjour %user%, <br>Attention, il ne vous reste plus que 3 annulations sans frais sur le quota attribué à votre forfait en cours.<br>Merci de votre confiance.");
@@ -175,10 +175,22 @@ function ba_plus_deactivate()
     // Remove rewrite rules
     flush_rewrite_rules();
 
-    ba_plus_drop_table();
+
+    delete_option('ba_plus_version');
+    delete_option('ba_plus_install_date');
+    delete_option('ba_plus_refund_delay');
+    delete_option('ba_plus_mail_cancel_body');
+    delete_option('ba_plus_mail_cancel_title');
+    delete_option('ba_plus_mail_waiting_list_body');
+    delete_option('ba_plus_mail_waiting_list_title');
+    delete_option('ba_plus_mail_certi_expire_body');
+    delete_option('ba_plus_mail_tree_cancel_left_title');
+    delete_option('ba_plus_mail_tree_cancel_left_body');
+    delete_option('ba_plus_mail_certi_expire_title');
 
     do_action('ba_plus_deactivate');
 }
+register_deactivation_hook(__FILE__, 'ba_plus_deactivate');
 
 
 // uninstall the plugin

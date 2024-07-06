@@ -47,9 +47,9 @@ function ba_plus_check_certificate_expiration(){
             $to = $user->user_email;
             echo "Send mail for certif to : " . $to . "<br>";
             $subject = get_option( 'ba_plus_mail_certi_expire_title' );
-            $subject = str_replace( '%doc%', "Certificat", $subject );
+            $subject = str_replace( '%doc%', "certificat médical", $subject );
             $body = get_option( 'ba_plus_mail_certi_expire_body' );
-            $body = str_replace( '%doc%', "Certificat", $body );
+            $body = str_replace( '%doc%', "certificat médical", $body );
             $body = str_replace( '%user%', $user->display_name, $body );
             $body = str_replace( '%expire_date%', date_diff(new DateTime($today), new DateTime($expire_date))->days, $body );
             $headers = array('Content-Type: text/html; charset=UTF-8');
@@ -70,7 +70,7 @@ function ba_plus_check_attestation_expiration(){
     $today = $today->format('Y-m-d');
     $interval_attes = array(
         'start' => $today,
-        'end' => date('Y-m-d',strtotime('+7 day'))
+        'end' => date('Y-m-d',strtotime('+8 day'))
     );
     foreach($users as $user){
         $user_id = $user->ID;
@@ -93,9 +93,9 @@ function ba_plus_check_attestation_expiration(){
             $to = $user->user_email;
             echo "Send mail for attest to : " . $to . "<br>";
             $subject = get_option( 'ba_plus_mail_certi_expire_title' );
-            $subject = str_replace( '%doc%', "Attestation", $subject );
+            $subject = str_replace( '%doc%', "attestation médical", $subject );
             $body = get_option( 'ba_plus_mail_certi_expire_body' );
-            $body = str_replace( '%doc%', "Attestation", $body );
+            $body = str_replace( '%doc%', "attestation médical", $body );
             $body = str_replace( '%user%', $user->display_name, $body );
             $body = str_replace( '%expire_date%', date_diff(new DateTime($today), new DateTime($expire_date))->days, $body );
 
