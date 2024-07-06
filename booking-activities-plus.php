@@ -45,11 +45,10 @@ require_once ('controller/controller-admin.php');
 require_once ('controller/controller-shortcodes.php');
 require_once ('controller/controller-certificate.php');
 require_once ('controller/controller-waiting-list.php');
-require_once ('controller/controller-settings.php');
 
 // -- VUES -- //
-require_once ('view/view-settings.php');
 require_once ('view/view-booking-list.php');
+require_once ('view/view-settings.php');
 
 // -- CRON -- //
 require_once ('cron/cron-waiting-list.php');
@@ -65,9 +64,9 @@ function ba_plus_enqueue_scripts()
     wp_register_script('ba-wl-sort', plugins_url('js/sort-by-date.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_register_script('ba-wl-btn', plugins_url('js/send-cancel-wl.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_register_script('ba-planning', plugins_url('js/admin-planning.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
-    wp_register_style('ba-planning-style', plugins_url('css/planning.css', __FILE__), BA_PLUS_VERSION, true);
     wp_register_script('ba-frontendadmin-settings', plugins_url('js/frontend-settings.js', __FILE__), array(), BA_PLUS_VERSION, true);
-    
+    wp_register_style('ba-planning-style', plugins_url('css/planning.css', __FILE__), BA_PLUS_VERSION, true);
+    wp_register_style('ba-popup-style', plugins_url('css/popup.css', __FILE__), BA_PLUS_VERSION, true);    
 }
 add_action('wp_enqueue_scripts', 'ba_plus_enqueue_scripts');
 
