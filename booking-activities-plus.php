@@ -176,6 +176,7 @@ function ba_plus_deactivate()
     flush_rewrite_rules();
 
 
+
     delete_option('ba_plus_version');
     delete_option('ba_plus_install_date');
     delete_option('ba_plus_refund_delay');

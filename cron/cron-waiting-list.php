@@ -171,19 +171,6 @@ function ba_plus_auto_register_waiting_list()
         // check if event is in less than 48 h 
         if ($event_start < date('Y-m-d h:i:s', strtotime('+48 hour')) && !$is_mail_send) {
             // send mail to user
-
-            $date = datefmt_create(
-                "fr-FR",
-                IntlDateFormatter::FULL,
-                IntlDateFormatter::NONE,
-                'Europe/Paris',
-                IntlDateFormatter::GREGORIAN
-            );
-            $str_date = datefmt_format($date, strtotime($event_start));
-            $str_date = ucfirst($str_date);
-            $str_date = explode(" ", $str_date);
-            $str_date = $str_date[0] . " " . $str_date[1] . " " . $str_date[2];
-
             $to = $user->user_email;
             $subject = get_option('ba_plus_mail_waiting_list_title');
             $body = get_option('ba_plus_mail_waiting_list_body');

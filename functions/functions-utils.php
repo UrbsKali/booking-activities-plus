@@ -399,7 +399,7 @@ add_filter('the_excerpt', 'html_shorttag_filter', 9);
  */
 function ba_plus_format_mail($text, $start_date, $end_date, $title, $user){
     $start = ba_plus_get_full_date($start_date);
-    $end = ba_plus_get_full_date($_GETend_date);
+    $end = ba_plus_get_full_date($end_date);
 
     $pretty_day = $start['day'] . " " . $start['number'] . " " . $start['month'];
     $hour_range = $start['hour'] . " - " . $end['hour'];
@@ -415,14 +415,14 @@ function ba_plus_format_mail($text, $start_date, $end_date, $title, $user){
  * @return array the date formatted
  */
 function ba_plus_get_full_date($date){
-    $date = datefmt_create(
+    $date_ = datefmt_create(
         "fr-FR",
         IntlDateFormatter::FULL,
         IntlDateFormatter::FULL,
         'Europe/Paris',
         IntlDateFormatter::GREGORIAN
     );
-    $str_date = datefmt_format($date, strtotime($date));
+    $str_date = datefmt_format($date_, strtotime($date));
     $str_date = ucfirst($str_date);
     $date = explode(" ", $str_date);
 
@@ -432,5 +432,5 @@ function ba_plus_get_full_date($date){
         "month" => $date[2],
         "year" => $date[3],
         "hour" => $date[4],
-    );s
+    );
 }
