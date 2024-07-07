@@ -5,7 +5,7 @@ $j('.bookacti-cancel-waiting-list').click(function () {
     $j.ajax({
         url: ajaxurl,
         type: 'POST',
-        data: { 
+        data: {
             action: 'baPlusCancelWaitingList',
             waiting_id: waiting_id,
             nonce: bookacti_localized.nonce
@@ -35,4 +35,11 @@ $j('.bookacti-refund-booking').closest("tr").on("bookacti_booking_action_data", 
         console.log('No refund action, adding booking_pass');
         data.refund_action = 'booking_pass';
     }
+});
+
+$j('body').on('bookacti_bookings_refunded', function (response, booking_selection) {
+    console.log("swicteeee");
+    let cancelBalance = document.querySelector(".ba-balance-amount");
+    let current_balance = parseInt(cancelBalance.innerText.split(" ")[5]);
+    cancelBalance.innerText = "Nombre d'annulation gratuite restante : " + (current_balance - 1);
 });

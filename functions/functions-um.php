@@ -27,6 +27,8 @@ function um_account_tab__bookingtab( $info ) {
 
 add_filter('um_account_content_hook_bookingtab', 'um_account_content_hook_bookingtab');
 function um_account_content_hook_bookingtab( $output ){
+    wp_enqueue_script('ba-wl-btn');
+
 	ob_start();
 	?>
 		
@@ -81,6 +83,7 @@ function ba_plus_admin_booking_tab( $args ) {
     echo do_shortcode( '[bookingactivities_waitinglist columns="events,actions" user_id='. $user_id . ']' );
     echo "<br><h2>Forfaits</h2><br>";
     echo do_shortcode( '[bookingactivities_passes user_id='. $user_id . ']');
+    echo do_shortcode( "[bap_forfaits_admin user_id='".$user_id."']" );
 
 }
 add_action( "um_profile_content_main_default", "ba_plus_admin_booking_tab", 10, 1 );

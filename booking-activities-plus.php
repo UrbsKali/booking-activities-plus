@@ -187,7 +187,9 @@ function ba_plus_deactivate()
     delete_option('ba_plus_mail_tree_cancel_left_title');
     delete_option('ba_plus_mail_tree_cancel_left_body');
     delete_option('ba_plus_mail_certi_expire_title');
-
+    delete_option('ba_plus_mail_booked_title');
+    delete_option('ba_plus_mail_booked_body');
+    
     do_action('ba_plus_deactivate');
 }
 register_deactivation_hook(__FILE__, 'ba_plus_deactivate');
@@ -198,7 +200,7 @@ function ba_plus_uninstall()
 {
     // Drop tables in database
     ba_plus_drop_table();
-
+    
     // Remove options
     delete_option('ba_plus_version');
     delete_option('ba_plus_install_date');
@@ -211,13 +213,15 @@ function ba_plus_uninstall()
     delete_option('ba_plus_mail_tree_cancel_left_title');
     delete_option('ba_plus_mail_tree_cancel_left_body');
     delete_option('ba_plus_mail_certi_expire_title');
-
+    delete_option('ba_plus_mail_booked_title');
+    delete_option('ba_plus_mail_booked_body');
+    
     // Remove transients
     delete_transient('ba_plus_installing');
-
+    
     // Remove rewrite rules
     flush_rewrite_rules();
-
+    
     do_action('ba_plus_uninstall');
 }
 register_uninstall_hook(__FILE__, 'ba_plus_uninstall');

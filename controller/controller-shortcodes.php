@@ -6,9 +6,10 @@ if (!defined('ABSPATH')) {
 
 add_shortcode('bookingactivities_waitinglist', 'ba_plus_shortcode_waiting_list');
 add_shortcode('bookingactivities_certificate', 'ba_plus_shortcode_certificate');
-add_shortcode( 'bookingactivities_cancel_balance', 'ba_plus_shortcode_cancel_balance' );
-add_shortcode( 'bookingactivities_planning', 'ba_plus_planning' );
-add_shortcode( 'bap_settings', 'ba_plus_admin_refund_delay' );
+add_shortcode('bookingactivities_cancel_balance', 'ba_plus_shortcode_cancel_balance');
+add_shortcode('bookingactivities_planning', 'ba_plus_planning');
+add_shortcode('bap_settings', 'ba_plus_admin_refund_delay');
+add_shortcode('bap_forfaits_admin', 'ba_plus_admin_forfaits_admin');
 
 
 function ba_plus_shortcode_waiting_list($raw_atts = array(), $content = null, $tag = '')
@@ -145,7 +146,8 @@ function ba_plus_shortcode_certificate($raw_atts = array(), $content = null, $ta
 	return $msg;
 }
 
-function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, $tag = ''){
+function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, $tag = '')
+{
 	// Check if user is logged in
 	if (!is_user_logged_in()) {
 		return bookacti_shortcode_login_form($raw_atts, $content, $tag);
@@ -180,7 +182,8 @@ function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, 
 	return $message;
 }
 
-function ba_plus_planning( $atts = array(), $content = null, $tag = '' ) {
+function ba_plus_planning($atts = array(), $content = null, $tag = '')
+{
 	// Check if user is admin
 	if (!is_user_logged_in()) {
 		return bookacti_shortcode_login_form($atts, $content, $tag);
@@ -190,11 +193,12 @@ function ba_plus_planning( $atts = array(), $content = null, $tag = '' ) {
 	wp_enqueue_style('ba-planning-style');
 	wp_enqueue_script('ba-planning');
 
-	$planning = ba_plus_create_planning( $atts );
+	$planning = ba_plus_create_planning($atts);
 	return $planning;
 }
 
-function ba_plus_admin_refund_delay($atts = array(), $content = null, $tag = ''){
+function ba_plus_admin_refund_delay($atts = array(), $content = null, $tag = '')
+{
 	// Check if user is admin
 	if (!is_user_logged_in()) {
 		return bookacti_shortcode_login_form($atts, $content, $tag);
@@ -213,6 +217,71 @@ function ba_plus_admin_refund_delay($atts = array(), $content = null, $tag = '')
 	$html .= '</div>';
 	// add a button to save the settings
 	$html .= '<button id="ba-admin-settings-save">' . __('Enregistrer', 'ba-plus') . '</button>';
-	
+
 	return $html;
+}
+
+function ba_plus_admin_forfaits_admin($atts = array(), $content = null, $tag = '')
+{
+	// Check if user is admin
+	if (!is_user_logged_in()) {
+		return bookacti_shortcode_login_form($atts, $content, $tag);
+	}
+
+	if (!current_user_can('manage_options')) {
+		return __('Vous n\'avez pas les droits pour accéder à cette page', 'ba-plus');
+	}
+
+	// get user_id from the shortcode
+	$user_id = 0;
+	if (!empty($atts['user_id'])) {
+		$user_id = intval($atts['user_id']);
+	} else {
+		return __('Vous devez spécifier un utilisateur', 'ba-plus');
+	}
+
+
+	wp_enqueue_script('ba-admin-settings');
+	wp_enqueue_style('ba-popup-style');
+
+	ob_start();
+
+	//get the current user passes
+	$passes = bapap_get_booking_passes(bapap_format_booking_pass_filters(array('user_id' => $user_id)));
+	// get the first pass
+	if (empty($passes)) {
+		return __('Cet utilisateur n\'a aucun forfait', 'ba-plus');
+	}
+	foreach ($passes as $p) {
+		$pass = $p;
+		break;
+	}
+	$pass_id = $pass->pass_template_id;
+
+
+
+	$booking_pass_templates = bapap_get_booking_pass_templates(bapap_format_booking_pass_template_filters());
+	$booking_pass_templates_options = array('none' => esc_html__('Aucun', 'booking-activities'));
+	foreach ($booking_pass_templates as $booking_pass_template) {
+		$booking_pass_templates_options[$booking_pass_template->id] = !empty($booking_pass_template->title) ? apply_filters('bookacti_translate_text', $booking_pass_template->title) : sprintf(esc_html__('Booking pass template #%s', 'ba-prices-and-credits'), $booking_pass_template->id);
+	}
+
+	$current_booking_pass_template_ids = isset($_GET['booking_pass_template_id']) ? $_GET['booking_pass_template_id'] : 0;
+	$args = array(
+		'name'     => 'booking_pass_template_id',
+		'id'       => 'bapap-booking-passes-filter-booking-pass-template',
+		'type'     => 'select',
+		'multiple' => 'maybe',
+		'class'    => 'bookacti-select2-no-ajax',
+		'options'  => $booking_pass_templates_options,
+		'value'    => $pass_id
+	);
+	bookacti_display_field($args);
+
+	$output = ob_get_contents();
+	ob_end_clean();
+
+	$output .= '<br><button>' . __('Enregistrer (Work in progress)', 'ba-plus') . '</button>';
+
+	return $output;
 }
