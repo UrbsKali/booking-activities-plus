@@ -30,14 +30,21 @@ $j('.bookacti-cancel-waiting-list').click(function () {
 });
 
 $j('.bookacti-refund-booking').closest("tr").on("bookacti_booking_action_data", function (event, data, booking_id, booking_type, action) {
-    console.log(data);
     if (!data.refund_action) {
         console.log('No refund action, adding booking_pass');
         data.refund_action = 'booking_pass';
     }
 });
 
-$j('body').on('bookacti_bookings_refunded', function (response, booking_selection) {
+$j( 'body' ).on( 'bookacti_booking_action_data', function (event, data_get_actions, booking_selection, action_type ) {
+    if (!data_get_actions.refund_action) {
+        console.log('No refund action, adding booking_pass');
+        data_get_actions.refund_action = 'booking_pass';
+    }
+});
+
+
+$j( 'body' ).on('bookacti_bookings_refunded', function (event, response, booking_selection) {
     console.log("swicteeee");
     let cancelBalance = document.querySelector(".ba-balance-amount");
     let current_balance = parseInt(cancelBalance.innerText.split(" ")[5]);

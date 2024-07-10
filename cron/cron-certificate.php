@@ -81,7 +81,8 @@ function ba_plus_check_attestation_expiration(){
             continue;
         }
         if ( $send_mail == 'true' ){
-            if ( $expire_date > $interval_attes['end'] ){
+            $diff = date_diff(new DateTime($today), new DateTime($expire_date));
+            if ( $diff->invert == 0 && $diff->days > 7){
                 update_user_meta( $user_id, 'send_mail_attes_expire', 'false' );
             }
             continue;

@@ -423,14 +423,16 @@ function ba_plus_get_full_date($date){
         IntlDateFormatter::GREGORIAN
     );
     $str_date = datefmt_format($date_, strtotime($date));
+    $pretty_hour = date('H:i', strtotime($date));
     $str_date = ucfirst($str_date);
     $date = explode(" ", $str_date);
+    $pretty_hour = str_replace(":", "h", $pretty_hour);
 
     return array(
         "day" => $date[0],
         "number" => $date[1],
         "month" => $date[2],
         "year" => $date[3],
-        "hour" => $date[4],
+        "hour" => $pretty_hour,
     );
 }

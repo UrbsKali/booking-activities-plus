@@ -18,11 +18,18 @@ function ba_plus_check_cancel(){
     echo "Checking for cancel number<br>";
     global $wpdb;
     $users = get_users();
+    echo "Users: " . count($users) . "<br>";
     foreach($users as $user){
         // if the user has a cancel number == 3, send mail
-        $user_nb_cancle = get_user_meta( $user->id, 'nb_cancel_left', true );
+        $user_cancel = get_user_meta( $user->id, 'nb_cancel_left', true );
         $send_mail = get_user_meta( $user->id, 'send_mail_cancel', true );
-        if ( $user_nb_cancle <= 3 && $send_mail == 'false' && $user_nb_cancle > 0) {
+
+        if ( $user_cancel == ''){
+            echo "User has no cancel number: ". $user->display_name ."<br>";
+            continue;
+        }
+
+        if ( $user_cancel <= 3 && $send_mail == 'false' && $user_cancel > 0) {
             $to = $user->user_email;
             echo $to . "<br>";
             $subject = get_option( 'ba_plus_mail_tree_cancel_left_title' );
@@ -32,7 +39,7 @@ function ba_plus_check_cancel(){
             wp_mail( $to, $subject, $body, $headers );
             update_user_meta( $user->id, 'send_mail_cancel', 'true' );
         }
-        if ( $user_nb_cancle > 3 && $send_mail == 'true' ){
+        if ( $user_cancel > 3 && $send_mail == 'true' ){
             update_user_meta( $user->id, 'send_mail_cancel', 'false' );
         }
     }
