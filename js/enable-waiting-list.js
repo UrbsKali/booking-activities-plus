@@ -111,3 +111,20 @@ row.first().on( 'bookacti_booking_action_data', function(data, booking_id, booki
     }
     console.log(data);
 });
+
+
+function remove_passe(){
+    // replace all occurence of "Passe" by "Forfait" in bookacti_localized
+
+    // get all the entries of bookacti_localized
+    entries = Object.entries(bookacti_localized);
+
+    // loop over the entries
+    for (const [key, value] of entries) {
+        // check if the value is a string
+        if (typeof value === 'string') {
+            // replace all occurence of "Passe" by "Forfait"
+            bookacti_localized[key] = value.replace(/Passe/g, 'Forfait');
+        }
+    }
+}

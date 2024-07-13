@@ -33,16 +33,57 @@ function send_settings(e) {
         console.error(error);
         create_popup("Erreur", "Une erreur est survenue lors de l'enregistrement, veuillez contacter votre administrateur.", "error");
     });
+}
 
+function send_forfait_settings(e) {
+    e.preventDefault();
+    console.log("send_forfait_settings");
 
+    // send via fetch url encoded data
+
+    let formData = new URLSearchParams();
+    formData.append("action", "baPlusUpdateSettings");
+    formData.append("settings[forfait]", document.getElementById("bapap-booking-passes-filter-booking-pass-template").value);
+    formData.append("settings[start_date]", document.getElementById("ba-plus-settings-pass-start-date").value);
+    formData.append("user_id", document.getElementById("ba-plus-admin-pass-add").dataset.userId);
+
+    fetch(ajaxurl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Something went wrong');
+        }
+    }).then(data => {
+        if (data.data.status == "success") {
+            create_popup("Paramètre sauvegardé !", "Ce paramètre à bien été mise à jour !", "success", true);
+        } else {
+            create_popup("Erreur", "Une erreur est survenue lors de l'enregistrement. Si vous avez indiqué la même quantité que précédemant, c'est normal. Sinon, veuillez contacter votre administrateur.", "error");
+            console.log(data);
+        }
+    }).catch(error => {
+        console.error(error);
+        create_popup("Erreur", "Une erreur est survenue lors de l'enregistrement, veuillez contacter votre administrateur.", "error");
+    });
 
 }
+
 
 let btn = document.getElementById("ba-cancel-balance-save");
 btn.addEventListener("click", send_settings);
 
+let forfait_btn = document.getElementById("ba-plus-admin-pass-add");
+if (forfait_btn) {
+    forfait_btn.addEventListener("click", send_forfait_settings);
+}
 
-function create_popup(title, message, level) {
+
+function create_popup(title, message, level, triggerReload = false) {
     let popupBG = document.createElement("div");
     popupBG.classList.add("ba-popup-bg");
 
@@ -72,6 +113,8 @@ function create_popup(title, message, level) {
     popupCross.innerText = "X";
     popupCross.addEventListener("click", function () {
         popup.remove();
+        if (triggerReload)
+            window.location.reload();
     });
     popupHeader.appendChild(popupCross);
 
@@ -79,6 +122,8 @@ function create_popup(title, message, level) {
     popupClose.innerText = "Ok";
     popupClose.addEventListener("click", function () {
         popup.remove();
+        if (triggerReload)
+            window.location.reload();
     });
     popup.appendChild(popupClose);
 

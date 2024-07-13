@@ -177,7 +177,7 @@ function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, 
 		$balance = 0;
 	}
 	$message = '<div class="ba-balance">';
-	$message .= '<div class="ba-balance-amount">' . __('Nombre d\'annulation gratuite restante : ', 'ba-plus') . $balance . '</div>';
+	$message .= '<div class="ba-balance-amount">' . __('Nombre d\'annulation gratuites restantes : ', 'ba-plus') . $balance . '</div>';
 	$message .= '</div>';
 	return $message;
 }
@@ -237,7 +237,7 @@ function ba_plus_admin_forfaits_admin($atts = array(), $content = null, $tag = '
 	if (!empty($atts['user_id'])) {
 		$user_id = intval($atts['user_id']);
 	} else {
-		return __('Vous devez spécifier un utilisateur', 'ba-plus');
+		return __('Vous devez spécifier un utilisateur dans les attributs du shortcode', 'ba-plus');
 	}
 
 
@@ -247,10 +247,10 @@ function ba_plus_admin_forfaits_admin($atts = array(), $content = null, $tag = '
 	ob_start();
 
 	//get the current user passes
-	$passes = bapap_get_booking_passes(bapap_format_booking_pass_filters(array('user_id' => $user_id)));
+	$passes = bapap_get_booking_passes(bapap_format_booking_pass_filters(array('user_id' => $user_id, 'active' => 1)));
 	// get the first pass
 	if (empty($passes)) {
-		return __('Cet utilisateur n\'a aucun forfait', 'ba-plus');
+		return __('Cet utilisateur n\'a aucun forfait actif', 'ba-plus');
 	}
 	foreach ($passes as $p) {
 		$pass = $p;
@@ -271,7 +271,7 @@ function ba_plus_admin_forfaits_admin($atts = array(), $content = null, $tag = '
 		'name'     => 'booking_pass_template_id',
 		'id'       => 'bapap-booking-passes-filter-booking-pass-template',
 		'type'     => 'select',
-		'multiple' => 'maybe',
+		'multiple' => 'no',
 		'class'    => 'bookacti-select2-no-ajax',
 		'options'  => $booking_pass_templates_options,
 		'value'    => $pass_id
@@ -281,7 +281,13 @@ function ba_plus_admin_forfaits_admin($atts = array(), $content = null, $tag = '
 	$output = ob_get_contents();
 	ob_end_clean();
 
-	$output .= '<br><button>' . __('Enregistrer (Work in progress)', 'ba-plus') . '</button>';
+	// add a date picker to select the start date of the pass
+	$output .= '<div class="ba-admin-settings-item">';
+	$output .= '<label for="ba-admin-settings-pass-start-date">' . __('Date de début du forfait', 'ba-plus') . '</label>';
+	$output .= '<input type="date" id="ba-plus-settings-pass-start-date">';
+	$output .= '</div>';
+
+	$output .= '<br><button id="ba-plus-admin-pass-add" data-user-id="' . $user_id . '">' . __('Ajouter un forfait', 'ba-plus') . '</button>';
 
 	return $output;
 }

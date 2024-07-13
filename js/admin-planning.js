@@ -6,7 +6,8 @@ $j(".ba-plus-edit-btn").click(function (e) {
     var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
     var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
     var is_recurring = $j(this).closest('.ba-planning-event-box').data('is-recurring');
-    var availability = $j(this).closest('.ba-planning-event-box').find('p.quantity').eq(0).text();
+    var availability = $j(this).closest('.ba-planning-event-box').find('p.quantity').eq(0).text().split('/')[1];
+    var current_booked = $j(this).closest('.ba-planning-event-box').find('p.quantity').eq(0).text().split('/')[0];
 
     // pass the data to the popup content div
     $j('.ba-planning-popup-content').data('event-id', event_id);
@@ -22,7 +23,7 @@ $j(".ba-plus-edit-btn").click(function (e) {
     $j('.ba-planning-popup-header p').text(event_name + " - " + event_start + " / " + event_end);
     // add a form to edit the event and add a dropdown to select state of the event
     var options = '';
-    if (availability == "0"){
+    if (availability == current_booked) {
         options = '<option value="complet">Complet</option><option value="actif">Actif</option><option value="ferme">Fermé</option>';
     } else {
         options = '<option value="actif">Actif</option><option value="complet">Complet</option><option value="ferme">Fermé</option>';

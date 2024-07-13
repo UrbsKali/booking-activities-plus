@@ -21,6 +21,26 @@ function ba_plus_ajax_add_booking()
     $event_start = sanitize_text_field($_POST['event_start']);
     $event_end = sanitize_text_field($_POST['event_end']);
 
+    // Check if the user has a booking pass
+    $filters = array(
+        'user_id' => $user_id,
+        'active' => 1
+    );
+    $filters = bapap_format_booking_pass_filters($filters);
+    $pass = bapap_get_booking_passes($filters);
+
+    if (empty($pass)) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a pas de forfaits actif.'));
+    }
+
+    foreach ($pass as $p) {
+        $pass = $p;
+        break;
+    }
+    if ($pass->credits_current <= 0) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a plus de crédits.'));
+    }
+
 
     $booking_data = bookacti_sanitize_booking_data(
         array(
@@ -37,6 +57,22 @@ function ba_plus_ajax_add_booking()
     );
     $booking_id = bookacti_insert_booking($booking_data);
     if ($booking_id) {
+        // remove a credit from the pass
+        $credited = bapap_add_booking_pass_credits($pass->id, -1);
+        if (!$credited) {
+            wp_send_json_error(array('status' => 'error', 'message' => 'Une erreur est survenue lors du débit de la réservation.'));
+        }
+
+        // add to the log
+        $log_data = array(
+            'credits_delta' => -1,
+            'credits_current' => $pass->credits_current - 1,
+            'credits_total' => $pass->credits_total,
+            'reason' => "Réservation ADMIN (depuis le planning) - " . $booking_data['event_title'] . " (" . $booking_data['event_start'] . ")",
+            'context' => 'updated_from_server',
+            'lang_switched' => 1
+        );
+        bapap_add_booking_pass_log($pass->id, $log_data);
         wp_send_json_success(array('status' => 'success', 'message' => 'Booking added successfully.'));
     } else {
         wp_send_json_error(array('status' => 'error', 'message' => 'An error occurred while adding the booking.'));
@@ -80,10 +116,13 @@ function ba_plus_ajax_edit_event()
     $ret = ba_plus_change_event_title($event_id, $event_start, $event_end, $event_title);
 
     $event_state = sanitize_text_field($_POST['event_state']);
+    $filters = array('event_id' => $event_id, 'status' => 'booked', 'from' => $event_start, 'to' => $event_end);
+    $filters = bookacti_format_booking_filters($filters);
+    $current_booking = count(bookacti_get_bookings($filters));
     if ($event_state == 'actif') {
         $ret = ba_plus_restore_event_availability($event_id, $event_start, $event_end);
     } else if ($event_state == 'complet') {
-        $ret = ba_plus_change_event_availability($event_id, $event_start, $event_end, 0);
+        $ret = ba_plus_change_event_availability($event_id, $event_start, $event_end, $current_booking);
     } else if ($event_state == 'ferme') {
         $ret = ba_plus_disable_event($event_id, $event_start, $event_end);
     }
@@ -91,16 +130,15 @@ function ba_plus_ajax_edit_event()
     if (isset($_POST['new_availability'])) {
         if (!is_numeric($_POST['new_availability'])) {
             wp_send_json_error(array('status' => 'error', 'message' => 'Invalid availability. (must be a number)'));
-        } 
+        }
         if (intval($_POST['new_availability']) < 0) {
             wp_send_json_error(array('status' => 'error', 'message' => 'Invalid availability. (must be >= 0)'));
         }
         $availability = intval(sanitize_text_field($_POST['new_availability']));
         $ret = ba_plus_change_event_availability($event_id, $event_start, $event_end, $availability);
     }
-    
-    wp_send_json_success(array('status' => 'success', 'message' => 'Event edited successfully.'));
 
+    wp_send_json_success(array('status' => 'success', 'message' => 'Event edited successfully.'));
 }
 add_action('wp_ajax_baPlusUpdateEvent', 'ba_plus_ajax_edit_event');
 
@@ -191,7 +229,7 @@ function ba_plus_ajax_edit_settings()
     if (isset($settings['free_cancel_delay'])) {
         if (!is_numeric($settings['free_cancel_delay'])) {
             wp_send_json_error(array('status' => 'error', 'message' => 'Invalid free cancel delay. (must be a number)'));
-        } 
+        }
         if (intval($settings['free_cancel_delay']) < 0) {
             wp_send_json_error(array('status' => 'error', 'message' => 'Invalid free cancel delay. (must be >= 0)'));
         }
@@ -212,6 +250,62 @@ function ba_plus_ajax_edit_settings()
 
         $user_id = intval($_POST['user_id']);
         $updated = update_user_meta($user_id, 'nb_cancel_left', $settings['nb_cancel_left']);
+    }
+
+    if (isset($settings["forfait"])) {
+        $user_id = intval($_POST['user_id']);
+        $start_date = $settings['start_date'];
+
+        if (!is_numeric($settings['forfait'])) {
+            wp_send_json_error(array('status' => 'error', 'message' => 'Invalid booking pass template. (must be a number)'));
+        }
+
+        if ($settings["start_date"] == "") {
+            wp_send_json_error(array('status' => 'error', 'message' => 'Invalid start date.'));
+        }
+    
+        $booking_pass_template_id = $settings['forfait'];
+        if ($booking_pass_template_id != 'none' && $booking_pass_template_id != '' && intval($booking_pass_template_id) > 0) {
+            $booking_pass = bapap_get_booking_pass_template(intval($booking_pass_template_id));
+            if (!empty($booking_pass)) {
+                $validity = $booking_pass['validity_period'];
+                $end_date = date('Y-m-d H:i:s', strtotime("+$validity days", strtotime($start_date)));
+                $user = get_user_by('id', $user_id);
+                $data = array(
+                    'id' => 0,
+                    'title' =>  $user->display_name . " - " . $booking_pass['title'],
+                    'pass_template_id' => $booking_pass_template_id,
+                    'credits_total' => $booking_pass['credits'],
+                    'credits_current' => $booking_pass['credits'],
+                    'user_id' => $user_id,
+                    'creation_date' => date('Y-m-d H:i:s', strtotime($start_date)),
+                    'expiration_date' => $end_date,
+                );
+                $data = bapap_sanitize_booking_pass_data(array_merge($_POST, $data));
+                $booking_pass_id = bapap_create_booking_pass($data);
+
+                if ($booking_pass_id) {
+                    $log_data = array(
+                        'credits_current' => $booking_pass['credits'],
+                        'credits_total' => $booking_pass['credits'],
+                        'reason' => esc_html__('Booking pass created from the admin panel.', 'ba-prices-and-credits'),
+                        'context' => 'created_from_admin',
+                        'lang_switched' => 1
+                    );
+                    bapap_add_booking_pass_log($booking_pass_id, $log_data);
+                    $updated = 1;
+                } else {
+                    update_user_meta($user_id, 'debug', print_r($data, true));
+                    $updated = 0;
+                }
+            } else {
+                update_user_meta($user_id, 'debug', "error");
+                $updated = 0;
+            }
+        } else {
+            update_user_meta($user_id, 'debug', "error");
+            $updated = 0;
+        }
     }
 
 
