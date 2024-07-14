@@ -41,6 +41,6 @@ function ba_plus_check_cancel(){
         }
         if ( $user_cancel > 3 && $send_mail == 'true' ){
             update_user_meta( $user->id, 'send_mail_cancel', 'false' );
-        }
+        }   
     }
 }

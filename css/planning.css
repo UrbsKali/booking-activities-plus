@@ -25,7 +25,7 @@
 
 .ba-planning-event-box {
     border: 1px solid black;
-    padding: 10px;
+    padding: 20px 10px 10px 10px;
     margin: 10px;
 }
 
@@ -83,7 +83,6 @@
     font-size: smaller !important;
     padding: 8px;
 }
-
 
 
 
@@ -156,10 +155,11 @@
 
 .quantity {
     position: absolute;
-    margin: -11px !important;
+    margin: -21px -11px !important;
     padding: 0 5px;
     background-color: #cccccc;
     border: #333 solid 1px;
+    font-size: smaller;
 }
 
 

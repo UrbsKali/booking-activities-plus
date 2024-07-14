@@ -6,8 +6,8 @@ $j(".ba-plus-edit-btn").click(function (e) {
     var event_start = $j(this).closest('.ba-planning-event-box').data('event-start');
     var event_end = $j(this).closest('.ba-planning-event-box').data('event-end');
     var is_recurring = $j(this).closest('.ba-planning-event-box').data('is-recurring');
-    var availability = $j(this).closest('.ba-planning-event-box').find('p.quantity').eq(0).text().split('/')[1];
-    var current_booked = $j(this).closest('.ba-planning-event-box').find('p.quantity').eq(0).text().split('/')[0];
+    var availability = $j(this).closest('.ba-planning-event-box').find('p.quantity').eq(0).data('availability');
+    var current_booked = $j(this).closest('.ba-planning-event-box').find('p.quantity').eq(0).data('count');
 
     // pass the data to the popup content div
     $j('.ba-planning-popup-content').data('event-id', event_id);

@@ -318,7 +318,7 @@ function ba_plus_create_event_div($event)
     ?>
     <div class="ba-planning-event-box" data-event-id="<? echo $id; ?>" data-event-start="<? echo $start; ?>"
         data-event-end="<? echo $end; ?>" data-is-recurring="<? echo $is_recurring; ?>">
-        <p class="quantity"><?  echo count($event['booked']) . "/" . $availability; ?></p> 
+        <p class="quantity" data-count="<? echo count($event['booked'])?>" data-availability="<? echo $availability?>"><? echo  - count($event['booked']) + $availability; ?> dispo.</p> 
         <p><?php echo $pretty_start . "/" . $pretty_end; ?></p>
         <p><?php echo $event['title']; ?></p>
         <div class="ba-plus-action">
