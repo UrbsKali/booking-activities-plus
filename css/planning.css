@@ -162,6 +162,30 @@
     font-size: smaller;
 }
 
+.ba-plus-info {
+    display: none;
+    border-radius: .625rem;
+    margin: 0 15px;
+    border: #cccccc 1px solid;
+    padding: .625rem;
+    text-align: center;
+}
+
+.ba-plus-info p {
+    margin: 0;
+}
+
+.ba-plus-info.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+.ba-plus-info.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
 
 /* Print style */
 @media print {

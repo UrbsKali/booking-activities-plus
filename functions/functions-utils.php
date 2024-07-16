@@ -247,6 +247,9 @@ function ba_plus_create_planning($args)
                 ?>
                 <button id="ba-plus-user-search-send">Ajouter</button>
             </div>
+            <div class="ba-plus-info">
+                
+            </div>
         </div>
     </div>
     <?php

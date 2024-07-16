@@ -96,6 +96,7 @@ $j('.ba-booked li').click(function (e) {
 });
 $j('.ba-planning-popup-close').click(function (e) {
     e.preventDefault();
+    clear_info();
     // close the popup
     $j('.ba-planning-popup-bg').css('display', 'none');
     document.querySelector('.user-add-popup').style.display = 'none';
@@ -152,14 +153,14 @@ function ba_plus_cancel_booking_callback(e) {
         },
         success: function (response) {
             if (response.status === 'success') {
-                location.reload();
+                show_info('success', 'Réservation supprimée', true);
             } else {
-                console.log(response);
+                show_info('error', response.message, false);
             }
         },
         error: function (response) {
-            console.log(response);
-        }
+                show_info('error', response, false);
+            }
     });
 }
 
@@ -177,13 +178,13 @@ function ba_plus_refund_booking_callback(e) {
         },
         success: function (response) {
             if (response.data.status === 'success') {
-                location.reload();
+                show_info('success', 'Réservation remboursée', true);
             } else {
-                console.log(response);
+                show_info('error', response.data.message, false);
             }
         },
         error: function (response) {
-            console.log(response);
+            show_info('error', response, false);
         }
     });
 }
@@ -210,13 +211,13 @@ function ba_plus_cancel_wl_callback(e) {
         },
         success: function (response) {
             if (response.status === 'success') {
-                location.reload();
+                show_info('success', 'Participant supprimé de la liste d\'attente', true);
             } else {
-                console.log(response);
+                show_info('error', response.message, false);
             }
         },
         error: function (response) {
-            console.log(response);
+            show_info('error', response, false);
         }
     });
 }
@@ -255,7 +256,9 @@ function ba_plus_update_event_callback(e) {
         event_state : event_state,
     };
 
-    if (old_availability !== new_availability){
+    if (old_availability != new_availability){
+        console.log(old_availability);
+        console.log(new_availability);
         data['new_availability'] = new_availability;
     }
 
@@ -265,13 +268,13 @@ function ba_plus_update_event_callback(e) {
         data: data,
         success: function (response) {
             if (response.data.status === 'success') {
-                location.reload();
+                show_info('success', 'Cours modifié', true);
             } else {
-                console.log(response);
+                show_info('error', response.data.message, false);
             }
         },
         error: function (response) {
-            console.log(response);
+            show_info('error', response, false);
         }
     });
 
@@ -299,13 +302,13 @@ function ba_plus_add_user_callback(e) {
         },
         success: function (response) {
             if (response.data.status === 'success') {
-                location.reload();
+                show_info('success', 'Participant ajouté', true);
             } else {
-                console.log(response);
+                show_info('error', response.data.message, false);
             }
         },
         error: function (response) {
-            console.log(response);
+            show_info('error', response.data.message, false);
         }
     });
 }
@@ -381,3 +384,31 @@ next_btn.addEventListener('click', function () {
     url += '?start_date=' + date_str;
     window.location.href = url;
 });
+
+/**
+ * Show info message on the popup
+ * @param {string} status success, error
+ * @param {string} text the message to display
+ * @param {boolean} reload reload the page after 2s
+ */
+function show_info(status, text, reload = false) {
+    let info = document.querySelector('.ba-plus-info');
+    info.style.display = 'block';
+    info.classList.add(status);
+    let p = document.createElement('p');
+    p.innerHTML = text;
+    info.appendChild(p);
+    if (reload) {
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    }
+}
+
+function clear_info(){
+    let info = document.querySelector('.ba-plus-info');
+    info.style.display = 'none';
+    info.classList.remove('success');
+    info.classList.remove('error');
+    info.innerHTML = '';
+}
