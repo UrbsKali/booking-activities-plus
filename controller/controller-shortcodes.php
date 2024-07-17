@@ -250,13 +250,14 @@ function ba_plus_admin_forfaits_admin($atts = array(), $content = null, $tag = '
 	$passes = bapap_get_booking_passes(bapap_format_booking_pass_filters(array('user_id' => $user_id, 'active' => 1)));
 	// get the first pass
 	if (empty($passes)) {
-		return __('Cet utilisateur n\'a aucun forfait actif', 'ba-plus');
+		$pass_id = 'none';
+	} else {
+		foreach ($passes as $p) {
+			$pass = $p;
+			break;
+		}
+		$pass_id = $pass->pass_template_id;
 	}
-	foreach ($passes as $p) {
-		$pass = $p;
-		break;
-	}
-	$pass_id = $pass->pass_template_id;
 
 
 

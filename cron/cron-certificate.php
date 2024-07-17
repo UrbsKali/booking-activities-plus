@@ -90,6 +90,8 @@ function ba_plus_check_attestation_expiration(){
             $body = str_replace( '%doc%', "attestation médicale", $body );
             $body = str_replace( '%user%', $user->display_name, $body );
             $body = str_replace( '%expire_date%', $diff->days, $body );
+            $body = str_replace('à le', 'à la', $body);
+            $body = str_replace('scanné', 'scannée', $body);
 
             $headers = array('Content-Type: text/html; charset=UTF-8');
             wp_mail( $to, $subject, $body, $headers );
