@@ -220,7 +220,7 @@ function ba_plus_auto_register_waiting_list()
         // auto register the user if there is a spot available
         $booked = ba_plus_check_if_event_is_full($event_id, $event_start, $event_end);
         $timezone = new DateTimeZone('Europe/Paris');
-        $diff = date_diff(date_create($event_start), date_create('now', $timezone));
+        $diff = date_diff(date_create('now', $timezone),date_create($event_start));
         if (!$booked && $diff->invert == 0) {
             // check user balance 
             $filters = array(
@@ -231,6 +231,7 @@ function ba_plus_auto_register_waiting_list()
             $pass = bapap_get_booking_passes($filters);
 
             if (empty($pass)) {
+                echo "User " . $user->display_name . " has no active pass<br>";
                 continue;
             }
 
@@ -240,6 +241,7 @@ function ba_plus_auto_register_waiting_list()
             });  
 
             if ($pass[0]->credits_current <= 0) {
+                echo "User " . $user->display_name . " has no credit left<br>";
                 continue;
             }
 
