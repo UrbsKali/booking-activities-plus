@@ -33,10 +33,13 @@ function ba_plus_ajax_add_booking()
         wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a pas de forfaits actif.'));
     }
 
-    foreach ($pass as $p) {
-        $pass = $p;
-        break;
-    }
+    // sort the booking pass by expiration date, shorter first
+    usort($pass, function ($a, $b) {
+        return strtotime($a->expiration_date) - strtotime($b->expiration_date);
+    });
+
+    $pass = $pass[0];
+
     if ($pass->credits_current <= 0) {
         wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a plus de crédits.'));
     }
@@ -105,6 +108,7 @@ function ba_plus_ajax_edit_event()
         $event = bookacti_get_event_by_id($event_id);
         $new_id = bookacti_unbind_selected_event_occurrence($event, $event_start, $event_end);
         if ($new_id) {
+            ba_plus_update_event_id_waiting_list($event_id, $event_start, $event_end, $new_id);
             $event_id = $new_id;
         } else {
             wp_send_json_error(array('status' => 'error', 'message' => 'An error occurred while unbinding the event.'));
@@ -164,30 +168,43 @@ function ba_plus_ajax_refund_booking()
 
     // Get the booking
     $booking = bookacti_get_booking_by_id($booking_id, true);
+    $user = get_user_by('id', $booking->user_id);
 
-    // Get the booking pass
-    if (!$booking->booking_pass_id) {
-        //wp_send_json_error(array('status' => 'error', 'message' => 'La réservation n\'est pas liée à un pass'));
-    } else {
-        $booking_pass = bapap_get_booking_pass($booking->booking_pass_id);
+    // get the most recent booking pass
+    $filters = array(
+        'user_id' => $booking->user_id,
+        'active' => 1
+    );
+    $filters = bapap_format_booking_pass_filters($filters);
+    $pass = bapap_get_booking_passes($filters);
 
-        // Refund the booking    
-        $credited = bapap_add_booking_pass_credits($booking->booking_pass_id, intval($booking->booking_pass_credits));
-        if (!$credited) {
-            wp_send_json_error(array('status' => 'error', 'message' => 'An error occurred while refunding the booking.'));
-        }
-
-        // add to the log
-        $log_data = array(
-            'credits_delta' => $booking->booking_pass_credits,
-            'credits_current' => intval($booking_pass['credits_current']) + intval($booking->booking_pass_credits),
-            'credits_total' => $booking_pass['credits_total'],
-            'reason' => "Annulation ADMIN (depuis le planning) - " . $booking->event_title . " (" . $booking->event_start . ")",
-            'context' => 'updated_from_server',
-            'lang_switched' => 1
-        );
-        bapap_add_booking_pass_log($booking_pass['id'], $log_data);
+    if (empty($pass)) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a pas de forfaits actif.'));
     }
+    
+    // sort the booking pass by expiration date, longer first
+    usort($pass, function ($a, $b) {
+        return - strtotime($a->expiration_date) + strtotime($b->expiration_date);
+    });    
+
+    
+
+    // Refund the booking    
+    $credited = bapap_add_booking_pass_credits($pass[0]->id, intval($booking->booking_pass_credits));
+    if (!$credited) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'Il y a eu une erreur lors du remboursement de la réservation.'));
+    }
+
+    // add to the log
+    $log_data = array(
+        'credits_delta' => $booking->booking_pass_credits,
+        'credits_current' => intval($pass[0]->credits_current) + intval($booking->booking_pass_credits),
+        'credits_total' => $pass[0]->credits_total,
+        'reason' => "Annulation ADMIN (depuis le planning) - " . $booking->event_title . " (" . $booking->event_start . ")",
+        'context' => 'updated_from_server',
+        'lang_switched' => 1
+    );
+    bapap_add_booking_pass_log($pass[0]->id, $log_data);
 
     $cancelled = ba_plus_set_refunded_booking($booking_id);
 

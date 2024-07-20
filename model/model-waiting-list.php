@@ -165,3 +165,14 @@ function ba_plus_get_waiting_list_count($event_id, $start_date, $end_date)
 
     return $waiting_list_count;
 }
+
+function ba_plus_update_event_id_waiting_list($old_id, $event_start, $event_end, $new_id)
+{
+    global $wpdb;
+
+    $query = 'UPDATE ' . BOOKACTI_TABLE_WAITING_LIST . ' SET event_id = %d WHERE event_id = %d AND start_date = %s AND end_date = %s';
+    $query = $wpdb->prepare($query, $new_id, $old_id, $event_start, $event_end);
+    $wpdb->query($query);
+
+    return $wpdb->rows_affected;
+}

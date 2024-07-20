@@ -9,8 +9,8 @@ add_filter('cron_schedules', 'example_add_cron_interval');
 function example_add_cron_interval($schedules)
 {
     $schedules['five_seconds'] = array(
-        'interval' => 1,
-        'display' => esc_html__('Every Seconds'),
+        'interval' => 5,
+        'display' => esc_html__('Every five Seconds'),
     );
     return $schedules;
 }
@@ -50,7 +50,8 @@ function ba_plus_clean_waiting_list()
         $event_start = $waiting->start_date;
         $event_end = $waiting->end_date;
 
-        if ($event_start < date('Y-m-d h:i:s', strtotime('-24 hour'))) {
+        $diff = date_diff(date_create($event_start), date_create(strtotime('now')));
+        if ($diff->invert == 1) {
             echo "Removing waiting list for event " . $event_id . "<br>";
             ba_plus_remove_all_waiting_list($event_id, $event_start, $event_end);
         }
@@ -96,15 +97,29 @@ function ba_plus_remove_empty_events()
                 $cancelled = ba_plus_set_refunded_booking($id);
 
                 // refund the user
-                $booking_pass = bapap_get_booking_pass($booking->booking_pass_id);
+                $filters = array(
+                    'user_id' => $booking->user_id,
+                    'active' => 1
+                );
+                $filters = bapap_format_booking_pass_filters($filters);
+                $pass = bapap_get_booking_passes($filters);
+            
+                if (empty($pass)) {
+                    wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a pas de forfaits actif.'));
+                }
                 
-                $booking_pass['credits_current'] += intval($booking->booking_pass_credits);
+                // sort the booking pass by expiration date, longer first
+                usort($pass, function ($a, $b) {
+                    return - strtotime($a->expiration_date) + strtotime($b->expiration_date);
+                });    
+                
+                $pass[0]->credits_current += intval($booking->booking_pass_credits);
                 $credited = bapap_add_booking_pass_credits($booking->booking_pass_id, intval($booking->booking_pass_credits));
                 // add to the log
                 $log_data = array(
                     'credits_delta' => $booking->booking_pass_credits,
-                    'credits_current' => $booking_pass['credits_current'],
-                    'credits_total' => $booking_pass['credits_total'],
+                    'credits_current' => $pass[0]->credits_current,
+                    'credits_total' => $pass[0]->credits_total,
                     'reason' => "Annulation automatique (manque de participants) -" . $event['title'] . " (" . $event['start'] . ")",
                     'context' => 'updated_from_server',
                     'lang_switched' => 1
@@ -169,7 +184,8 @@ function ba_plus_auto_register_waiting_list()
 
 
         // check if event is in less than 48 h 
-        if ($event_start < date('Y-m-d h:i:s', strtotime('+48 hour')) && !$is_mail_send) {
+        $diff = date_diff(date_create($event_start), date_create("+48 hours"));
+        if ($diff->days < 2 && $diff->invert == 0 && !$is_mail_send) {
             // send mail to user
             $to = $user->user_email;
             $subject = get_option('ba_plus_mail_waiting_list_title');
@@ -192,7 +208,7 @@ function ba_plus_auto_register_waiting_list()
                 );
 
                 $sms_sent = banp_send_sms_notification($notif);
-                echo "Send SMS for still in wl to : " . $phone . " (status:.". $sms_sent .")<br> ";
+                echo "Send SMS for still in wl to : " . $phone . " (status: ". $sms_sent .")<br> ";
             }
             $is_mail_send = true;
             update_user_meta($user->ID, 'send_mail_warning_48h_' . $event_id, $is_mail_send);
@@ -201,7 +217,8 @@ function ba_plus_auto_register_waiting_list()
 
         // auto register the user if there is a spot available
         $booked = ba_plus_check_if_event_is_full($event_id, $event_start, $event_end);
-        if (!$booked) {
+        $diff = date_diff(date_create($event_start), date_create(strtotime('now')));
+        if (!$booked && $diff->invert == 0) {
             // check user balance 
             $filters = array(
                 'user_id' => $waiting->user_id,
@@ -210,11 +227,16 @@ function ba_plus_auto_register_waiting_list()
             $filters = bapap_format_booking_pass_filters($filters);
             $pass = bapap_get_booking_passes($filters);
 
-            foreach ($pass as $p) {
-                $pass = $p;
-                break;
+            if (empty($pass)) {
+                continue;
             }
-            if ($pass->credits_current <= 0) {
+
+            // sort the booking pass by expiration date, shorter first
+            usort($pass, function ($a, $b) {
+                return  strtotime($a->expiration_date) - strtotime($b->expiration_date);
+            });  
+
+            if ($pass[0]->credits_current <= 0) {
                 continue;
             }
 
@@ -236,18 +258,18 @@ function ba_plus_auto_register_waiting_list()
             $booking_id = bookacti_insert_booking($booking_data);
             if ($booking_id) {
                 // Remove one credit from the user
-                $pass->credits_current -= 1;
-                bapap_update_booking_pass_data($pass->id, array('credits_current' => $pass->credits_current));
+                $pass[0]->credits_current -= 1;
+                bapap_update_booking_pass_data($pass[0]->id, array('credits_current' => $pass[0]->credits_current));
                 // add to the log
                 $log_data = array(
                     'credits_delta' => '-1',
-                    'credits_current' => $pass->credits_current,
-                    'credits_total' => $pass->credits_total,
+                    'credits_current' => $pass[0]->credits_current,
+                    'credits_total' => $pass[0]->credits_total,
                     'reason' => "Inscription automatique (via liste d'attente) - " . $waiting->title . " (" . $waiting->start . ")",
                     'context' => 'updated_from_server',
                     'lang_switched' => 1
                 );
-                bapap_add_booking_pass_log($pass->id, $log_data);
+                bapap_add_booking_pass_log($pass[0]->id, $log_data);
 
                 echo "User " . $user->display_name . " has been added to the event " . $waiting->title . "<br>";
 
