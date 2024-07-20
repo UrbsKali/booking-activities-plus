@@ -50,7 +50,8 @@ function ba_plus_clean_waiting_list()
         $event_start = $waiting->start_date;
         $event_end = $waiting->end_date;
 
-        $diff = date_diff(date_create($event_start), date_create(strtotime('now')));
+        $timezone = new DateTimeZone('Europe/Paris');
+        $diff = date_diff(date_create('now', $timezone), date_create($event_start));
         if ($diff->invert == 1) {
             echo "Removing waiting list for event " . $event_id . "<br>";
             ba_plus_remove_all_waiting_list($event_id, $event_start, $event_end);
@@ -183,8 +184,9 @@ function ba_plus_auto_register_waiting_list()
         $is_mail_send = get_user_meta($user->ID, 'send_mail_warning_48h_' . $event_id, true);
 
 
-        // check if event is in less than 48 h 
-        $diff = date_diff(date_create($event_start), date_create("+48 hours"));
+        // check if event is in less than 48 h / Paris
+        $timezone = new DateTimeZone('Europe/Paris');
+        $diff = date_diff(date_create('now', $timezone), date_create($event_start, $timezone));
         if ($diff->days < 2 && $diff->invert == 0 && !$is_mail_send) {
             // send mail to user
             $to = $user->user_email;
@@ -217,7 +219,8 @@ function ba_plus_auto_register_waiting_list()
 
         // auto register the user if there is a spot available
         $booked = ba_plus_check_if_event_is_full($event_id, $event_start, $event_end);
-        $diff = date_diff(date_create($event_start), date_create(strtotime('now')));
+        $timezone = new DateTimeZone('Europe/Paris');
+        $diff = date_diff(date_create($event_start), date_create('now', $timezone));
         if (!$booked && $diff->invert == 0) {
             // check user balance 
             $filters = array(

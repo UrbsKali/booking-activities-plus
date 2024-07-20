@@ -19,7 +19,8 @@ if ( ! wp_next_scheduled( 'bookacti_cron_check_attest' ) ) {
 function ba_plus_check_certificate_expiration(){
     echo "Checking for certificate expiration<br>";
     $users = get_users();
-    $today = new DateTime();
+    $timezone = new DateTimeZone('Europe/Paris');
+    $today = new DateTime('now', $timezone);
     foreach($users as $user){
         $user_id = $user->ID;
         $expire_date = get_user_meta($user_id, 'certif_med', true); // certif_med
@@ -60,7 +61,8 @@ function ba_plus_check_certificate_expiration(){
 function ba_plus_check_attestation_expiration(){
     echo "Checking for attestation expiration<br>";
     $users = get_users();
-    $today = new DateTime();
+    $timezone = new DateTimeZone('Europe/Paris');
+    $today = new DateTime('now', $timezone);
     foreach($users as $user){
         $user_id = $user->ID;
         $expire_date = get_user_meta($user_id, 'attest_med', true); // attest_med
