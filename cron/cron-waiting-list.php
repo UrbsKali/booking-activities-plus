@@ -32,12 +32,6 @@ if (!wp_next_scheduled('bookacti_cron_auto_add_wl')) {
 }
 
 
-
-/**
- * Cron job to check if there are any waiting list users that can be moved to the main list
- */
-
-
 /**
  * Cron job to purge the waiting list of past events
  */
@@ -51,9 +45,9 @@ function ba_plus_clean_waiting_list()
         $event_end = $waiting->end_date;
 
         $timezone = new DateTimeZone('Europe/Paris');
-        $diff = date_diff(date_create('now', $timezone), date_create($event_start));
+        $diff = date_diff(date_create('now', $timezone), date_create($event_start, $timezone));
         if ($diff->invert == 1) {
-            echo "Removing waiting list for event " . $event_id . "<br>";
+            echo "&nbsp;&nbsp;Removing waiting list for event " . $event_id . "<br>";
             ba_plus_remove_all_waiting_list($event_id, $event_start, $event_end);
         }
     }
@@ -63,23 +57,24 @@ function ba_plus_remove_empty_events()
 {
     echo "Checking for empty events<br>";
     // create a date object for today
-    $today = new DateTime();
-    $today = $today->format('Y-m-d h:i:s');
-    $tonight = new DateTime();
-    $tonight = date('Y-m-d H:i:s', strtotime('+14 hour'));
+    $timezone = new DateTimeZone('Europe/Paris');
+    $today = new DateTime("now", $timezone);
+    $tonight = new DateTime('+12 hour', $timezone);
     $interval = array(
-        'start' => $today,
-        'end' => $tonight
+        'start' => $today->format('Y-m-d H:i:s'),
+        'end' => $tonight->format('Y-m-d H:i:s')
     );
     $args = array(
         'interval' => $interval,
-        'active' => 1
+        'active' => 1,
     );
     // get all events that are empty
     $events = bookacti_fetch_booked_events($args);
     foreach ($events["data"] as $event) {
         $booked = -bookacti_get_event_availability($event["id"], $event['start'], $event['end']) + $event['availability'];
-        if ($booked < 3 && $event['start'] < date('Y-m-d h:i:s', strtotime('+24 hour'))) {
+        echo "&nbsp;&nbsp;Checking event " . $event["id"] . " with " . $booked . " booked<br>";
+        if ($booked < 3) {
+            echo "&nbsp;&nbsp;Removing event " . $event["id"] . "<br>";
             // get all bookings for the event
             $filters = array(
                 'event_id' => $event['id'],
@@ -106,7 +101,7 @@ function ba_plus_remove_empty_events()
                 $pass = bapap_get_booking_passes($filters);
             
                 if (empty($pass)) {
-                    wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a pas de forfaits actif.'));
+                    echo '&nbsp;&nbsp;&nbsp;&nbsp;L\'utilisateur '. $booking->user_id .' n\'a pas de forfaits actif.';
                 }
                 
                 // sort the booking pass by expiration date, longer first
@@ -131,7 +126,7 @@ function ba_plus_remove_empty_events()
                 // send mail
                 $user = get_user_by('id', $booking->user_id);
                 $to = $user->user_email;
-                echo "Send mail for cancel to : " . $to . "<br>";
+                echo "&nbsp;&nbsp;&nbsp;&nbsp;Send mail for cancel to : " . $to . "<br>";
                 $subject = get_option('ba_plus_mail_cancel_title');
                 $body = get_option('ba_plus_mail_cancel_body');
                 $body = ba_plus_format_mail($body, $event['start'], $event['end'], $event['title'], $user); 
@@ -152,7 +147,7 @@ function ba_plus_remove_empty_events()
                     );
 
                     $sms_sent = banp_send_sms_notification($notif);
-                    echo "Send SMS for cancel to : " . $phone . " (status:.". $sms_sent .")<br> ";
+                    echo "&nbsp;&nbsp;&nbsp;&nbsp;Send SMS for cancel to : " . $phone . " (status:.". $sms_sent .")<br> ";
                 }
             }
             // unbind the event
@@ -175,6 +170,8 @@ function ba_plus_auto_register_waiting_list()
 {
     echo "Checking for waiting list<br>";
     $waiting_list = ba_plus_get_all_waiting_list();
+    $timezone = new DateTimeZone('Europe/Paris');
+    $today = new DateTime('now', $timezone);
     foreach ($waiting_list as $waiting) {
         $event_id = $waiting->event_id;
         $event_start = $waiting->start_date;
@@ -185,8 +182,7 @@ function ba_plus_auto_register_waiting_list()
 
 
         // check if event is in less than 48 h / Paris
-        $timezone = new DateTimeZone('Europe/Paris');
-        $diff = date_diff(date_create('now', $timezone), date_create($event_start, $timezone));
+        $diff = date_diff($today, date_create($event_start, $timezone));
         if ($diff->days < 2 && $diff->invert == 0 && !$is_mail_send) {
             // send mail to user
             $to = $user->user_email;
@@ -210,28 +206,27 @@ function ba_plus_auto_register_waiting_list()
                 );
 
                 $sms_sent = banp_send_sms_notification($notif);
-                echo "Send SMS for still in wl to : " . $phone . " (status: ". $sms_sent .")<br> ";
+                echo "&nbsp;&nbsp;Send SMS for still in wl to : " . $phone . " (status: ". $sms_sent .")<br> ";
             }
             $is_mail_send = true;
             update_user_meta($user->ID, 'send_mail_warning_48h_' . $event_id, $is_mail_send);
-            echo "Send mail for still in wl to : " . $to . "<br>";
+            echo "&nbsp;&nbsp;Send mail for still in wl to : " . $to . "<br>";
         }
 
         // auto register the user if there is a spot available
         $booked = ba_plus_check_if_event_is_full($event_id, $event_start, $event_end);
-        $timezone = new DateTimeZone('Europe/Paris');
-        $diff = date_diff(date_create('now', $timezone),date_create($event_start));
+        $diff = date_diff($today, date_create($event_start, $timezone));
         if (!$booked && $diff->invert == 0) {
             // check user balance 
             $filters = array(
-                'user_id' => $waiting->user_id,
+                'user_id' => $user->ID,
                 'active' => 1
             );
             $filters = bapap_format_booking_pass_filters($filters);
             $pass = bapap_get_booking_passes($filters);
 
             if (empty($pass)) {
-                echo "User " . $user->display_name . " has no active pass<br>";
+                echo "&nbsp;&nbsp;User " . $user->display_name . " has no active pass<br>";
                 continue;
             }
 
@@ -241,7 +236,7 @@ function ba_plus_auto_register_waiting_list()
             });  
 
             if ($pass[0]->credits_current <= 0) {
-                echo "User " . $user->display_name . " has no credit left<br>";
+                echo "&nbsp;&nbsp;User " . $user->display_name . " has no credit left<br>";
                 continue;
             }
 
@@ -276,7 +271,7 @@ function ba_plus_auto_register_waiting_list()
                 );
                 bapap_add_booking_pass_log($pass[0]->id, $log_data);
 
-                echo "User " . $user->display_name . " has been added to the event " . $waiting->title . "<br>";
+                echo "&nbsp;&nbsp;User " . $user->display_name . " has been added to the event " . $waiting->title . "<br>";
 
                 // Send email to user
                 $user = get_user_by('id', $waiting->user_id);

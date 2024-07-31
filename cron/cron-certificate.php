@@ -30,7 +30,7 @@ function ba_plus_check_certificate_expiration(){
             continue;
         }
 
-        $expire_date = new DateTime($expire_date);
+        $expire_date = new DateTime($expire_date, $timezone);
         $diff = date_diff($today, $expire_date);
         if ( $send_mail == 'true' ){
             if ( $diff->invert == 0 && $diff->days > 60){
@@ -41,13 +41,13 @@ function ba_plus_check_certificate_expiration(){
 
         if ( $diff->invert == 0 && $diff->days <= 60 ){
             $to = $user->user_email;
-            echo "Send mail for certif to : " . $to . "<br>";
+            echo "&nbsp;&nbsp;Send mail for certif to : " . $to . "<br>";
             $subject = get_option( 'ba_plus_mail_certi_expire_title' );
             $subject = str_replace( '%doc%', "certificat médical", $subject );
             $body = get_option( 'ba_plus_mail_certi_expire_body' );
             $body = str_replace( '%doc%', "certificat médical", $body );
             $body = str_replace( '%user%', $user->display_name, $body );
-            $body = str_replace( '%expire_date%', $diff->days, $body );
+            $body = str_replace( '%expire_date%', $diff->days+1, $body );
             $headers = array('Content-Type: text/html; charset=UTF-8');
             wp_mail( $to, $subject, $body, $headers );
             update_user_meta( $user_id, 'send_mail_certif_expire', 'true' );
@@ -73,7 +73,7 @@ function ba_plus_check_attestation_expiration(){
             continue;
         }
 
-        $expire_date = new DateTime($expire_date);
+        $expire_date = new DateTime($expire_date, $timezone);
         $diff = date_diff($today, $expire_date);
 
         if ( $send_mail == 'true' ){
@@ -85,13 +85,13 @@ function ba_plus_check_attestation_expiration(){
         
         if ( $diff->invert == 0 && $diff->days <= 7 ){
             $to = $user->user_email;
-            echo "Send mail for attest to : " . $to . "<br>";
+            echo "&nbsp;&nbsp;Send mail for attest to : " . $to . "<br>";
             $subject = get_option( 'ba_plus_mail_certi_expire_title' );
             $subject = str_replace( '%doc%', "attestation médicale", $subject );
             $body = get_option( 'ba_plus_mail_certi_expire_body' );
             $body = str_replace( '%doc%', "attestation médicale", $body );
             $body = str_replace( '%user%', $user->display_name, $body );
-            $body = str_replace( '%expire_date%', $diff->days, $body );
+            $body = str_replace( '%expire_date%', $diff->days+1, $body );
             $body = str_replace('à le', 'à la', $body);
             $body = str_replace('scanné', 'scannée', $body);
 

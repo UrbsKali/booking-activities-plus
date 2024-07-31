@@ -63,7 +63,11 @@ function send_forfait_settings(e) {
         if (data.data.status == "success") {
             create_popup("Paramètre sauvegardé !", "Ce paramètre à bien été mise à jour !", "success", true);
         } else {
-            create_popup("Erreur", "Une erreur est survenue lors de l'enregistrement. Si vous avez indiqué la même quantité que précédemant, c'est normal. Sinon, veuillez contacter votre administrateur.", "error");
+            if (data.data.message == "Invalid start date.") {
+                create_popup("Erreur", "La date de début du forfait n'est pas valide.", "error");
+                return;
+            }
+            create_popup("Erreur", "Une erreur est survenue lors de l'enregistrement. Veuillez contacter votre administrateur.", "error");
             console.log(data);
         }
     }).catch(error => {

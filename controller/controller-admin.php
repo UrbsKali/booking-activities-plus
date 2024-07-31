@@ -277,7 +277,7 @@ function ba_plus_ajax_edit_settings()
             wp_send_json_error(array('status' => 'error', 'message' => 'Invalid booking pass template. (must be a number)'));
         }
 
-        if ($settings["start_date"] == "") {
+        if ($settings["start_date"] == "" || strtotime($settings["start_date"]) === false || !$settings["start_date"]) {
             wp_send_json_error(array('status' => 'error', 'message' => 'Invalid start date.'));
         }
     

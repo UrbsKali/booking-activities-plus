@@ -12,7 +12,7 @@ $j('.bookacti-booking-form').on('bookacti_trigger_event_click', function (info, 
     trigger.click = true;
 });
 $j('.bookacti-booking-form').on('bookacti_update_quantity', function (info, qty_data) {
-    if( qty_data.avail == 0 ) { 
+    if( qty_data.avail == 0 || qty_data.avail < 0 ) { 
         document.querySelector('.bookacti-submit-form.button').value = 'Ajouter à la liste d\'attente';
     } else {
         document.querySelector('.bookacti-submit-form.button').value = 'Réserver';
@@ -111,20 +111,3 @@ row.first().on( 'bookacti_booking_action_data', function(data, booking_id, booki
     }
     console.log(data);
 });
-
-
-function remove_passe(){
-    // replace all occurence of "Passe" by "Forfait" in bookacti_localized
-
-    // get all the entries of bookacti_localized
-    entries = Object.entries(bookacti_localized);
-
-    // loop over the entries
-    for (const [key, value] of entries) {
-        // check if the value is a string
-        if (typeof value === 'string') {
-            // replace all occurence of "Passe" by "Forfait"
-            bookacti_localized[key] = value.replace(/Passe/g, 'Forfait');
-        }
-    }
-}
