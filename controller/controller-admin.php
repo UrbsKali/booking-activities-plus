@@ -30,7 +30,7 @@ function ba_plus_ajax_add_booking()
     $pass = bapap_get_booking_passes($filters);
 
     if (empty($pass)) {
-        wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a pas de forfaits actif.'));
+        wp_send_json_error(array('status' => 'error', 'message' => 'Le forfait de ce client a une date de validité dépassée'));
     }
 
     // sort the booking pass by expiration date, shorter first
@@ -41,9 +41,20 @@ function ba_plus_ajax_add_booking()
     $pass = $pass[0];
 
     if ($pass->credits_current <= 0) {
-        wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a plus de crédits.'));
+        wp_send_json_error(array('status' => 'error', 'message' => 'Le forfait de ce client est à 0'));
     }
 
+    $certi_date = get_user_meta($user_id, "certif_med", true);
+    $attest_date = get_user_meta($user_id, "attest_med", true);
+    if (empty($certi_date) || empty($attest_date)) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'Ce client n\'a pas de certificat médical ou d\'attestation médicale.'));
+    } else if (date('Y/m/d', strtotime($certi_date)) < date('Y/m/d')) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'Le certificat médical de ce client doit être renouvelé'));
+    } else if (date('Y/m/d', strtotime($attest_date)) < date('Y/m/d')) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'L\'attestation médicale de ce client doit être renouvelée'));
+    }
+
+    
 
     $booking_data = bookacti_sanitize_booking_data(
         array(
@@ -170,6 +181,11 @@ function ba_plus_ajax_refund_booking()
     $booking = bookacti_get_booking_by_id($booking_id, true);
     $user = get_user_by('id', $booking->user_id);
 
+    $nb_cancelled_events = get_user_meta($booking->user_id, 'nb_cancel_left', true);
+    if (empty($nb_cancelled_events) || intval($nb_cancelled_events) <= 0) {
+         wp_send_json_error(array('status' => 'error', 'message' => 'ce client a utilisé tout son quota d\'annulations sans frais'));
+    }
+
     // get the most recent booking pass
     $filters = array(
         'user_id' => $booking->user_id,
@@ -179,7 +195,7 @@ function ba_plus_ajax_refund_booking()
     $pass = bapap_get_booking_passes($filters);
 
     if (empty($pass)) {
-        wp_send_json_error(array('status' => 'error', 'message' => 'L\'utilisateur n\'a pas de forfaits actif.'));
+        wp_send_json_error(array('status' => 'error', 'message' => 'Le forfait de ce client a une date de validité dépassée'));
     }
     
     // sort the booking pass by expiration date, longer first

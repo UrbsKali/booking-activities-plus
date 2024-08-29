@@ -177,7 +177,7 @@ function ba_plus_shortcode_cancel_balance($raw_atts = array(), $content = null, 
 		$balance = 0;
 	}
 	$message = '<div class="ba-balance">';
-	$message .= '<div class="ba-balance-amount">' . __('Nombre d\'annulation gratuites restantes : ', 'ba-plus') . $balance . '</div>';
+	$message .= '<div class="ba-balance-amount">' . __('Nombre d\'annulations gratuites restantes : ', 'ba-plus') . $balance . '</div>';
 	$message .= '</div>';
 	return $message;
 }
