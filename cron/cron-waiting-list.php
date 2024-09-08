@@ -280,7 +280,7 @@ function ba_plus_auto_register_waiting_list()
                 $body = get_option('ba_plus_mail_booked_body');
                 $body = ba_plus_format_mail($body, $waiting->start_date, $waiting->end_date, $waiting->title, $user);
                 $headers = array('Content-Type: text/html; charset=UTF-8');
-                wp_mail($to, $subject, $body, $headers);
+                wp_mail($to, $subject, $body, $headers);                
             }
         }
 

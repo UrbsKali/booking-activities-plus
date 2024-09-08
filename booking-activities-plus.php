@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Booking Activities Plus
  * Plugin URI: https://github.com/Urbskali/booking-activities-plus
@@ -28,32 +29,32 @@ if (!defined('BA_PLUS_PATH')) {
 
 // # ---------------- IMPORT ---------------- # //
 // -- DATABASE -- //
-require_once ('model/model-install.php');
-require_once ('model/model-global.php');
-require_once ('model/model-waiting-list.php');
-require_once ('model/model-passes.php');
+require_once('model/model-install.php');
+require_once('model/model-global.php');
+require_once('model/model-waiting-list.php');
+require_once('model/model-passes.php');
 
 // -- FONCTIONS -- //
-require_once ('functions/functions-utils.php');
-require_once ('functions/functions-booking.php');
-require_once ('functions/functions-booking-system.php');
-require_once ('functions/functions-passes.php');
-require_once ('functions/functions-um.php');
+require_once('functions/functions-utils.php');
+require_once('functions/functions-booking.php');
+require_once('functions/functions-booking-system.php');
+require_once('functions/functions-passes.php');
+require_once('functions/functions-um.php');
 
 // -- CONTROLLERS -- //
-require_once ('controller/controller-admin.php');
-require_once ('controller/controller-shortcodes.php');
-require_once ('controller/controller-certificate.php');
-require_once ('controller/controller-waiting-list.php');
+require_once('controller/controller-admin.php');
+require_once('controller/controller-shortcodes.php');
+require_once('controller/controller-certificate.php');
+require_once('controller/controller-waiting-list.php');
 
 // -- VUES -- //
-require_once ('view/view-booking-list.php');
-require_once ('view/view-settings.php');
+require_once('view/view-booking-list.php');
+require_once('view/view-settings.php');
 
 // -- CRON -- //
-require_once ('cron/cron-waiting-list.php');
-require_once ('cron/cron-certificate.php');
-require_once ('cron/cron-cancel.php');
+require_once('cron/cron-waiting-list.php');
+require_once('cron/cron-certificate.php');
+require_once('cron/cron-cancel.php');
 
 
 
@@ -66,7 +67,7 @@ function ba_plus_enqueue_scripts()
     wp_register_script('ba-planning', plugins_url('js/admin-planning.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_register_script('ba-frontendadmin-settings', plugins_url('js/frontend-settings.js', __FILE__), array(), BA_PLUS_VERSION, true);
     wp_register_style('ba-planning-style', plugins_url('css/planning.css', __FILE__), BA_PLUS_VERSION, true);
-    wp_register_style('ba-popup-style', plugins_url('css/popup.css', __FILE__), BA_PLUS_VERSION, true);    
+    wp_register_style('ba-popup-style', plugins_url('css/popup.css', __FILE__), BA_PLUS_VERSION, true);
 }
 add_action('wp_enqueue_scripts', 'ba_plus_enqueue_scripts');
 
@@ -82,11 +83,11 @@ add_action('admin_enqueue_scripts', 'ba_plus_enqueue_admin_scripts');
 // SEND AJAX REQUEST
 function ba_plus_ajaxurl()
 {
-    ?>
+?>
     <script type="text/javascript">
         var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
     </script>
-    <?php
+<?php
 }
 add_action('wp_head', 'ba_plus_ajaxurl');
 
@@ -144,19 +145,19 @@ function ba_plus_activate()
     add_option('ba_plus_refund_delay', 24);
 
     add_option('ba_plus_mail_cancel_title', 'Scéance annulée');
-    add_option('ba_plus_mail_cancel_body', "Bonjour %user%,<br> Nous sommes au regret de vous informer que le cours %event% est annulé faute d'inscrits en nombre suffisant.<br> Votre compte est recrédité du nombre d'unité correspondant");
+    add_option('ba_plus_mail_cancel_body', "Bonjour %user%,<br> Nous sommes au regret de vous informer que le cours %event% est annulé faute d'inscrits en nombre suffisant.<br> Votre compte est recrédité du nombre d'unité correspondant.<br>Cordialement,<br>L'Espace Pilates de la Vallée de Chevreuse");
 
     add_option('ba_plus_mail_waiting_list_title', "Vous êtes toujours dans la file d'attente");
-    add_option('ba_plus_mail_waiting_list_body', "Bonjour %user%,<br> Vous êtes toujours en alerte sur le cours %event%.<br> Si vous n'êtes plus disponible, pensez à supprimer cette alerte, sinon vous risquez de ne plus pouvoir vous annuler sans frais");
+    add_option('ba_plus_mail_waiting_list_body', "Bonjour %user%,<br> Vous êtes toujours en alerte sur le cours %event%.<br> Si vous n'êtes plus disponible, pensez à supprimer cette alerte, sinon vous risquez de ne plus pouvoir vous annuler sans frais<br>Cordialement,<br>L'Espace Pilates de la Vallée de Chevreuse");
 
     add_option('ba_plus_mail_booked_title', "Vous avez été inscrit automatiquement à un cours");
-    add_option('ba_plus_mail_booked_body', "Bonjour %user%, <br>Vous avez été inscit(e) sur le cours %event%, à la suite de votre alerte. Vous avez la possiblité de vous annuler sans frais à plus de 24 heures. ");
+    add_option('ba_plus_mail_booked_body', "Bonjour %user%, <br>Vous avez été inscit(e) sur le cours %event%, à la suite de votre alerte. Vous avez la possiblité de vous annuler sans frais à plus de 24 heures.<br>Cordialement,<br>L'Espace Pilates de la Vallée de Chevreuse");
 
     add_option('ba_plus_mail_certi_expire_title', 'Votre %doc% expire bientôt');
-    add_option('ba_plus_mail_certi_expire_body', 'Bonjour %user%,<br>Votre %doc% arrivera à échéance dans %expire_date% jours, pensez à le renouveler et à nous l\'envoyer scanné pour ne pas que votre compte soit bloqué. Les modèles de docuements à remplir sont dans le CGU.');
+    add_option('ba_plus_mail_certi_expire_body', "Bonjour %user%,<br>Votre %doc% arrivera à échéance dans %expire_date% jours, pensez à le renouveler et à nous l\'envoyer scanné pour ne pas que votre compte soit bloqué. Les modèles de docuements à remplir sont dans le CGU.<br>Cordialement,<br>L'Espace Pilates de la Vallée de Chevreus");
 
     add_option('ba_plus_mail_tree_cancel_left_title', 'Plus que trois annulations');
-    add_option('ba_plus_mail_tree_cancel_left_body', "Bonjour %user%, <br>Attention, il ne vous reste plus que 3 annulations sans frais sur le quota attribué à votre forfait en cours.");
+    add_option('ba_plus_mail_tree_cancel_left_body', "Bonjour %user%, <br>Attention, il ne vous reste plus que 3 annulations sans frais sur le quota attribué à votre forfait en cours.<br>Cordialement,<br>L'Espace Pilates de la Vallée de Chevreuse");
 
 
     // Add rewrite rules
@@ -164,7 +165,6 @@ function ba_plus_activate()
 
 
     do_action('ba_plus_activate');
-
 }
 register_activation_hook(__FILE__, 'ba_plus_activate');
 
@@ -188,7 +188,7 @@ function ba_plus_deactivate()
     delete_option('ba_plus_mail_certi_expire_title');
     delete_option('ba_plus_mail_booked_title');
     delete_option('ba_plus_mail_booked_body');
-    
+
     do_action('ba_plus_deactivate');
 }
 register_deactivation_hook(__FILE__, 'ba_plus_deactivate');
@@ -199,7 +199,7 @@ function ba_plus_uninstall()
 {
     // Drop tables in database
     ba_plus_drop_table();
-    
+
     // Remove options
     delete_option('ba_plus_version');
     delete_option('ba_plus_install_date');
@@ -214,14 +214,13 @@ function ba_plus_uninstall()
     delete_option('ba_plus_mail_certi_expire_title');
     delete_option('ba_plus_mail_booked_title');
     delete_option('ba_plus_mail_booked_body');
-    
+
     // Remove transients
     delete_transient('ba_plus_installing');
-    
+
     // Remove rewrite rules
     flush_rewrite_rules();
-    
+
     do_action('ba_plus_uninstall');
 }
 register_uninstall_hook(__FILE__, 'ba_plus_uninstall');
-

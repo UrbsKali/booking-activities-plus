@@ -43,7 +43,7 @@ function um_account_content_hook_bookingtab( $output ){
         // affiche les shortcodes pour avoir les informations de l'utilisateur (résa, listes d'attente et passes)
         echo "<br><h2>Réservations</h2><br>";
         echo do_shortcode( '[bookingactivities_list columns="status,events,actions" user_id='. $user_id . ']' );
-        echo "<br><h2>File d'attente</h2><br>";
+        echo "<br><h2>Files d'attentes</h2><br>";
         echo do_shortcode( '[bookingactivities_waitinglist columns="events,actions" user_id='. $user_id . ']' );
         echo "<br><h2>Forfaits</h2><br>";
         echo do_shortcode( '[bookingactivities_passes user_id='. $user_id . ']');
@@ -75,11 +75,11 @@ function ba_plus_admin_booking_tab( $args ) {
         return;
     }
     // affiche les shortcodes pour avoir les informations de l'utilisateur (résa, listes d'attente et passes)
-    echo "<br><h2>Nombre d'annulation restante</h2><br>";
+    echo "<br><h2>Nombre d'annulations restantes</h2><br>";
     echo do_shortcode( "[bookingactivities_cancel_balance user_id='".$user_id."']" );
     echo "<br><h2>Réservations</h2><br>";
     echo do_shortcode( '[bookingactivities_list columns="status,events" user_id='. $user_id . ']' );
-    echo "<br><h2>File d'attente</h2><br>";
+    echo "<br><h2>Files d'attentes</h2><br>";
     echo do_shortcode( '[bookingactivities_waitinglist columns="events,actions" user_id='. $user_id . ']' );
     echo "<br><h2>Forfaits</h2><br>";
     echo do_shortcode( '[bookingactivities_passes user_id='. $user_id . ']');

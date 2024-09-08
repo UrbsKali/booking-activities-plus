@@ -285,11 +285,14 @@ function ba_plus_add_user_callback(e) {
 
     // send info to action baPlusAdminBooking
     // data : user_id, event_id, event_start, event_end
-    var user_id = document.querySelector('#bookacti-booking-filter-customer option:nth-child(4)').value;
+    var user_id = $j( '#bookacti-booking-filter-customer' ).select2('data')[0].id;
     var event_id = $j('.ba-planning-popup-content').data('event-id');
     var event_start = $j('.ba-planning-popup-content').data('event-start');
     var event_end = $j('.ba-planning-popup-content').data('event-end');
-    console.log(user_id);
+    if (user_id === '' || event_id === '' || event_start === '' || event_end === '') {
+        show_info('error', "Vous devez remplir le champ utilisateur", false);
+        return;
+    }
     $j.ajax({
         url: ajaxurl,
         type: 'POST',
