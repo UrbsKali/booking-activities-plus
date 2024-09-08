@@ -35,11 +35,11 @@ function ba_plus_validate_picked_event($validated, $picked_event, $args)
 
     if (!empty(ba_plus_check_if_user_is_in_waiting_list($user_id, $event_id, $start_date, $end_date))) {
         $error = 'already_in_waiting_list';
-        $validated['messages'][$error] = array('Vous êtes déjà dans la liste d\'attente pour cet événement');
+        $validated['messages'][$error] = array('Vous êtes déjà dans la liste d\'attente pour ce cours');
         $validated['status'] = 'error';
     } else if (ba_plus_check_if_already_booked($user_id, $event_id, $start_date, $end_date)) {
         $error = 'already_booked';
-        $validated['messages'][$error] = array('Vous avez déjà réservé cet événement');
+        $validated['messages'][$error] = array('Vous avez déjà réservé ce cours');
         $validated['status'] = 'error';
     } else {
         $validated['status'] = 'success';
@@ -93,6 +93,12 @@ function ba_plus_add_user_to_waiting_list($form_id, $booking_form_values, $retur
     // Refetch to check to get the waiting list state
     $response = bookacti_validate_picked_events($booking_form_values['picked_events'], $booking_form_values);
     if (!isset($response['waiting_list']) || $response['waiting_list'] !== true) {
+        // get number of free cancel left
+        $user_id = $booking_form_values['user_id'];
+        $nb_cancel_left = get_user_meta($user_id, 'nb_cancel_left', true);
+        if ($nb_cancel_left == 0) {
+            $return_array['messages']['booked'] .= ", Attention vous avez atteint votre quota d'annulations sans frais. Vous ne serez pas re-crédité(e) si vous annulez.";
+        }   
         return;
     }
 
@@ -115,6 +121,11 @@ function ba_plus_add_user_to_waiting_list($form_id, $booking_form_values, $retur
     if ($waiting_list_id) {
         $return_array['status'] = 'success';
         $return_array['messages']['booked'] = "Vous êtes bien dans la liste d'attente !";
+        $user_id = $booking_form_values['user_id'];
+        $nb_cancel_left = get_user_meta($user_id, 'nb_cancel_left', true);
+        if ($nb_cancel_left == 0) {
+            $return_array['messages']['booked'] .= ", Attention vous avez atteint votre quota d'annulations sans frais. Vous ne serez pas re-crédité(e) si vous annulez.";
+        }  
     } else {
         $return_array['error'] = 'unknown';
         $return_array['messages']['unknown'] = esc_html__('An error occurred, please try again.', 'booking-activities');
@@ -220,7 +231,7 @@ function ba_plus_filters_refund_step1($refunded, $bookings, $booking_type, $refu
 
     return $refunded;
 }
-add_filter("bookacti_refund_booking", "ba_plus_filters_refund_step1", 21, 6);
+add_filter("bookacti_refund_booking", "ba_plus_filters_refund_step1", 1, 6);
 
 
 /**
