@@ -154,7 +154,7 @@ function ba_plus_activate()
     add_option('ba_plus_mail_booked_body', "Bonjour %user%, <br>Vous avez été inscit(e) sur le cours %event%, à la suite de votre alerte. Vous avez la possiblité de vous annuler sans frais à plus de 24 heures.<br>Cordialement,<br>L'Espace Pilates de la Vallée de Chevreuse");
 
     add_option('ba_plus_mail_certi_expire_title', 'Votre %doc% expire bientôt');
-    add_option('ba_plus_mail_certi_expire_body', "Bonjour %user%,<br>Votre %doc% arrivera à échéance dans %expire_date% jours, pensez à le renouveler et à nous l\'envoyer scanné pour ne pas que votre compte soit bloqué. Les modèles de docuements à remplir sont dans le CGU.<br>Cordialement,<br>L'Espace Pilates de la Vallée de Chevreus");
+    add_option('ba_plus_mail_certi_expire_body', "Bonjour %user%,<br>Votre %doc% arrivera à échéance dans %expire_date% jours, pensez à le renouveler et à nous l\'envoyer scanné pour ne pas que votre compte soit bloqué. Les modèles de docuements à remplir sont dans le CGU.<br>Cordialement,<br>L'Espace Pilates de la Vallée de Chevreuse");
 
     add_option('ba_plus_mail_tree_cancel_left_title', 'Plus que trois annulations');
     add_option('ba_plus_mail_tree_cancel_left_body', "Bonjour %user%, <br>Attention, il ne vous reste plus que 3 annulations sans frais sur le quota attribué à votre forfait en cours.<br>Cordialement,<br>L'Espace Pilates de la Vallée de Chevreuse");

@@ -75,6 +75,15 @@ function ba_plus_set_refunded_booking( $booking_id ) {
 
 	return $cancelled;
 }
+function ba_plus_set_cancel_booking( $booking_id ) {
+	global $wpdb;
+
+	$query = 'UPDATE ' . BOOKACTI_TABLE_BOOKINGS . ' SET state = "cancelled", active = 0 WHERE id = %d AND active = 1';
+	$prep  = $wpdb->prepare( $query, $booking_id );
+	$cancelled = $wpdb->query( $prep );
+
+	return $cancelled;
+}
 
 function ba_plus_change_event_title($event_id, $event_start, $event_end, $event_title){
 	global $wpdb;

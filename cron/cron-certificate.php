@@ -48,7 +48,7 @@ function ba_plus_check_certificate_expiration(){
             $body = str_replace( '%doc%', "certificat médical", $body );
             $body = str_replace( '%user%', $user->display_name, $body );
             $body = str_replace( '%expire_date%', $diff->days+1, $body );
-            $headers = array('Content-Type: text/html; charset=UTF-8');
+            $headers = array('Content-Type: text/html; charset=UTF-8','From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
             wp_mail( $to, $subject, $body, $headers );
             update_user_meta( $user_id, 'send_mail_certif_expire', 'true' );
         }
@@ -95,7 +95,7 @@ function ba_plus_check_attestation_expiration(){
             $body = str_replace('à le', 'à la', $body);
             $body = str_replace('scanné', 'scannée', $body);
 
-            $headers = array('Content-Type: text/html; charset=UTF-8');
+            $headers = array('Content-Type: text/html; charset=UTF-8','From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
             wp_mail( $to, $subject, $body, $headers );
             update_user_meta( $user_id, 'send_mail_attes_expire', 'true' );
         }

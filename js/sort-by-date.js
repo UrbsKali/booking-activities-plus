@@ -71,16 +71,12 @@ function main() {
 
             let previous_page = document.querySelector('.bookacti-user-booking-list-previous-page>a');
             if (previous_page !== null) {
-                previous_page.href = previous_page.href.replace('general','bookingtab')
-                previous_page.href = previous_page.href.replace('reservations-cours/compte','compte-2/bookingtab')
-                previous_page.href = previous_page.href.replace('password','bookingtab')
+                previous_page.href = previous_page.href.replace('mon-compte-2/?','mon-compte-2/bookingtab/?')
             }
 
             let next_page = document.querySelector('.bookacti-user-booking-list-next-page>a');
             if (next_page !== null) {
-                next_page.href = next_page.href.replace('general','bookingtab')
-                next_page.href = next_page.href.replace('reservations-cours/compte','compte-2/bookingtab')
-                next_page.href = next_page.href.replace('password','bookingtab')
+                next_page.href = next_page.href.replace('mon-compte-2/?','mon-compte-2/bookingtab/?')
             }
 
         }, 50 * i);

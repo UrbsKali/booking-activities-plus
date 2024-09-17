@@ -80,7 +80,7 @@ function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_pag
                             "fr-FR",
                             IntlDateFormatter::FULL,
                             IntlDateFormatter::SHORT,
-                            'Europe/Paris',
+                            'UTC',
                             IntlDateFormatter::GREGORIAN
                         );
                         $str_date = datefmt_format($date, strtotime($list_item->event_start));
@@ -194,7 +194,7 @@ function ba_plus_create_planning($args)
     ob_start();
     ?>
     <script>
-        nonce_delete_booking = '<?php echo wp_create_nonce('bookacti_delete_booking'); ?>';
+        const nonce_change_booking = '<?php echo wp_create_nonce( 'bookacti_change_booking_status' ); ?>';
     </script>
     <div class="ba-planning-navbar ba-plus-ignore-print">
         <div>

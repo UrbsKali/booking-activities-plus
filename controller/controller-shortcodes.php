@@ -99,11 +99,11 @@ function ba_plus_shortcode_certificate($raw_atts = array(), $content = null, $ta
 
 	$msg = '';
 	if (empty($certificate_expire_date)) {
-		$msg .= '<div class="ba-error">' . __('Vous n\'avez aucun certificat médical d\'enregistré', 'ba-plus') . '</div>';
+		$msg .= '<div class="ba-error">' . __('Vous n\'avez aucun certificat médical enregistré', 'ba-plus') . '</div>';
 		$error_attest = true;
 	}
 	if (empty($attestation_expire_date)) {
-		$msg .= '<div class="ba-error">' . __('Vous n\'avez aucune attestation d\'enregistré', 'ba-plus') . '</div>';
+		$msg .= '<div class="ba-error">' . __('Vous n\'avez aucune attestation enregistrée', 'ba-plus') . '</div>';
 		$error_certif = true;
 	}
 
@@ -116,15 +116,24 @@ function ba_plus_shortcode_certificate($raw_atts = array(), $content = null, $ta
 		IntlDateFormatter::GREGORIAN
 	);
 
+
+	$timezone = new DateTimeZone('Europe/Paris');
+    $today = new DateTime('now', $timezone);
+
+	$certif_expire_date = new DateTime($certificate_expire_date, $timezone);
+	$attest_expire_date = new DateTime($attestation_expire_date, $timezone);
+    $certif_diff = date_diff($today, $certif_expire_date);
+    $attest_diff = date_diff($today, $attest_expire_date);
+
 	// add warning if attestation is expired
-	$str_date_att = datefmt_format($date, strtotime($attestation_expire_date));
-	if (date('Y/m/d', strtotime($attestation_expire_date)) < date('Y/m/d') && !$error_attest) {
+	$str_date_att = datefmt_format($date, $attest_expire_date);
+	if ($attest_diff->invert == 1 && !$error_attest) {
 		$msg .= '<div class="ba-error">' . __('Votre attestation est expiré depuis le ', 'ba-plus') . $str_date_att . '</div>';
 		$error_attest = true;
 	}
 	// add warning if certificate is expired
-	$str_date_certif = datefmt_format($date, strtotime($certificate_expire_date));
-	if (date('Y/m/d', strtotime($certificate_expire_date)) < date('Y/m/d') && !$error_certif) {
+	$str_date_certif = datefmt_format($date, $certif_expire_date);
+	if ($certif_diff->invert == 1 && !$error_certif) {
 		$msg .= '<div class="ba-error">' . __('Votre certificat est expiré depuis le ', 'ba-plus') . $str_date_certif . '</div>';
 		$error_certif = true;
 	}

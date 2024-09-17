@@ -130,7 +130,7 @@ function ba_plus_remove_empty_events()
                 $subject = get_option('ba_plus_mail_cancel_title');
                 $body = get_option('ba_plus_mail_cancel_body');
                 $body = ba_plus_format_mail($body, $event['start'], $event['end'], $event['title'], $user); 
-                $headers = array('Content-Type: text/html; charset=UTF-8');
+                $headers = array('Content-Type: text/html; charset=UTF-8','From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
                 wp_mail($to, $subject, $body, $headers);
 
                 // Send SMS
@@ -189,7 +189,7 @@ function ba_plus_auto_register_waiting_list()
             $subject = get_option('ba_plus_mail_waiting_list_title');
             $body = get_option('ba_plus_mail_waiting_list_body');
             $body = ba_plus_format_mail($body, $waiting->start_date, $waiting->end_date, $waiting->title, $user);
-            $headers = array('Content-Type: text/html; charset=UTF-8');
+            $headers = array('Content-Type: text/html; charset=UTF-8','From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
             wp_mail($to, $subject, $body, $headers);
 
             // send sms
@@ -279,7 +279,7 @@ function ba_plus_auto_register_waiting_list()
                 $subject = get_option('ba_plus_mail_booked_title');
                 $body = get_option('ba_plus_mail_booked_body');
                 $body = ba_plus_format_mail($body, $waiting->start_date, $waiting->end_date, $waiting->title, $user);
-                $headers = array('Content-Type: text/html; charset=UTF-8');
+                $headers = array('Content-Type: text/html; charset=UTF-8','From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
                 wp_mail($to, $subject, $body, $headers);                
             }
         }

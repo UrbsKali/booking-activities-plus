@@ -136,8 +136,6 @@ $j('.ba-wl li').click(function (e) {
 
 function ba_plus_cancel_booking_callback(e) {
     e.preventDefault();
-    // get the user id
-    var user_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-header h3').text();
     // get the booking id
     var booking_id = $j(this).closest('.ba-planning-popup-bg').find('.ba-planning-popup-content').data('booking-id');
     // send the ajax request
@@ -145,21 +143,18 @@ function ba_plus_cancel_booking_callback(e) {
         url: ajaxurl,
         type: 'POST',
         data: {
-            action: 'bookactiDeleteBooking',
-            user_id: user_id,
+            action: 'baPlusCancelBooking',
             booking_id: booking_id,
-            context: 'admin_booking_list',
-            nonce: nonce_delete_booking
         },
         success: function (response) {
-            if (response.status === 'success') {
+            if (response.data.status === 'success') {
                 show_info('success', 'Réservation supprimée', true);
             } else {
-                show_info('error', response.message, false);
+                show_info('error', response.data.message, false);
             }
         },
         error: function (response) {
-                show_info('error', response, false);
+                show_info('error', response.data.message, false);
             }
     });
 }

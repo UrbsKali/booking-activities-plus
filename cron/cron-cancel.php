@@ -31,7 +31,7 @@ function ba_plus_check_cancel(){
             $subject = get_option( 'ba_plus_mail_tree_cancel_left_title' );
             $body = get_option( 'ba_plus_mail_tree_cancel_left_body' );
             $body = str_replace( '%user%', $user->display_name, $body );
-            $headers = array('Content-Type: text/html; charset=UTF-8');
+            $headers = array('Content-Type: text/html; charset=UTF-8','From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
             wp_mail( $to, $subject, $body, $headers );
             update_user_meta( $user->ID, 'send_mail_cancel', 'true' );
         }

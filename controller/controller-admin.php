@@ -33,6 +33,15 @@ function ba_plus_ajax_add_booking()
         wp_send_json_error(array('status' => 'error', 'message' => 'Le forfait de ce client a une date de validité dépassée'));
     }
 
+    // remove the booking pass that has no more credits
+    $pass = array_filter($pass, function ($p) {
+        return $p->credits_current > 0;
+    });
+
+    if (empty($pass)) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'Le forfait de ce client est à 0'));
+    }
+
     // sort the booking pass by expiration date, shorter first
     usort($pass, function ($a, $b) {
         return strtotime($a->expiration_date) - strtotime($b->expiration_date);
@@ -44,17 +53,26 @@ function ba_plus_ajax_add_booking()
         wp_send_json_error(array('status' => 'error', 'message' => 'Le forfait de ce client est à 0'));
     }
 
+    $timezone = new DateTimeZone('Europe/Paris');
+    $today = new DateTime('now', $timezone);
+
     $certi_date = get_user_meta($user_id, "certif_med", true);
     $attest_date = get_user_meta($user_id, "attest_med", true);
+
+    $certif_expire_date = new DateTime($certi_date, $timezone);
+    $attest_expire_date = new DateTime($attest_date, $timezone);
+
+    $certif_diff = date_diff($today, $certif_expire_date);
+    $attest_diff = date_diff($today, $attest_expire_date);
     if (empty($certi_date) || empty($attest_date)) {
         wp_send_json_error(array('status' => 'error', 'message' => 'Ce client n\'a pas de certificat médical ou d\'attestation médicale.'));
-    } else if (date('Y/m/d', strtotime($certi_date)) < date('Y/m/d')) {
+    } else if ($certif_diff->invert == 1) {
         wp_send_json_error(array('status' => 'error', 'message' => 'Le certificat médical de ce client doit être renouvelé'));
-    } else if (date('Y/m/d', strtotime($attest_date)) < date('Y/m/d')) {
+    } else if ($attest_diff->invert == 1) {
         wp_send_json_error(array('status' => 'error', 'message' => 'L\'attestation médicale de ce client doit être renouvelée'));
     }
 
-    
+
 
     $booking_data = bookacti_sanitize_booking_data(
         array(
@@ -76,6 +94,12 @@ function ba_plus_ajax_add_booking()
         if (!$credited) {
             wp_send_json_error(array('status' => 'error', 'message' => 'Une erreur est survenue lors du débit de la réservation.'));
         }
+        $new_booking_meta = array(
+            'booking_pass_id' => $pass->id,
+            'booking_pass_credits' => 1
+        );
+
+        bookacti_update_metadata("booking", $booking_id, $new_booking_meta);
 
         // add to the log
         $log_data = array(
@@ -87,12 +111,55 @@ function ba_plus_ajax_add_booking()
             'lang_switched' => 1
         );
         bapap_add_booking_pass_log($pass->id, $log_data);
+
+        // send email
+        bookacti_send_notification('customer_booked_booking', $booking_id, "single");
+
+
         wp_send_json_success(array('status' => 'success', 'message' => 'Booking added successfully.'));
     } else {
         wp_send_json_error(array('status' => 'error', 'message' => 'An error occurred while adding the booking.'));
     }
 }
 add_action('wp_ajax_baPlusAdminBooking', 'ba_plus_ajax_add_booking');
+
+
+
+/**
+ * AJAX Controller - Cancel a booking by an admin
+ */
+function ba_plus_ajax_cancel_booking()
+{
+    // Check if user has permission
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'You do not have permission to perform this action.'));
+    }
+
+    // Check if all required parameters are set (booking_id)
+    if (!isset($_POST['booking_id'])) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'Missing parameters.'));
+    }
+
+    // Sanitize all parameters
+    $booking_id = intval(sanitize_text_field($_POST['booking_id']));
+    $booking = bookacti_get_booking_by_id($booking_id, true);
+    $user = get_user_by('id', $booking->user_id);
+
+    
+    $cancelled = ba_plus_set_cancel_booking($booking_id);
+
+    if (!$cancelled) {
+        wp_send_json_error(array('status' => 'error', 'message' => 'An error occurred while refunding the booking.'));
+    }
+
+    // get new booking 
+    $new_booking = bookacti_get_booking_by_id($booking_id, false);
+    do_action('bookacti_booking_state_changed', $new_booking, 'cancelled', array('is_admin' => true));
+
+    wp_send_json_success(array('status' => 'success', 'message' => 'La réservation a été annulée avec succès.'));
+}
+add_action('wp_ajax_baPlusCancelBooking', 'ba_plus_ajax_cancel_booking');
+
 
 /**
  * AJAX Controller - Edit event by an admin
@@ -183,7 +250,7 @@ function ba_plus_ajax_refund_booking()
 
     $nb_cancelled_events = get_user_meta($booking->user_id, 'nb_cancel_left', true);
     if (empty($nb_cancelled_events) || intval($nb_cancelled_events) <= 0) {
-         wp_send_json_error(array('status' => 'error', 'message' => 'ce client a utilisé tout son quota d\'annulations sans frais'));
+        wp_send_json_error(array('status' => 'error', 'message' => 'ce client a utilisé tout son quota d\'annulations sans frais'));
     }
 
     // get the most recent booking pass
@@ -197,13 +264,13 @@ function ba_plus_ajax_refund_booking()
     if (empty($pass)) {
         wp_send_json_error(array('status' => 'error', 'message' => 'Le forfait de ce client a une date de validité dépassée'));
     }
-    
+
     // sort the booking pass by expiration date, longer first
     usort($pass, function ($a, $b) {
-        return - strtotime($a->expiration_date) + strtotime($b->expiration_date);
-    });    
+        return -strtotime($a->expiration_date) + strtotime($b->expiration_date);
+    });
 
-    
+
 
     // Refund the booking    
     $credited = bapap_add_booking_pass_credits($pass[0]->id, intval($booking->booking_pass_credits));
@@ -296,7 +363,7 @@ function ba_plus_ajax_edit_settings()
         if ($settings["start_date"] == "" || strtotime($settings["start_date"]) === false || !$settings["start_date"]) {
             wp_send_json_error(array('status' => 'error', 'message' => 'Invalid start date.'));
         }
-    
+
         $booking_pass_template_id = $settings['forfait'];
         if ($booking_pass_template_id != 'none' && $booking_pass_template_id != '' && intval($booking_pass_template_id) > 0) {
             $booking_pass = bapap_get_booking_pass_template(intval($booking_pass_template_id));
