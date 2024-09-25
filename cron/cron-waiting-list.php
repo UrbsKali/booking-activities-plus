@@ -59,7 +59,7 @@ function ba_plus_remove_empty_events()
     // create a date object for today
     $timezone = new DateTimeZone('Europe/Paris');
     $today = new DateTime("now", $timezone);
-    $tonight = new DateTime('+12 hour', $timezone);
+    $tonight = new DateTime('+15 hour', $timezone);
     $interval = array(
         'start' => $today->format('Y-m-d H:i:s'),
         'end' => $tonight->format('Y-m-d H:i:s')
