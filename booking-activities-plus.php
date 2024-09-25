@@ -32,7 +32,6 @@ if (!defined('BA_PLUS_PATH')) {
 require_once('model/model-install.php');
 require_once('model/model-global.php');
 require_once('model/model-waiting-list.php');
-require_once('model/model-passes.php');
 
 // -- FONCTIONS -- //
 require_once('functions/functions-utils.php');
@@ -43,6 +42,7 @@ require_once('functions/functions-um.php');
 
 // -- CONTROLLERS -- //
 require_once('controller/controller-admin.php');
+require_once('controller/controller-user.php');
 require_once('controller/controller-shortcodes.php');
 require_once('controller/controller-certificate.php');
 require_once('controller/controller-waiting-list.php');

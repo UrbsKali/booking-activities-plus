@@ -82,6 +82,38 @@ function ba_plus_remove_empty_events()
             );
             $filters = bookacti_format_booking_filters($filters);
             $event['bookings'] = bookacti_get_bookings($filters);
+
+            // unbind the event
+            $event_id = $event['id'];
+            if ($event['repeat_freq'] != "none") {
+                $event_new = bookacti_get_event_by_id($event['id']);
+                $new_id = bookacti_unbind_selected_event_occurrence($event_new, $event['start'], $event['end']);
+                if ($new_id) {
+                    $event_id = $new_id;
+                } else {
+                    echo "&nbsp;&nbsp;&nbsp;&nbsp;Event " . $event_id . " could not be unbind<br>";
+                    // send mail to admin
+                    $to = 'urbain.lantres@gmail.com';
+                    $subject = "Erreur lors de la suppression d'un événement";
+                    $body = "L'événement " . $event['title'] . " (" . $event['start'] . ") n'a pas pu être délié.";
+                    wp_mail($to, $subject, $body);
+                    continue;
+                }
+            }
+
+            // deactivate the event
+            $deactivated = bookacti_deactivate_event($event_id);
+            if ($deactivated) {
+                echo "&nbsp;&nbsp;&nbsp;&nbsp;Event " . $event_id . " deactivated<br>";
+            } else {
+                echo "&nbsp;&nbsp;&nbsp;&nbsp;Event " . $event_id . " could not be deactivated<br>";
+                $to = 'urbain.lantres@gmail.com';
+                $subject = "Erreur lors de la suppression d'un événement";
+                $body = "L'événement " . $event['title'] . " (" . $event['start'] . ") n'a pas pu être désactivé.";
+                wp_mail($to, $subject, $body);
+                continue;
+            }
+
             // Remove all bookings, refund, and send email to all users
             foreach ($event['bookings'] as $id => $booking) {
                 if ($booking->state == "cancelled" || $booking->state == "refunded") {
@@ -99,16 +131,16 @@ function ba_plus_remove_empty_events()
                 );
                 $filters = bapap_format_booking_pass_filters($filters);
                 $pass = bapap_get_booking_passes($filters);
-            
+
                 if (empty($pass)) {
-                    echo '&nbsp;&nbsp;&nbsp;&nbsp;L\'utilisateur '. $booking->user_id .' n\'a pas de forfaits actif.';
+                    echo '&nbsp;&nbsp;&nbsp;&nbsp;L\'utilisateur ' . $booking->user_id . ' n\'a pas de forfaits actif.';
                 }
-                
+
                 // sort the booking pass by expiration date, longer first
                 usort($pass, function ($a, $b) {
-                    return - strtotime($a->expiration_date) + strtotime($b->expiration_date);
-                });    
-                
+                    return -strtotime($a->expiration_date) + strtotime($b->expiration_date);
+                });
+
                 $pass[0]->credits_current += intval($booking->booking_pass_credits);
                 $credited = bapap_add_booking_pass_credits($booking->booking_pass_id, intval($booking->booking_pass_credits));
                 // add to the log
@@ -129,8 +161,8 @@ function ba_plus_remove_empty_events()
                 echo "&nbsp;&nbsp;&nbsp;&nbsp;Send mail for cancel to : " . $to . "<br>";
                 $subject = get_option('ba_plus_mail_cancel_title');
                 $body = get_option('ba_plus_mail_cancel_body');
-                $body = ba_plus_format_mail($body, $event['start'], $event['end'], $event['title'], $user); 
-                $headers = array('Content-Type: text/html; charset=UTF-8','From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
+                $body = ba_plus_format_mail($body, $event['start'], $event['end'], $event['title'], $user);
+                $headers = array('Content-Type: text/html; charset=UTF-8', 'From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
                 wp_mail($to, $subject, $body, $headers);
 
                 // Send SMS
@@ -147,21 +179,9 @@ function ba_plus_remove_empty_events()
                     );
 
                     $sms_sent = banp_send_sms_notification($notif);
-                    echo "&nbsp;&nbsp;&nbsp;&nbsp;Send SMS for cancel to : " . $phone . " (status:.". $sms_sent .")<br> ";
+                    echo "&nbsp;&nbsp;&nbsp;&nbsp;Send SMS for cancel to : " . $phone . " (status:." . $sms_sent . ")<br> ";
                 }
             }
-            // unbind the event
-            $event_id = $event['id'];
-            if ($event['repeat_freq'] != "none") {
-                $event_new = bookacti_get_event_by_id($event['id']);
-                $new_id = bookacti_unbind_selected_event_occurrence($event_new, $event['start'], $event['end']);
-                if ($new_id) {
-                    $event_id = $new_id;
-                }
-            }
-
-            // deactivate the event
-            bookacti_deactivate_event($event_id);
         }
     }
 }
@@ -189,7 +209,7 @@ function ba_plus_auto_register_waiting_list()
             $subject = get_option('ba_plus_mail_waiting_list_title');
             $body = get_option('ba_plus_mail_waiting_list_body');
             $body = ba_plus_format_mail($body, $waiting->start_date, $waiting->end_date, $waiting->title, $user);
-            $headers = array('Content-Type: text/html; charset=UTF-8','From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
+            $headers = array('Content-Type: text/html; charset=UTF-8', 'From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
             wp_mail($to, $subject, $body, $headers);
 
             // send sms
@@ -206,7 +226,7 @@ function ba_plus_auto_register_waiting_list()
                 );
 
                 $sms_sent = banp_send_sms_notification($notif);
-                echo "&nbsp;&nbsp;Send SMS for still in wl to : " . $phone . " (status: ". $sms_sent .")<br> ";
+                echo "&nbsp;&nbsp;Send SMS for still in wl to : " . $phone . " (status: " . $sms_sent . ")<br> ";
             }
             $is_mail_send = true;
             update_user_meta($user->ID, 'send_mail_warning_48h_' . $event_id, $is_mail_send);
@@ -233,7 +253,7 @@ function ba_plus_auto_register_waiting_list()
             // sort the booking pass by expiration date, shorter first
             usort($pass, function ($a, $b) {
                 return  strtotime($a->expiration_date) - strtotime($b->expiration_date);
-            });  
+            });
 
             if ($pass[0]->credits_current <= 0) {
                 echo "&nbsp;&nbsp;User " . $user->display_name . " has no credit left<br>";
@@ -279,10 +299,9 @@ function ba_plus_auto_register_waiting_list()
                 $subject = get_option('ba_plus_mail_booked_title');
                 $body = get_option('ba_plus_mail_booked_body');
                 $body = ba_plus_format_mail($body, $waiting->start_date, $waiting->end_date, $waiting->title, $user);
-                $headers = array('Content-Type: text/html; charset=UTF-8','From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
-                wp_mail($to, $subject, $body, $headers);                
+                $headers = array('Content-Type: text/html; charset=UTF-8', 'From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
+                wp_mail($to, $subject, $body, $headers);
             }
         }
-
     }
 }

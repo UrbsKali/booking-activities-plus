@@ -1,58 +1,16 @@
 let event_col = document.querySelectorAll('.bookacti-column-title-events');
+let is_enable = false;
+let user_id = 0;
 
-
-function sort_booking_by_date(reverse = false) {
-    let booking_table = document.querySelector('.bookacti-user-booking-list-table');
-    let rows = booking_table.querySelectorAll('tr');
-    let rows_array = Array.from(rows);
-    rows_array.shift(); // remove the header
-    rows_array.sort((a, b) => {
-        let text_a = "vendredi 1 janvier 1970 10h00"
-        let text_b = "vendredi 1 janvier 1970 10h00"
-        try {
-            text_a = a.querySelectorAll('td')[1].querySelector('span.bookacti-booking-event-start').innerText;
-            text_b = b.querySelectorAll('td')[1].querySelector('span.bookacti-booking-event-start').innerText;
-        } catch (error) {
-            console.log(error);
-        }
-
-
-        let date_a = parse_date(text_a);
-        let date_b = parse_date(text_b);
-        if (reverse) {
-            return date_b - date_a;
-        }
-        return date_a - date_b;
-    });
-    booking_table.innerHTML = '';
-    booking_table.appendChild(rows[0]);
-    rows_array.forEach((row) => {
-        booking_table.appendChild(row);
-    });
-}
-
-function parse_date(str) {
-    // receive a string like "lundi 29 avril 2024 18h45" 
-    // return a date object
-    let date = str.split(' ');
-    let day = parseInt(date[1]);
-    let month_str = date[2];
-    let month = 0;
-    let month_array = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'décembre'];
-    for (let i = 0; i < month_array.length; i++) {
-        if (month_array[i] === month_str) {
-            month = i;
-            break;
-        }
-    }
-    let year = parseInt(date[3]);
-    let time = date[4];
-    let hour = parseInt(time.split('h')[0]);
-    let minute = parseInt(time.split('h')[1]);
-    return new Date(year, month, day, hour, minute);
-}
 function main() {
     is_enable = false
+    // get url params
+    let url_args = new URLSearchParams(window.location.search);
+    let order = url_args.get('order');
+    if (order !== 'asc' || order !== 'desc') {
+        order = 'asc';
+    }
+
     for (let i = 0; i < 10; i++) { // c'est du bricolage, c'est pas propre mais ça marche
         setTimeout(() => {
             if (is_enable) {
@@ -62,39 +20,125 @@ function main() {
             if (event_col === null) {
                 return;
             }
-            event_col.innerHTML = 'Événements <span class="sort-by-date" style="cursor:pointer;">▲</span><style>.bookacti-column-title-events:after{visibility:hidden;}</style>';
-            event_col.style.visibility = 'visible';
-            sort_booking_by_date();
-            let sort_btn = event_col.querySelector('.sort-by-date');
-            sort_btn.addEventListener('click', click_callback);
-            is_enable = true;
 
-            let previous_page = document.querySelector('.bookacti-user-booking-list-previous-page>a');
-            if (previous_page !== null) {
-                previous_page.href = previous_page.href.replace('mon-compte-2/?','mon-compte-2/bookingtab/?')
-            }
+            enable(order, true);
 
-            let next_page = document.querySelector('.bookacti-user-booking-list-next-page>a');
-            if (next_page !== null) {
-                next_page.href = next_page.href.replace('mon-compte-2/?','mon-compte-2/bookingtab/?')
-            }
 
         }, 50 * i);
     }
 }
 
+function enable(order, setup = false) {
+    user_id = document.querySelector('.bookacti-user-booking-list').dataset.userId;
+    event_col = document.querySelector('.bookacti-column-title-events');
+
+    event_col.innerHTML = 'Événements <span class="sort-by-date" style="cursor:pointer;">▲</span><style>.bookacti-column-title-events:after{visibility:hidden;}</style>';
+    event_col.style.visibility = 'visible';
+
+    let sort_btn = event_col.querySelector('.sort-by-date');
+    sort_btn.addEventListener('click', click_callback);
+
+    if (order === 'asc') {
+        sort_btn.innerHTML = '▲';
+        sort_btn.classList.remove('reverse');
+    } else {
+        sort_btn.innerHTML = '▼';
+        sort_btn.classList.add('reverse');
+    }
+
+    is_enable = true;
+
+    let previous_page = document.querySelector('.bookacti-user-booking-list-previous-page>a');
+    if (previous_page !== null) {
+        previous_page.href = previous_page.href.replace('mon-compte-2/?', 'mon-compte-2/bookingtab/?')
+        // add order to next page
+        let new_url = new URL(previous_page.href);
+        let search_params = new_url.searchParams;
+        search_params.set('order', order);
+        previous_page.href = new_url.href;
+    }
+
+    let next_page = document.querySelector('.bookacti-user-booking-list-next-page>a');
+    if (next_page !== null) {
+        next_page.href = next_page.href.replace('mon-compte-2/?', 'mon-compte-2/bookingtab/?')
+        // add order to next page
+        let new_url = new URL(next_page.href);
+        let search_params = new_url.searchParams;
+        search_params.set('order', order);
+        next_page.href = new_url.href;
+    }
+
+    let url_args = new URLSearchParams(window.location.search);
+    let page = url_args.get('bookacti_booking_list_paged_1');
+    // if page is not an int or less than 1, set to 1
+    if (page === null) {
+        page = 1;
+    }
+
+    if (setup) {
+        setTable(order === 'asc', page)
+    }
+
+
+
+}
+
 function click_callback(event) {
     let target = event.target;
+    let url_args = new URLSearchParams(window.location.search);
+    let page = url_args.get('bookacti_booking_list_paged_1');
+    if (page === null) {
+        page = 1;
+    }
     if (target.tagName === 'SPAN') {
         let reverse = target.classList.contains('reverse');
-        if (reverse) {
-            target.innerHTML = '▲';
-        } else {
-            target.innerHTML = '▼';
-        }
-        sort_booking_by_date(!reverse);
-        target.classList.toggle('reverse');
+        // set the params to url 
+        let new_url = new URL(window.location.href);
+        let search_params = new_url.searchParams;
+        search_params.set('order', reverse ? 'asc' : 'desc');
+        // send ajax request to ba_plus_get_booking_list
+        setTable(reverse, page)
     }
+}
+
+async function setTable(reverse, page = 1) {
+    formData = new URLSearchParams();
+    formData.append('action', 'baPlusGetBookingList');
+    formData.append('order', reverse ? 'asc' : 'desc');
+    formData.append('user_id', user_id);
+    formData.append('uri', window.location.pathname);
+
+
+    return fetch(`${ajaxurl}?bookacti_booking_list_paged_1=${page}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Something went wrong');
+        }
+    }).then(data => {
+        if (data.data.status == "success") {
+            // replace the table
+            let booking_table = document.querySelector('.bookacti-user-booking-list');
+            booking_table.replaceWith(htmlToNode(data.data.html.trim()));
+            enable(reverse ? 'asc' : 'desc');
+        } else {
+            console.log(data);
+        }
+    }).catch(error => {
+        console.error(error);
+    });
+}
+
+function htmlToNode(html) {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    return template.content.firstChild;
 }
 
 document.addEventListener('DOMContentLoaded', main);
