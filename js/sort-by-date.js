@@ -7,7 +7,8 @@ function main() {
     // get url params
     let url_args = new URLSearchParams(window.location.search);
     let order = url_args.get('order');
-    if (order !== 'asc' || order !== 'desc') {
+    if (order != 'asc' && order != 'desc') {
+        console.log('order is not valid, set to asc');
         order = 'asc';
     }
 
@@ -20,10 +21,7 @@ function main() {
             if (event_col === null) {
                 return;
             }
-
             enable(order, true);
-
-
         }, 50 * i);
     }
 }
@@ -76,7 +74,7 @@ function enable(order, setup = false) {
     }
 
     if (setup) {
-        setTable(order === 'asc', page)
+        setTable(order, page)
     }
 
 
@@ -95,16 +93,17 @@ function click_callback(event) {
         // set the params to url 
         let new_url = new URL(window.location.href);
         let search_params = new_url.searchParams;
-        search_params.set('order', reverse ? 'asc' : 'desc');
+        search_params.set('order', reverse ? 'desc' : 'asc');
+        window.history.pushState({}, '', new_url.href);
         // send ajax request to ba_plus_get_booking_list
-        setTable(reverse, page)
+        setTable(reverse ? 'desc' : 'asc', page)
     }
 }
 
-async function setTable(reverse, page = 1) {
+async function setTable(order, page = 1) {
     formData = new URLSearchParams();
     formData.append('action', 'baPlusGetBookingList');
-    formData.append('order', reverse ? 'asc' : 'desc');
+    formData.append('order', order);
     formData.append('user_id', user_id);
     formData.append('uri', window.location.pathname);
 
@@ -126,7 +125,7 @@ async function setTable(reverse, page = 1) {
             // replace the table
             let booking_table = document.querySelector('.bookacti-user-booking-list');
             booking_table.replaceWith(htmlToNode(data.data.html.trim()));
-            enable(reverse ? 'asc' : 'desc');
+            enable(order);
         } else {
             console.log(data);
         }

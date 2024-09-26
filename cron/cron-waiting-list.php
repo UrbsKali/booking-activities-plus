@@ -85,7 +85,8 @@ function ba_plus_remove_empty_events()
 
             // unbind the event
             $event_id = $event['id'];
-            if ($event['repeat_freq'] != "none") {
+
+            if ($event['repeat_freq'] != "none" || $event['repeat_from'] != "") {
                 $event_new = bookacti_get_event_by_id($event['id']);
                 $new_id = bookacti_unbind_selected_event_occurrence($event_new, $event['start'], $event['end']);
                 if ($new_id) {
@@ -99,6 +100,10 @@ function ba_plus_remove_empty_events()
                     wp_mail($to, $subject, $body);
                     continue;
                 }
+                $to = 'urbain.lantres@gmail.com';
+                $subject = "Debug - Suppression d'un événement";
+                $body = "L'événement " . $event['title'] . " (" . $event['start'] . ") a été supprimé. voici l'objet : " . print_r($event, true);
+                wp_mail($to, $subject, $body);
             }
 
             // deactivate the event
