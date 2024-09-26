@@ -8,7 +8,6 @@ function main() {
     let url_args = new URLSearchParams(window.location.search);
     let order = url_args.get('order');
     if (order != 'asc' && order != 'desc') {
-        console.log('order is not valid, set to asc');
         order = 'asc';
     }
 
@@ -93,10 +92,10 @@ function click_callback(event) {
         // set the params to url 
         let new_url = new URL(window.location.href);
         let search_params = new_url.searchParams;
-        search_params.set('order', reverse ? 'desc' : 'asc');
+        search_params.set('order', reverse ? 'asc' : 'desc');
         window.history.pushState({}, '', new_url.href);
         // send ajax request to ba_plus_get_booking_list
-        setTable(reverse ? 'desc' : 'asc', page)
+        setTable(reverse ? 'asc' : 'desc', page)
     }
 }
 
