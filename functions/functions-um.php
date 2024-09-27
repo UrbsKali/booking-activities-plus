@@ -84,6 +84,5 @@ function ba_plus_admin_booking_tab( $args ) {
     echo "<br><h2>Forfaits</h2><br>";
     echo do_shortcode( '[bookingactivities_passes user_id='. $user_id . ']');
     echo do_shortcode( "[bap_forfaits_admin user_id='".$user_id."']" );
-
 }
 add_action( "um_profile_content_main_default", "ba_plus_admin_booking_tab", 10, 1 );

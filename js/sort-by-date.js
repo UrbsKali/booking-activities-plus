@@ -76,6 +76,9 @@ function enable(order, setup = false) {
         setTable(order, page)
     }
 
+    bookacti_init_booking_actions();
+    bookacti_init_tooltip();
+
 
 
 }

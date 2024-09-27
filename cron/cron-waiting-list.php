@@ -179,7 +179,7 @@ function ba_plus_remove_empty_events()
                         'sms' => array(
                             'active' => 1,
                             'to' => array($phone),
-                            'message' => $body
+                            'message' => str_replace("<br>", "\n", $body)
                         )
                     );
 
@@ -226,7 +226,7 @@ function ba_plus_auto_register_waiting_list()
                     'sms' => array(
                         'active' => 1,
                         'to' => array($phone),
-                        'message' => $body
+                        'message' => str_replace("<br>", "\n", $body)
                     )
                 );
 
