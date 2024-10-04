@@ -260,7 +260,12 @@ function ba_plus_auto_register_waiting_list()
                 return  strtotime($a->expiration_date) - strtotime($b->expiration_date);
             });
 
-            if ($pass[0]->credits_current <= 0) {
+            // remove empty booking pass from the list
+            $pass = array_filter($pass, function ($p) {
+                return $p->credits_current > 0;
+            });
+
+            if (empty($pass)) {
                 echo "&nbsp;&nbsp;User " . $user->display_name . " has no credit left<br>";
                 continue;
             }
