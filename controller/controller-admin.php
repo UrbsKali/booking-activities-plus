@@ -273,9 +273,13 @@ function ba_plus_ajax_refund_booking()
 
 
     // Refund the booking    
+    if (intval($booking->booking_pass_credits) <= 0) {
+        $booking->booking_pass_credits = 1;
+    }
+
     $credited = bapap_add_booking_pass_credits($pass[0]->id, intval($booking->booking_pass_credits));
     if (!$credited) {
-        wp_send_json_error(array('status' => 'error', 'message' => 'Il y a eu une erreur lors du remboursement de la réservation.'));
+        wp_send_json_error(array('status' => 'error', 'message' => 'Il y a eu une erreur lors du remboursement de la réservation.', 'debug' => $pass[0]->id . " " . $booking->booking_pass_credits));
     }
 
     // add to the log

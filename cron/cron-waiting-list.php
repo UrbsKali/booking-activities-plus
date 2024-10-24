@@ -267,6 +267,12 @@ function ba_plus_auto_register_waiting_list()
 
             if (empty($pass)) {
                 echo "&nbsp;&nbsp;User " . $user->display_name . " has no credit left<br>";
+                // send mail to admin
+                // send mail to admin
+                $to = 'urbain.lantres@gmail.com';
+                $subject = "Debug: file d'attente";
+                $body = "La file d'attente " . $waiting->title . " (" . $waiting->start . ") n'a pas pu être traitée. L'utilisateur " . $user->display_name . " n'a pas de crédit.";
+                wp_mail($to, $subject, $body);               
                 continue;
             }
 

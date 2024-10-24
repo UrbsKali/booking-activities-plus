@@ -134,6 +134,15 @@ $j('.ba-wl li').click(function (e) {
     $j('.ba-planning-popup-wl-delete').click(ba_plus_cancel_wl_callback);
 });
 
+$j('#ba-planning-date').change(function () {
+    var date = $j(this).val();
+    var url = window.location.href;
+    url = url.split('?')[0];
+    url += '?start_date=' + date;
+    window.location.href = url;
+});
+
+
 function ba_plus_cancel_booking_callback(e) {
     e.preventDefault();
     // get the booking id

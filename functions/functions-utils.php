@@ -201,6 +201,7 @@ function ba_plus_create_planning($args)
             <button id="ba-planning-prev-week"><<</button>
             <button id="ba-planning-today">Aujourd'hui</button>
             <button id="ba-planning-next-week">>></button>
+            <input type="date" id="ba-planning-date" value="<?php echo date('Y-m-d', strtotime($today)); ?>">
         </div>
         <button id="ba-planning-print">Imprimer</button>
     </div>

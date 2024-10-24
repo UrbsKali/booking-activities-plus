@@ -233,3 +233,20 @@ div:has(.ba-planning) {
     padding: 0 !important;
 }
 }
+
+#ba-planning-date {
+    /*Skin the input to look like a button*/
+    display: inline-block;
+    font-weight: 400;
+    color: #c36;
+    text-align: center;
+    white-space: nowrap;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid #c36;
+    padding: 7px 10px;
+    font-size: 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    width: 40px;
+}
