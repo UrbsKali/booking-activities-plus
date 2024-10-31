@@ -185,6 +185,10 @@ function ba_plus_filters_refund_step2($credits, $bookings, $booking_type)
     if (empty($nb_cancelled_events) || $nb_cancelled_events <= 0) {
         return 0;
     } else if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600)) {
+        // if admin, allow refund
+        if (current_user_can('manage_options')) {
+            return $credits;
+        }
         return 0;
     } else {
         $nb_cancelled_events--;
@@ -207,7 +211,7 @@ function ba_plus_filters_refund_step1($refunded, $bookings, $booking_type, $refu
     $event_start = strtotime($bookings[0]->event_start);
     $current_time = time();
     $diff = $event_start - $current_time;
-    if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600)) {
+    if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600) && !current_user_can('manage_options')) {
         return array(
             'status' => 'failed',
             'error' => 'refund_too_late',

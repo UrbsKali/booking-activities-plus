@@ -272,7 +272,19 @@ function ba_plus_auto_register_waiting_list()
                 $to = 'urbain.lantres@gmail.com';
                 $subject = "Debug: file d'attente";
                 $body = "La file d'attente " . $waiting->title . " (" . $waiting->start . ") n'a pas pu être traitée. L'utilisateur " . $user->display_name . " n'a pas de crédit.";
-                wp_mail($to, $subject, $body);               
+                wp_mail($to, $subject, $body);     
+                // delete the waiting list
+                
+                // send mail to user
+                $user = get_user_by('id', $waiting->user_id);
+                $to = $user->user_email;
+                $subject = 'Plus de crédit pour l\'événement ' . $waiting->title;
+                $body = 'Bonjour '. $user->display_name .'<br>Désolé, mais vous n\'avez plus de crédit pour vous inscrire à l\'événement ' . $waiting->title . ' (' . $waiting->start . '). <br>Cordialement, <br>L\'Espace Pilates de la Vallée de Chevreuse';
+                $headers = array('Content-Type: text/html; charset=UTF-8', 'From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
+                wp_mail($to, $subject, $body, $headers);
+                
+                ba_plus_remove_waiting_list_by_event_id($event_id, $waiting->user_id, $event_start, $event_end);       
+
                 continue;
             }
 
