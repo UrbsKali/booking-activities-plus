@@ -6,9 +6,10 @@ if (!defined('ABSPATH')) {
 
 
 
-function ba_plus_check_forfait($return_array, $booking, $form_id){
-     // check if user pass is running low 
-     $filters = array(
+function ba_plus_check_forfait($return_array, $booking, $form_id)
+{
+    // check if user pass is running low 
+    $filters = array(
         'user_id' => $booking->user_id,
         'active' => 1
     );
@@ -23,7 +24,21 @@ function ba_plus_check_forfait($return_array, $booking, $form_id){
         if ($pass[0]->credits_current == 0) {
             $return_array['messages']['credits_low'] = 'Vous n\'avez plus de crédits sur ce forfait. Vous ne pourrez plus réserver de cours après celui-ci.';
         }
+
+        // check user waiting list, if credit - waiting list = 0, show message
+        $waiting_list = ba_plus_get_user_waiting_list(get_current_user_id());
+        $nb_waiting_list = count($waiting_list);
+        if ($nb_waiting_list > 0) {
+            $credits = $pass[0]->credits_current;
+            if ($credits - $nb_waiting_list <= 0) {
+                $return_array['messages']['waiting_list'] = 'Vous avez ' . $nb_waiting_list . ' cours en liste d\'attente. Si vous réservez encore un cours, il est possible qu\'une des ces listes d\'attente ne fonctionne pas par manque d\'unité.';
+            }
+        }
     }
+
+
+
+
     return $return_array;
 }
 add_filter('bookacti_booking_form_validated_response', 'ba_plus_check_forfait', 10, 3);
@@ -220,7 +235,7 @@ function ba_plus_filters_refund_step1($refunded, $bookings, $booking_type, $refu
     }
 
     $nb_cancelled_events = get_user_meta($user_id, 'nb_cancel_left', true);
-    if (    (empty($nb_cancelled_events) || $nb_cancelled_events <= 0 )&& $refunded['status'] == 'failed') {
+    if ((empty($nb_cancelled_events) || $nb_cancelled_events <= 0) && $refunded['status'] == 'failed') {
         return array(
             'status' => 'failed',
             'error' => 'no_credits',

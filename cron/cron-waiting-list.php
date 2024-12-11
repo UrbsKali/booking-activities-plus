@@ -8,9 +8,9 @@ if (!defined('ABSPATH')) {
 add_filter('cron_schedules', 'example_add_cron_interval');
 function example_add_cron_interval($schedules)
 {
-    $schedules['five_seconds'] = array(
-        'interval' => 5,
-        'display' => esc_html__('Every five Seconds'),
+    $schedules['ten_minutes'] = array(
+        'interval' => 600,
+        'display' => esc_html__('Every 10 minutes'),
     );
     return $schedules;
 }
@@ -19,16 +19,16 @@ function example_add_cron_interval($schedules)
 // add the clean waiting list cron job
 add_action('bookacti_cron_clean_waiting_list', 'ba_plus_clean_waiting_list');
 add_action('bookacti_cron_remove_empty_events', 'ba_plus_remove_empty_events');
-add_action('bookacti_cron_auto_add_wl', 'ba_plus_auto_register_waiting_list');
+add_action('bookacti_cron_remind_wl', 'ba_plus_send_reminder_waiting_list');
 
 if (!wp_next_scheduled('bookacti_cron_clean_waiting_list')) {
-    wp_schedule_event(time(), 'five_seconds', 'bookacti_cron_clean_waiting_list');
+    wp_schedule_event(time(), 'ten_minutes', 'bookacti_cron_clean_waiting_list');
 }
 if (!wp_next_scheduled('bookacti_cron_remove_empty_events')) {
-    wp_schedule_event(time(), 'five_seconds', 'bookacti_cron_remove_empty_events');
+    wp_schedule_event(time(), 'ten_minutes', 'bookacti_cron_remove_empty_events');
 }
-if (!wp_next_scheduled('bookacti_cron_auto_add_wl')) {
-    wp_schedule_event(time(), 'five_seconds', 'bookacti_cron_auto_add_wl');
+if (!wp_next_scheduled('bookacti_cron_remind_wl')) {
+    wp_schedule_event(time(), 'ten_minutes', 'bookacti_cron_remind_wl');
 }
 
 
@@ -91,6 +91,12 @@ function ba_plus_remove_empty_events()
                 $new_id = bookacti_unbind_selected_event_occurrence($event_new, $event['start'], $event['end']);
                 if ($new_id) {
                     $event_id = $new_id;
+                    $filters = array(
+                        'event_id' => $event_id,
+                        'active' => 1
+                    );
+                    $filters = bookacti_format_booking_filters($filters);
+                    $event['bookings'] = bookacti_get_bookings($filters);
                 } else {
                     echo "&nbsp;&nbsp;&nbsp;&nbsp;Event " . $event_id . " could not be unbind<br>";
                     // send mail to admin
@@ -191,9 +197,9 @@ function ba_plus_remove_empty_events()
     }
 }
 
-function ba_plus_auto_register_waiting_list()
+function ba_plus_send_reminder_waiting_list()
 {
-    echo "Checking for waiting list<br>";
+    echo "Checking for reminder waiting list<br>";
     $waiting_list = ba_plus_get_all_waiting_list();
     $timezone = new DateTimeZone('Europe/Paris');
     $today = new DateTime('now', $timezone);
@@ -236,100 +242,6 @@ function ba_plus_auto_register_waiting_list()
             $is_mail_send = true;
             update_user_meta($user->ID, 'send_mail_warning_48h_' . $event_id, $is_mail_send);
             echo "&nbsp;&nbsp;Send mail for still in wl to : " . $to . "<br>";
-        }
-
-        // auto register the user if there is a spot available
-        $booked = ba_plus_check_if_event_is_full($event_id, $event_start, $event_end);
-        $diff = date_diff($today, date_create($event_start, $timezone));
-        if (!$booked && $diff->invert == 0) {
-            // check user balance 
-            $filters = array(
-                'user_id' => $user->ID,
-                'active' => 1
-            );
-            $filters = bapap_format_booking_pass_filters($filters);
-            $pass = bapap_get_booking_passes($filters);
-
-            if (empty($pass)) {
-                echo "&nbsp;&nbsp;User " . $user->display_name . " has no active pass<br>";
-                continue;
-            }
-
-            // sort the booking pass by expiration date, shorter first
-            usort($pass, function ($a, $b) {
-                return  strtotime($a->expiration_date) - strtotime($b->expiration_date);
-            });
-
-            // remove empty booking pass from the list
-            $pass = array_filter($pass, function ($p) {
-                return $p->credits_current > 0;
-            });
-
-            if (empty($pass)) {
-                echo "&nbsp;&nbsp;User " . $user->display_name . " has no credit left<br>";
-                // send mail to admin
-                // send mail to admin
-                $to = 'urbain.lantres@gmail.com';
-                $subject = "Debug: file d'attente";
-                $body = "La file d'attente " . $waiting->title . " (" . $waiting->start . ") n'a pas pu être traitée. L'utilisateur " . $user->display_name . " n'a pas de crédit.";
-                wp_mail($to, $subject, $body);     
-                // delete the waiting list
-                
-                // send mail to user
-                $user = get_user_by('id', $waiting->user_id);
-                $to = $user->user_email;
-                $subject = 'Plus de crédit pour l\'événement ' . $waiting->title;
-                $body = 'Bonjour '. $user->display_name .'<br>Désolé, mais vous n\'avez plus de crédit pour vous inscrire à l\'événement ' . $waiting->title . ' (' . $waiting->start . '). <br>Cordialement, <br>L\'Espace Pilates de la Vallée de Chevreuse';
-                $headers = array('Content-Type: text/html; charset=UTF-8', 'From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
-                wp_mail($to, $subject, $body, $headers);
-                
-                ba_plus_remove_waiting_list_by_event_id($event_id, $waiting->user_id, $event_start, $event_end);       
-
-                continue;
-            }
-
-            ba_plus_remove_waiting_list_by_event_id($event_id, $waiting->user_id, $event_start, $event_end);
-            // add the user to the event
-            $booking_data = bookacti_sanitize_booking_data(
-                array(
-                    'user_id' => $waiting->user_id,
-                    'form_id' => $waiting->template_id,
-                    'event_id' => $waiting->event_id,
-                    'event_start' => $waiting->start_date,
-                    'event_end' => $waiting->end_date,
-                    'quantity' => 1,
-                    'status' => "booked",
-                    'payment_status' => "paid",
-                    'active' => 'according_to_status'
-                )
-            );
-            $booking_id = bookacti_insert_booking($booking_data);
-            if ($booking_id) {
-                // Remove one credit from the user
-                $pass[0]->credits_current -= 1;
-                bapap_update_booking_pass_data($pass[0]->id, array('credits_current' => $pass[0]->credits_current));
-                // add to the log
-                $log_data = array(
-                    'credits_delta' => '-1',
-                    'credits_current' => $pass[0]->credits_current,
-                    'credits_total' => $pass[0]->credits_total,
-                    'reason' => "Inscription automatique (via liste d'attente) - " . $waiting->title . " (" . $waiting->start . ")",
-                    'context' => 'updated_from_server',
-                    'lang_switched' => 1
-                );
-                bapap_add_booking_pass_log($pass[0]->id, $log_data);
-
-                echo "&nbsp;&nbsp;User " . $user->display_name . " has been added to the event " . $waiting->title . "<br>";
-
-                // Send email to user
-                $user = get_user_by('id', $waiting->user_id);
-                $to = $user->user_email;
-                $subject = get_option('ba_plus_mail_booked_title');
-                $body = get_option('ba_plus_mail_booked_body');
-                $body = ba_plus_format_mail($body, $waiting->start_date, $waiting->end_date, $waiting->title, $user);
-                $headers = array('Content-Type: text/html; charset=UTF-8', 'From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
-                wp_mail($to, $subject, $body, $headers);
-            }
-        }
+        }        
     }
 }

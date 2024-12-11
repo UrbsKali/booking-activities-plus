@@ -1,0 +1,16 @@
+@media screen and (max-width: 782px) {
+    .bookacti-user-booking-list-table thead {
+        display: block !important;
+    }
+
+    .bookacti-user-booking-list-table thead .bookacti-column-status {
+        display: none !important;
+    }
+    .bookacti-user-booking-list-table thead .bookacti-column-actions {
+        display: none !important;
+    }
+    .bookacti-user-booking-list-table thead .bookacti-column-events {
+        width: 100vw !important;
+        text-align: center !important;
+    }
+}

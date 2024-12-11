@@ -5,12 +5,11 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 add_action( 'bookacti_cron_check_cancel', 'ba_plus_check_cancel' );
 
 if ( ! wp_next_scheduled( 'bookacti_cron_check_cancel' ) ) {
-    wp_schedule_event( time(), 'five_seconds', 'bookacti_cron_check_cancel' );
+    wp_schedule_event( time(), 'hourly', 'bookacti_cron_check_cancel' );
 }
 
-if ( ! wp_next_scheduled( 'bookacti_cron_test' ) ) {
-    wp_schedule_event( time(), 'five_seconds', 'bookacti_cron_test' );
-}
+
+
 
 function ba_plus_check_cancel(){
     echo "Checking for cancel number<br>";

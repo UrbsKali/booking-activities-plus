@@ -35,6 +35,7 @@ add_filter("bookacti_booking_system_data", "ba_plus_get_waiting_data", 2, 2);
  */
 function ba_plus_booking_list_scripts($booking_list, $raw_atts, $content){
     wp_enqueue_script('ba-wl-sort');
+    wp_enqueue_style('ba-wl-sort-style');
     return $booking_list;
 }
 add_filter("bookacti_shortcode_bookingactivities_list_output", "ba_plus_booking_list_scripts", 5, 3);

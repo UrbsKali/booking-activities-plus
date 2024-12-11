@@ -39,6 +39,7 @@ require_once('functions/functions-booking.php');
 require_once('functions/functions-booking-system.php');
 require_once('functions/functions-passes.php');
 require_once('functions/functions-um.php');
+require_once('functions/functions-waiting-list.php');
 
 // -- CONTROLLERS -- //
 require_once('controller/controller-admin.php');
@@ -66,8 +67,10 @@ function ba_plus_enqueue_scripts()
     wp_register_script('ba-wl-btn', plugins_url('js/send-cancel-wl.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_register_script('ba-planning', plugins_url('js/admin-planning.js', __FILE__), array('jquery'), BA_PLUS_VERSION, true);
     wp_register_script('ba-frontendadmin-settings', plugins_url('js/frontend-settings.js', __FILE__), array(), BA_PLUS_VERSION, true);
+    
     wp_register_style('ba-planning-style', plugins_url('css/planning.css', __FILE__), BA_PLUS_VERSION, true);
     wp_register_style('ba-popup-style', plugins_url('css/popup.css', __FILE__), BA_PLUS_VERSION, true);
+    wp_register_style('ba-wl-sort-style', plugins_url('css/sort-by-date.css', __FILE__), BA_PLUS_VERSION, true);
 }
 add_action('wp_enqueue_scripts', 'ba_plus_enqueue_scripts');
 
