@@ -36,14 +36,14 @@ function ba_plus_update_waiting_list($event_id, $start, $end)
             $subject = "Debug: file d'attente";
             $body = "La file d'attente " . $item->title . " (" . $item->start . ") n'a pas pu être traitée. L'utilisateur " . $user->display_name . " n'a pas de pass.";
             wp_mail($to, $subject, $body);
-            
+
             // send mail to user
             $to = $user->user_email;
             $subject = 'Plus de crédits pour l\'événement ' . $item->title;
             $body = 'Bonjour ' . $user->display_name . '<br>Nous vous avons désinscrit de votre place sur la liste d\'attente du cours ' . $item->title . ' (' . $item->start . '), car vous n\'avez plus d\'unité disponible.<br>Merci pour votre compréhension.<br>Cordialement,<br>L\'Espace Pilates de la Vallée de Chevreuse';
             $headers = array('Content-Type: text/html; charset=UTF-8', 'From: ACADEMIE FRANCAISE DE PILATES <sarah.portiche@academie-pilates.com>');
             wp_mail($to, $subject, $body, $headers);
-            
+
             // delete the waiting list
             ba_plus_remove_waiting_list_by_event_id($event_id, $user->ID, $start, $end);
             continue;
@@ -53,7 +53,7 @@ function ba_plus_update_waiting_list($event_id, $start, $end)
         $pass = array_filter($pass, function ($p) {
             return $p->credits_current > 0;
         });
-        
+
         // sort the booking pass by expiration date, shorter first
         usort($pass, function ($a, $b) {
             return strtotime($a->expiration_date) - strtotime($b->expiration_date);

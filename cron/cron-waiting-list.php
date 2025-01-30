@@ -73,7 +73,7 @@ function ba_plus_remove_empty_events()
     foreach ($events["data"] as $event) {
         $booked = -bookacti_get_event_availability($event["id"], $event['start'], $event['end']) + $event['availability'];
         echo "&nbsp;&nbsp;Checking event " . $event["id"] . " with " . $booked . " booked<br>";
-        if ($booked < 3) {
+        if ($booked < 3 && $event['activity_id'] != 5) { // if event is not FONDAMENTAUX and less than 3 booked
             echo "&nbsp;&nbsp;Removing event " . $event["id"] . "<br>";
             // get all bookings for the event
             $filters = array(
@@ -100,13 +100,13 @@ function ba_plus_remove_empty_events()
                 } else {
                     echo "&nbsp;&nbsp;&nbsp;&nbsp;Event " . $event_id . " could not be unbind<br>";
                     // send mail to admin
-                    $to = 'urbain.lantres@gmail.com';
+                    $to = 'urbain.jeu@gmail.com';
                     $subject = "Erreur lors de la suppression d'un événement";
                     $body = "L'événement " . $event['title'] . " (" . $event['start'] . ") n'a pas pu être délié.";
                     wp_mail($to, $subject, $body);
                     continue;
                 }
-                $to = 'urbain.lantres@gmail.com';
+                $to = 'urbain.jeu@gmail.com';
                 $subject = "Debug - Suppression d'un événement";
                 $body = "L'événement " . $event['title'] . " (" . $event['start'] . ") a été supprimé. voici l'objet : " . print_r($event, true);
                 wp_mail($to, $subject, $body);
@@ -118,7 +118,7 @@ function ba_plus_remove_empty_events()
                 echo "&nbsp;&nbsp;&nbsp;&nbsp;Event " . $event_id . " deactivated<br>";
             } else {
                 echo "&nbsp;&nbsp;&nbsp;&nbsp;Event " . $event_id . " could not be deactivated<br>";
-                $to = 'urbain.lantres@gmail.com';
+                $to = 'urbain.jeu@gmail.com';
                 $subject = "Erreur lors de la suppression d'un événement";
                 $body = "L'événement " . $event['title'] . " (" . $event['start'] . ") n'a pas pu être désactivé.";
                 wp_mail($to, $subject, $body);
