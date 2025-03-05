@@ -138,7 +138,8 @@ $j('#ba-planning-date').change(function () {
     var date = $j(this).val();
     var url = window.location.href;
     url = url.split('?')[0];
-    url += '?start_date=' + date;
+    let date_str = date.split('-').reverse().join('-');
+    url += '?start_date=' + date_str;
     window.location.href = url;
 });
 
