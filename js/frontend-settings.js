@@ -1,3 +1,7 @@
+/**
+ * Send settings via fetch.
+ * @param {Event} e - The event object.
+ */
 function send_settings(e) {
     e.preventDefault();
     console.log("send_settings");
@@ -8,7 +12,6 @@ function send_settings(e) {
     formData.append("action", "baPlusUpdateSettings");
     formData.append("settings[nb_cancel_left]", document.getElementById("ba-cancel-balance").value);
     formData.append("user_id", document.getElementById("ba-cancel-balance").dataset.userId);
-
 
     fetch(ajaxurl, {
         method: 'POST',
@@ -35,6 +38,10 @@ function send_settings(e) {
     });
 }
 
+/**
+ * Send forfait settings via fetch.
+ * @param {Event} e - The event object.
+ */
 function send_forfait_settings(e) {
     e.preventDefault();
     console.log("send_forfait_settings");
@@ -77,7 +84,6 @@ function send_forfait_settings(e) {
 
 }
 
-
 let btn = document.getElementById("ba-cancel-balance-save");
 btn.addEventListener("click", send_settings);
 
@@ -86,7 +92,13 @@ if (forfait_btn) {
     forfait_btn.addEventListener("click", send_forfait_settings);
 }
 
-
+/**
+ * Create a popup.
+ * @param {string} title - The title of the popup.
+ * @param {string} message - The message of the popup.
+ * @param {string} level - The level of the popup (e.g., success, error).
+ * @param {boolean} [triggerReload=false] - Whether to trigger a page reload after closing the popup.
+ */
 function create_popup(title, message, level, triggerReload = false) {
     let popupBG = document.createElement("div");
     popupBG.classList.add("ba-popup-bg");

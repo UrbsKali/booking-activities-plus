@@ -11,6 +11,17 @@ if ( ! wp_next_scheduled( 'bookacti_cron_check_cancel' ) ) {
 
 
 
+/**
+ * Checks users who have limited cancellations left on their pass.
+ * 
+ * This function is executed via a scheduled cron job to identify users
+ * with 3 or fewer cancellations left and sends them a reminder email.
+ * The function ensures each user only receives one notification until 
+ * their cancellation count changes.
+ * 
+ * @since 1.0.0
+ * @return void
+ */
 function ba_plus_check_cancel(){
     echo "Checking for cancel number<br>";
     $users = get_users();

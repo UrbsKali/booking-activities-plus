@@ -33,7 +33,13 @@ if (!wp_next_scheduled('bookacti_cron_remind_wl')) {
 
 
 /**
- * Cron job to purge the waiting list of past events
+ * Cleans up outdated or invalid entries from the waiting list.
+ * 
+ * This function is executed by a cron job to maintain the waiting list
+ * by removing expired entries, already processed bookings, or other
+ * entries that no longer need to be in the waiting list.
+ * 
+ * @return void
  */
 function ba_plus_clean_waiting_list()
 {
@@ -53,6 +59,13 @@ function ba_plus_clean_waiting_list()
     }
 }
 
+/**
+ * Removes events that have not enough participants.
+ * 
+ * This function refund all bookings and deactivate the event if it has less than 3 participants.
+ * 
+ * @return void
+ */
 function ba_plus_remove_empty_events()
 {
     echo "Checking for empty events<br>";
@@ -197,6 +210,14 @@ function ba_plus_remove_empty_events()
     }
 }
 
+/**
+ * Sends reminder notifications to users on the waiting list for bookable activities.
+ * 
+ * This function is designed to be run by a scheduled cron job. It identifies users
+ * on waiting lists with events starting in less than 48 hours and sends them a reminder
+ * 
+ * @return void
+ */
 function ba_plus_send_reminder_waiting_list()
 {
     echo "Checking for reminder waiting list<br>";

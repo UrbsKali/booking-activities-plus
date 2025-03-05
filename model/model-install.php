@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Create the database table for the waiting list
+ * Create the necessary tables for the plugin.
  */
 function ba_plus_create_tables()
 {
@@ -35,7 +35,7 @@ function ba_plus_create_tables()
 }
 
 /**
- * Drop the database table for the waiting list
+ * Drop the tables created by the plugin.
  */
 function ba_plus_drop_table()
 {

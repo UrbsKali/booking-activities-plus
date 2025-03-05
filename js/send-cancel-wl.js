@@ -1,4 +1,3 @@
-
 // call ajax when user click on cancel waiting list button
 $j('.bookacti-cancel-waiting-list').click(function () {
     var waiting_id = $j(this).data('waiting-id');

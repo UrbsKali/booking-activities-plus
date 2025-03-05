@@ -4,6 +4,15 @@ if (!defined('ABSPATH')) {
 }
 
 add_filter('um_account_page_default_tabs_hook', 'ba_plus_booking_tab', 100 );
+/**
+ * Add a booking tab to a tabs collection.
+ *
+ * This function adds or modifies a booking-related tab within the tabs array,
+ * likely used in a user profile or dashboard context.
+ *
+ * @param array $tabs The existing tabs array to modify.
+ * @return array Modified tabs array with the booking tab included.
+ */
 function ba_plus_booking_tab( $tabs ) {
 	$tabs[800]['bookingtab']['icon'] = 'um-faicon-pencil';
 	$tabs[800]['bookingtab']['title'] = 'Réservations';
@@ -12,9 +21,17 @@ function ba_plus_booking_tab( $tabs ) {
 	return $tabs;
 }
 	
-/* make our new tab hookable */
 
 add_action('um_account_tab__bookingtab', 'um_account_tab__bookingtab');
+/**
+ * Add or modify a booking tab in Ultimate Member account area.
+ *
+ * This function handles the integration between Booking Activities Plus and Ultimate Member plugin,
+ * creating or modifying the booking tab in user account area.
+ * 
+ * @param array $info Tab information array provided by Ultimate Member.
+ * @return array Modified tab information.
+ */
 function um_account_tab__bookingtab( $info ) {
 	global $ultimatemember;
 	extract( $info );
@@ -24,8 +41,18 @@ function um_account_tab__bookingtab( $info ) {
 }
 
 /* Finally we add some content in the tab */
-
 add_filter('um_account_content_hook_bookingtab', 'um_account_content_hook_bookingtab');
+/**
+ * Hooks into Ultimate Member account page to display booking tab content.
+ * 
+ * This function handles the content display for the booking tab in the user's account area
+ * when using the Ultimate Member plugin.
+ * 
+ * @param string $output The current output HTML for the account tab content.
+ * @return string Modified output HTML with booking information.
+ * 
+ * @hook um_account_content_hook_bookingtab
+ */
 function um_account_content_hook_bookingtab( $output ){
     wp_enqueue_script('ba-wl-btn');
 

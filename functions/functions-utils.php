@@ -4,6 +4,17 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Create a user waiting list.
+ *
+ * This function generates a waiting list for users based on specific filters.
+ *
+ * @param array $filters An associative array of filters to apply on the user list.
+ * @param array $columns Optional. An array defining the columns to be included in the waiting list. Defaults to an empty array.
+ * @param int   $per_page Optional. The number of results to display per page. Defaults to 10.
+ *
+ * @return mixed Returns the waiting list data. The data is show in HTML to the client.
+ */
 function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_page = 10)
 {
     if (!$columns) {
@@ -115,10 +126,14 @@ function ba_plus_create_user_waiting_list($filters, $columns = array(), $per_pag
 }
 
 /**
- * Get the rows for the waiting list
- * @since 1.7.6
- * @version 1.8.0
- * @return string
+ * Generates HTML output for waiting list actions.
+ *
+ * This function creates the HTML structure that displays the available actions for a waiting list item.
+ * It is intended to be used within the booking activities module, providing users with interactive options
+ * for managing waiting items.
+ *
+ * @param mixed $waiting_item The waiting item data, which can be an array or object containing the necessary details.
+ * @return string The HTML markup representing the waiting list actions.
  */
 function bookacti_get_waiting_list_actions_html($waiting_item)
 {
@@ -136,7 +151,7 @@ function bookacti_get_waiting_list_actions_html($waiting_item)
 
 /**
  * Create the admin planning 
- * @return string
+ * @return string HTML content
  */
 function ba_plus_create_planning($args)
 {
@@ -260,7 +275,7 @@ function ba_plus_create_planning($args)
 /**
  * Create an day column, with multiple events in it
  * @param array $events the events to display, agregated with user booked and waiting list
- * @return string
+ * @return string HTML content
  */
 function ba_plus_create_day_col($events, $day)
 {
@@ -398,7 +413,6 @@ add_filter('the_excerpt', 'html_shorttag_filter', 9);
  * @param string $start_date the start date of the event
  * @param string $end_date the end date of the event
  * @param string $title the title of the event
- * @param WP_User $user the user to format
  * @return string
  */
 function ba_plus_format_mail($text, $start_date, $end_date, $title, $user){

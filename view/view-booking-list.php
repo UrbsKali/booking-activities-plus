@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Show a list of all waiting users
+ * Show a list of all waiting users in the wordpress admin UI of booking activities
  */
 function ba_plus_show_waiting_list()
 {

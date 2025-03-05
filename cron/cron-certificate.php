@@ -12,9 +12,18 @@ if ( ! wp_next_scheduled( 'bookacti_cron_check_attest' ) ) {
     wp_schedule_event( time(), 'hourly', 'bookacti_cron_check_attest' );
 }   
 
-
 /**
- * Check all users, and send them a mail if their certificate expire in less than 60 days
+ * Check all users' certificate expiration dates and send notification emails.
+ * 
+ * This function queries all users in the system and checks if any of their certificates 
+ * are due to expire within the next 60 days. If a certificate is about to expire, 
+ * the function sends an email notification to the user to inform them of the upcoming expiration.
+ * 
+ * This is intended to be run as a scheduled task via WordPress cron to ensure
+ * users are reminded to renew their certificates before they expire.
+ * 
+ * @since 1.0.0
+ * @return void
  */
 function ba_plus_check_certificate_expiration(){
     echo "Checking for certificate expiration<br>";
@@ -55,8 +64,19 @@ function ba_plus_check_certificate_expiration(){
     }
 }
 
+
 /**
- * Check all users, and send them a mail if their certificate expire in less than 7 days
+ * Check all users' attestation expiration dates and send notification emails.
+ * 
+ * This function queries all users in the system and checks if any of their attestation 
+ * are due to expire within the next 7 days. If a attestation is about to expire, 
+ * the function sends an email notification to the user to inform them of the upcoming expiration.
+ * 
+ * This is intended to be run as a scheduled task via WordPress cron to ensure
+ * users are reminded to renew their attestation before they expire.
+ * 
+ * @since 1.0.0
+ * @return void
  */
 function ba_plus_check_attestation_expiration(){
     echo "Checking for attestation expiration<br>";

@@ -6,6 +6,17 @@ if (!defined('ABSPATH')) {
 
 
 
+/**
+ * Checks and processes forfait (package/plan) information for a booking.
+ * 
+ * This function is used to tell user if they are running low on credits or if they have
+ * courses in the waiting list that may not be fulfilled due to lack of credits.
+ *
+ * @param array $return_array The array to be returned by the calling function
+ * @param object $booking Booking data containing customer and reservation information
+ * @param int $form_id The ID of the form used for the booking
+ * @return array Modified return array with forfait information if applicable
+ */
 function ba_plus_check_forfait($return_array, $booking, $form_id)
 {
     // check if user pass is running low 
@@ -173,9 +184,17 @@ function ba_plus_add_user_to_waiting_list($form_id, $booking_form_values, $retur
 add_action("bookacti_booking_form_before_booking", "ba_plus_add_user_to_waiting_list", 5, 3);
 
 
-
 /**
- * Verify that user can cancel the event
+ * Filter whether a user can cancel an event booking.
+ * 
+ * This function determines if a user has permission to cancel a specific booking 
+ * 
+ * @param bool   $is_allowed            Initial value determining if cancellation is allowed.
+ * @param object|array $booking         The booking object or array containing booking details.
+ * @param array  $context               Additional context information for the cancellation check.
+ * @param bool   $allow_grouped_booking Whether to allow cancellation of bookings that are part of a group.
+ * 
+ * @return bool True if the user can cancel the event, false otherwise.
  */
 function ba_plus_can_cancel_event($is_allowed, $booking, $context, $allow_grouped_booking)
 {
@@ -186,6 +205,16 @@ function ba_plus_can_cancel_event($is_allowed, $booking, $context, $allow_groupe
 }
 add_filter("bookacti_booking_can_be_cancelled", "ba_plus_can_cancel_event", 5, 4);
 
+/**
+ * Filters the credits applied during the second step of the refund process.
+ * Updates the user's remaining free cancellations balance if applicable.
+ *
+ * @param mixed  $credits      The credits to be applied for the refund.
+ * @param array  $bookings     Array of bookings to be refunded.
+ * @param string $booking_type The type of booking being refunded.
+ * 
+ * @return mixed Modified credits for the refund process.
+ */
 function ba_plus_filters_refund_step2($credits, $bookings, $booking_type)
 {
     $booking = $bookings[0];
@@ -198,14 +227,17 @@ function ba_plus_filters_refund_step2($credits, $bookings, $booking_type)
     $diff = $event_start - $current_time;
 
     if (empty($nb_cancelled_events) || $nb_cancelled_events <= 0) {
+        // No cancellations left, no refund
         return 0;
     } else if ($diff < (get_option('ba_plus_refund_delay', 24) * 3600)) {
-        // if admin, allow refund
+        // Cancellation is too late (within refund delay timeframe)
+        // Only admins can bypass this restriction
         if (current_user_can('manage_options')) {
             return $credits;
         }
         return 0;
     } else {
+        // Valid cancellation, decrement the user's free cancellation counter
         $nb_cancelled_events--;
         update_user_meta($user_id, 'nb_cancel_left', $nb_cancelled_events);
         return $credits;
@@ -214,6 +246,19 @@ function ba_plus_filters_refund_step2($credits, $bookings, $booking_type)
 add_filter("bapap_refund_booking_pass_amount", "ba_plus_filters_refund_step2", 1, 3);
 
 
+/**
+ * First step of the refund process that validates bookings before proceeding to actual refund.
+ * This function filters and prevents inappropriate bookings from being refunded in step 2.
+ * 
+ * @param bool|array $refunded      Whether the booking(s) will be refunded or array of refund status.
+ * @param array      $bookings      Array of booking data to be refunded.
+ * @param string     $booking_type  Type of booking being processed.
+ * @param string     $refund_action Action being taken (e.g., 'full', 'partial').
+ * @param string     $refund_message Message associated with the refund.
+ * @param string     $context       Optional. Additional context for the refund process. Default empty string.
+ * 
+ * @return bool|array $refunded     Modified refund status after validation.
+ */
 function ba_plus_filters_refund_step1($refunded, $bookings, $booking_type, $refund_action, $refund_message, $context = '')
 {
     if ($refund_action !== 'booking_pass') {

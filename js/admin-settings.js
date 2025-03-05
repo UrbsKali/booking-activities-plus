@@ -1,3 +1,6 @@
+/**
+ * Send the settings via fetch.
+ */
 function send_settings(e) {
     e.preventDefault();
     console.log("send_settings");
@@ -32,15 +35,21 @@ function send_settings(e) {
         console.error(error);
         create_popup("Erreur", "Une erreur est survenue lors de l'enregistrement, veuillez contacter votre administrateur.", "error");
     });
-
-
-
 }
 
-let btn = document.getElementById("ba-admin-settings-save");
-btn.addEventListener("click", send_settings);
+/**
+ * Save the admin settings.
+ */
+function saveAdminSettings() {
+    let btn = document.getElementById("ba-admin-settings-save");
+    btn.addEventListener("click", send_settings);
+}
 
+saveAdminSettings();
 
+/**
+ * Create a popup with the given title, message, and level.
+ */
 function create_popup(title, message, level) {
     let popupBG = document.createElement("div");
     popupBG.classList.add("ba-popup-bg");

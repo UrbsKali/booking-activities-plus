@@ -3,7 +3,17 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// connect to bapap_booking_pass_created w/ $booking_pass_id, $booking_pass_data
+/**
+ * Callback function triggered when a booking pass is created.
+ * 
+ * This function is triggered after a new booking pass is successfully created in the system.
+ * It can be used to perform additional actions or processing when a pass is created.
+ * 
+ * @param int   $booking_pass_id   The ID of the newly created booking pass.
+ * @param array $booking_pass_data The data associated with the booking pass.
+ * 
+ * @return void
+ */
 function ba_plus_booking_pass_created($booking_pass_id, $booking_pass_data)
 {
     // add free cancellation to user meta, depending on the pass type

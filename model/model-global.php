@@ -42,6 +42,14 @@ function ba_plus_check_if_already_booked($user_id, $event_id, $start_date, $end_
 	return false;
 }
 
+/**
+ * Check if an event is full.
+ *
+ * @param int $event_id The ID of the event.
+ * @param string $start_date The start date of the event.
+ * @param string $end_date The end date of the event.
+ * @return bool True if the event is full, false otherwise.
+ */
 function ba_plus_check_if_event_is_full($event_id, $start_date, $end_date)
 {
 	global $wpdb;

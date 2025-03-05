@@ -19,9 +19,6 @@ $j('.bookacti-booking-form').on('bookacti_update_quantity', function (info, qty_
     }
 });
 
-
-
-
 $j('.bookacti-booking-form').on('bookacti_validate_picked_events', function (info, valid_form) {
     if (!valid_form.is_qty_inf_to_avail) {
         valid_form.is_qty_inf_to_avail = true;
@@ -44,6 +41,9 @@ function main() {
     }
 }
 
+/**
+ * Enable the waiting list for an event.
+ */
 function add_waiting_number() {
     event_col = document.querySelectorAll('.bookacti-availability-container');
     if (event_col.length === 0) {
@@ -75,6 +75,9 @@ function add_waiting_number() {
     });
 }
 
+/**
+ * Load buttons and add event listeners to them.
+ */
 function load_btn() {
     if (btn_init) {
         return;
@@ -96,13 +99,7 @@ function load_btn() {
     }
 }
 
-
-
-
-
-
 document.addEventListener('DOMContentLoaded', main);
-
 
 row = $j( '.bookacti-refund-booking[data-booking-id="' + booking_id + '"]' ).closest( 'tr' );
 row.first().on( 'bookacti_booking_action_data', function(data, booking_id, booking_type, type) {

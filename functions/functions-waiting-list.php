@@ -4,6 +4,20 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Updates the waiting list for a specific event within a given time frame.
+ * 
+ * This function is triggered when a user cancels their booking, freeing up a spot.
+ * It processes the waiting list for the event and automatically registers the first 
+ * eligible user from the waiting list to fill the newly available spot.
+ * 
+ * @param int   $event_id The ID of the event that had a cancellation.
+ * @param mixed $start    The start date/time of the cancelled booking.
+ * @param mixed $end      The end date/time of the cancelled booking.
+ * 
+ * @return bool|null True if a user from the waiting list was successfully registered, 
+ *                   null if the waiting list was empty or no action was taken.
+ */
 function ba_plus_update_waiting_list($event_id, $start, $end)
 {
     // auto register the user if there is a spot available
@@ -168,6 +182,20 @@ function ba_plus_update_waiting_list($event_id, $start, $end)
 }
 
 
+/**
+ * Updates the waiting list when a booking is cancelled or refunded.
+ * 
+ * This function is triggered whenever a booking state changes. It specifically
+ * checks if the new state is "cancelled" or "refunded" by admin,
+ * as admin can refund without triggering a cancelled state before,
+ * and if so, it updates the waiting list to potentially assign the newly 
+ * available spot to someone on the waiting list.
+ * 
+ * @param object $new_booking The booking data that is being modified
+ * @param string $new_state The new state of the booking (e.g., "cancelled", "refunded")
+ * @param array $args Additional arguments related to the state change
+ * @return void
+ */
 function ba_plus_filter_cancel_booking($new_booking, $new_state, $args)
 {
     if ($new_state != "cancelled" && !($new_state == "refunded" && $args['is_admin'])) {

@@ -3,8 +3,19 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+
 /**
- * Send data to the js for waiting list information on the booking form
+ * Send data to JavaScript for waiting list information on the booking form.
+ * 
+ * This function retrieves waiting list entries and formats them to be
+ * used by the booking form's JavaScript components.
+ * 
+ * @since 1.0.0
+ * 
+ * @param array $booking_system_data Data related to the booking system configuration.
+ * @param array $atts                Additional attributes that may affect the waiting list data retrieval.
+ * 
+ * @return array                     Updated booking system data with waiting list information.
  */
 function ba_plus_get_waiting_data($booking_system_data, $atts)
 {

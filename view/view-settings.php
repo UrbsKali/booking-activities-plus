@@ -4,6 +4,9 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
+/**
+ * Initialize the settings for the plugin.
+ */
 function ba_plus_settings_init()
 {
 
@@ -18,7 +21,9 @@ function ba_plus_settings_section_callback()
 
 }
 
-
+/**
+ * Display the settings page for the plugin.
+ */
 function ba_plus_settings_page()
 {
 

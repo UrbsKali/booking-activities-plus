@@ -2,6 +2,9 @@ let event_col = document.querySelectorAll('.bookacti-column-title-events');
 let is_enable = false;
 let user_id = 0;
 
+/**
+ * Main function to initialize the sorting functionality.
+ */
 function main() {
     is_enable = false
     // get url params
@@ -25,6 +28,11 @@ function main() {
     }
 }
 
+/**
+ * Enable the sorting functionality and set up the event listeners.
+ * @param {string} order - The order of sorting (asc or desc).
+ * @param {boolean} setup - Whether to set up the table initially.
+ */
 function enable(order, setup = false) {
     user_id = document.querySelector('.bookacti-user-booking-list').dataset.userId;
     event_col = document.querySelector('.bookacti-column-title-events');
@@ -78,11 +86,12 @@ function enable(order, setup = false) {
 
     bookacti_init_booking_actions();
     bookacti_init_tooltip();
-
-
-
 }
 
+/**
+ * Callback function for the sort button click event.
+ * @param {Event} event - The click event.
+ */
 function click_callback(event) {
     let target = event.target;
     let url_args = new URLSearchParams(window.location.search);
@@ -102,13 +111,18 @@ function click_callback(event) {
     }
 }
 
+/**
+ * Set the booking table with the sorted data.
+ * @param {string} order - The order of sorting (asc or desc).
+ * @param {number} page - The page number.
+ * @returns {Promise<void>}
+ */
 async function setTable(order, page = 1) {
     formData = new URLSearchParams();
     formData.append('action', 'baPlusGetBookingList');
     formData.append('order', order);
     formData.append('user_id', user_id);
     formData.append('uri', window.location.pathname);
-
 
     return fetch(`${ajaxurl}?bookacti_booking_list_paged_1=${page}`, {
         method: 'POST',
@@ -136,6 +150,11 @@ async function setTable(order, page = 1) {
     });
 }
 
+/**
+ * Convert HTML string to a DOM node.
+ * @param {string} html - The HTML string.
+ * @returns {Node} - The DOM node.
+ */
 function htmlToNode(html) {
     const template = document.createElement('template');
     template.innerHTML = html;
